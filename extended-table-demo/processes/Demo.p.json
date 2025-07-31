@@ -27,7 +27,7 @@
     }, {
       "id" : "f12",
       "type" : "DialogCall",
-      "name" : "MultiViewStateDialog1",
+      "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.NoneLazy",
         "startMethod" : "start()",
@@ -68,7 +68,7 @@
     }, {
       "id" : "f17",
       "type" : "DialogCall",
-      "name" : "MultiViewStateDialog1",
+      "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.Lazy",
         "startMethod" : "start()",
@@ -102,7 +102,7 @@
     }, {
       "id" : "f4",
       "type" : "DialogCall",
-      "name" : "MultiViewStateDialog1",
+      "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.ColumnToggler",
         "startMethod" : "start()",
@@ -129,23 +129,23 @@
     }, {
       "id" : "f6",
       "type" : "RequestStart",
-      "name" : "Row Selection",
+      "name" : "Single Row Selection",
       "config" : {
-        "callSignature" : "RowSelection",
-        "outLink" : "RowSelection.ivp",
-        "startName" : "Row Selection",
+        "callSignature" : "SingleRowSelection",
+        "outLink" : "SingleRowSelection.ivp",
+        "startName" : "Single Row Selection",
         "case" : { }
       },
       "visual" : {
-        "at" : { "x" : 96, "y" : 712 }
+        "at" : { "x" : 96, "y" : 696 }
       },
       "connect" : { "id" : "f13", "to" : "f7" }
     }, {
       "id" : "f7",
       "type" : "DialogCall",
-      "name" : "MultiViewStateDialog1",
+      "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.RowSelection",
+        "dialogId" : "com.axonivy.market.extendedtable.demo.SingleRowSelection",
         "startMethod" : "start()",
         "call" : {
           "code" : [
@@ -158,14 +158,55 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 224, "y" : 712 }
+        "at" : { "x" : 224, "y" : 696 }
       },
       "connect" : { "id" : "f14", "to" : "f8" }
     }, {
       "id" : "f8",
       "type" : "TaskEnd",
       "visual" : {
-        "at" : { "x" : 352, "y" : 712 }
+        "at" : { "x" : 352, "y" : 696 }
+      }
+    }, {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Multiple Row Selection",
+      "config" : {
+        "callSignature" : "MultipleRowSelection",
+        "outLink" : "MultipleRowSelection.ivp",
+        "startName" : "Multiple Row Selection",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 816 }
+      },
+      "connect" : { "id" : "f20", "to" : "f1" }
+    }, {
+      "id" : "f1",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.MultipleRowSelection",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 816 }
+      },
+      "connect" : { "id" : "f21", "to" : "f2" }
+    }, {
+      "id" : "f2",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 816 }
       }
     } ]
 }

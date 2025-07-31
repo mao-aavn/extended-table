@@ -10,13 +10,16 @@
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
 
+			<h2>Single Row Selection</h2>
 			<h:form id="form" style="margin-top: 100px;">
 				<p:messages showDetail="true" />
 				<p:growl id="msgs" showDetail="true"></p:growl>
-				<h2>Single Row Selection</h2>
+
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="singleRowSelectionTable" manageStateBean="#{dataTableStateBean}"
-					widgetVar="singleRowSelectionTable" id="singleRowSelectionTableWrapper"
+					tableId="singleRowSelectionTable"
+					manageStateBean="#{dataTableStateBean}"
+					widgetVar="singleRowSelectionTable"
+					id="singleRowSelectionTableWrapper"
 					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
 					allowUnsorting="true"
 					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
@@ -76,89 +79,8 @@
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:selectOneMenu onchange="PF('singleRowSelectionTable').filter()"
-								style="width:100%; box-sizing: border-box;">
-								<f:selectItem itemLabel="Select One" itemValue="#{null}"
-									noSelectionOption="true" />
-								<f:selectItems
-									value="#{rowSelectionShowcaseBean.customerStatus}" />
-							</p:selectOneMenu>
-						</f:facet>
-						<span
-							class="customer-badge status-#{item.status.name().toLowerCase()}">
-							#{item.status} </span>
-					</p:column>
-				</ic:com.axonivy.market.extendedtable.ExtendedTable>
-
-			</h:form>
-
-
-			<h:form id="multiSelectionForm" style="margin-top: 100px;">
-				<h2>Multiple Row Selection</h2>
-				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="multiRowSelectionTable"
-					manageStateBean="#{dataTableStateBean}"
-					widgetVar="multiRowSelectionTable" id="multiRowSelectionWrapper"
-					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
-					allowUnsorting="true"
-					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
-					showResetButton="true" paginator="true" rows="10"
-					selectionMode="multiple"
-					selection="#{rowSelectionShowcaseBean.selectedCustomers}"
-					rowKey="#{item.id}">
-
-					<f:facet name="event">
-						<p:ajax event="rowSelect"
-							listener="#{rowSelectionShowcaseBean.onRowSelect}"
-							update="form:msgs" />
-					</f:facet>
-
-					<!-- Id column -->
-					<p:column headerText="Id" filterBy="#{item.id}" sortBy="#{item.id}"
-						filterMatchMode="contains">
-						<f:facet name="filter">
-							<p:inputText onchange="PF('multiRowSelectionTable').filter()"
-								id="idFilter" styleClass="custom-filter" />
-						</f:facet>
-
-						<h:outputText value="#{item.id}" />
-					</p:column>
-
-
-					<!-- Name column -->
-					<p:column headerText="Name" filterBy="#{item.name}"
-						sortBy="#{item.name}" filterMatchMode="contains">
-						<f:facet name="filter">
-							<p:inputText onchange="PF('multiRowSelectionTable').filter()"
-								id="nameFilter" styleClass="custom-filter" />
-						</f:facet>
-
-						<h:outputText value="#{item.name}" />
-					</p:column>
-
-					<!-- Country column -->
-					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
-						<span class="flag flag-#{item.country.code}"
-							style="width: 30px; height: 20px" />
-						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.country.name}" />
-					</p:column>
-
-					<!-- Representative column -->
-					<p:column headerText="Representative"
-						filterBy="#{item.representative.name}"
-						sortBy="#{item.representative.name}" filterMatchMode="startsWith">
-						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.representative.name}" />
-					</p:column>
-
-
-					<!-- Status column with custom filter -->
-					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="exact">
-						<f:facet name="filter">
-							<p:selectOneMenu onchange="PF('multiRowSelectionTable').filter()"
+							<p:selectOneMenu
+								onchange="PF('singleRowSelectionTable').filter()"
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
@@ -172,8 +94,6 @@
 					</p:column>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>
-
-
 		</ui:define>
 	</ui:composition>
 </h:body>

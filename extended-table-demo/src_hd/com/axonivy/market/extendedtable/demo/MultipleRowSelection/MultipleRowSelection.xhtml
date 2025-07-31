@@ -9,20 +9,45 @@
 	<ui:composition template="/layouts/basic-10.xhtml">
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
-			<h:form id="lazyForm">
-				<ic:com.axonivy.market.extendedtable.ExtendedTable tableId="lazyTable"
-					manageStateBean="#{dataTableStateBean}" widgetVar="lazyTable"
-					id="extendedTable" showDeleteButton="true" showResetButton="true"
-					paginator="true" rows="10" allowUnsorting="true"
-					filteredValue="#{lazyShowcaseBean.filteredItems}" lazy="true"
-					value="#{lazyShowcaseBean.lazyModel}">
+			<h2>Multiple Row Selection</h2>
+			<h:form id="form" style="margin-top: 100px;">
+				<p:growl id="msgs" showDetail="true"></p:growl>
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					manageStateBean="#{dataTableStateBean}"
+					tableId="multiRowSelectionTable" widgetVar="multiRowSelectionTable"
+					id="multiRowSelectionTableWrapper"
+					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
+					allowUnsorting="true"
+					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
+					showResetButton="true" paginator="true" rows="10"
+					selectionMode="multiple"
+					selection="#{rowSelectionShowcaseBean.selectedCustomers}"
+					rowKey="#{item.id}">
+
+					<f:facet name="event">
+						<p:ajax event="rowSelect"
+							listener="#{rowSelectionShowcaseBean.onRowSelect}"
+							update="form:msgs" />
+					</f:facet>
+
+					<!-- Id column -->
+					<p:column headerText="Id" filterBy="#{item.id}" sortBy="#{item.id}"
+						filterMatchMode="contains">
+						<f:facet name="filter">
+							<p:inputText onchange="PF('multiRowSelectionTable').filter()"
+								id="idFilter" styleClass="custom-filter" />
+						</f:facet>
+
+						<h:outputText value="#{item.id}" />
+					</p:column>
+
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
-							<p:inputText onchange="PF('lazyTable').filter()" id="nameFilter"
-								styleClass="custom-filter" />
+							<p:inputText onchange="PF('multiRowSelectionTable').filter()"
+								id="nameFilter" styleClass="custom-filter" />
 						</f:facet>
 
 						<h:outputText value="#{item.name}" />
@@ -50,11 +75,12 @@
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:selectOneMenu onchange="PF('lazyTable').filter()"
+							<p:selectOneMenu onchange="PF('multiRowSelectionTable').filter()"
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
-								<f:selectItems value="#{lazyShowcaseBean.customerStatus}" />
+								<f:selectItems
+									value="#{rowSelectionShowcaseBean.customerStatus}" />
 							</p:selectOneMenu>
 						</f:facet>
 						<span

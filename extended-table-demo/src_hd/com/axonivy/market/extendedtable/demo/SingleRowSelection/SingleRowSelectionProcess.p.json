@@ -3,7 +3,7 @@
   "id" : "19836868E3ECA0EC",
   "kind" : "HTML_DIALOG",
   "config" : {
-    "data" : "com.axonivy.market.extendedtable.demo.RowSelection.RowSelectionData"
+    "data" : "com.axonivy.market.extendedtable.demo.SingleRowSelection.SingleRowSelectionData"
   },
   "elements" : [ {
       "id" : "f0",

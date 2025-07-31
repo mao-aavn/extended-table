@@ -1,0 +1,373 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<cc:interface componentType="IvyComponent">
+	<!-- 
+	PROBLEMS: 
+	1. var="item" is fixed => rowKey="#{item.id}" is not flexible in naming
+	2. Must switch for row selection/none selection 
+	 -->
+
+	<!-- Beans -->
+	<cc:attribute name="manageStateBean" required="true"
+		type="com.axonivy.market.extendedtable.DataTableStateBean" />
+
+	<!-- UI Labels -->
+	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
+	<cc:attribute name="resetTableLabel" default="Reset Table"></cc:attribute>
+	<cc:attribute name="saveStateLabel" default="Save Table State"></cc:attribute>
+	<cc:attribute name="restoreStateLabel" default="Restore Table State"></cc:attribute>
+	<cc:attribute name="deleteStateLabel" default="Delete Table State"></cc:attribute>
+	<cc:attribute name="stateNameRequiredMsg"
+		default="State name is required"></cc:attribute>
+
+	<cc:attribute name="showResetButton" default="false"></cc:attribute>
+	<cc:attribute name="showDeleteButton" default="false"></cc:attribute>
+
+	<!-- Datatable mapping -->
+	<cc:attribute name="tableId"></cc:attribute>
+	<cc:attribute name="widgetVar"></cc:attribute>
+	<cc:attribute name="value" required="true" />
+	<cc:attribute name="paginator" default="false"
+		shortDescription="Enables pagination. Default is false." />
+	<cc:attribute name="rows" default="0"
+		shortDescription="Number of rows to display per page. Default value is 0 meaning to display all data available." />
+	<cc:attribute name="sortMode" default="single" />
+	<cc:attribute name="emptyMessage" default="No records found." />
+
+	<cc:attribute name="allowUnsorting" default="false" />
+	<cc:attribute name="ariaRowLabel" />
+	<cc:attribute name="binding" />
+	<cc:attribute name="cellEditMode" default="eager" />
+	<cc:attribute name="cellSeparator" />
+	<cc:attribute name="clientCache" default="false" />
+	<cc:attribute name="currentPageReportTemplate"
+		default="{startRecord}-{endRecord} of {totalRecords} records" />
+	<cc:attribute name="dataLocale" />
+	<cc:attribute name="dir" default="ltr" />
+	<cc:attribute name="disableContextMenuIfEmpty" default="false" />
+	<cc:attribute name="disabledSelection" default="false" />
+	<cc:attribute name="disabledTextSelection" default="true" />
+	<cc:attribute name="draggableColumns" default="false" />
+	<cc:attribute name="draggableRows" default="false" />
+	<cc:attribute name="draggableRowsFunction" />
+	<cc:attribute name="editInitEvent" />
+	<cc:attribute name="editMode" default="row" />
+	<cc:attribute name="editable" default="false" />
+	<cc:attribute name="editingRow" default="false" />
+	<cc:attribute name="escapeText" default="true" />
+	<cc:attribute name="expandedRow" default="false" />
+	<cc:attribute name="filterBy" />
+	<cc:attribute name="filterDelay" default="300" />
+	<cc:attribute name="filterEvent" default="keyup" />
+	<cc:attribute name="filteredValue" required="false"
+		type="java.util.List" />
+	<cc:attribute name="first" default="0" />
+	<cc:attribute name="frozenColumns" default="0" />
+	<cc:attribute name="frozenRows" />
+	<cc:attribute name="globalFilter" />
+	<cc:attribute name="globalFilterOnly" default="false" />
+	<cc:attribute name="globalFilterFunction" />
+	<!-- <cc:attribute name="id" /> Replaced by tableId attr-->
+	<cc:attribute name="lazy" default="false" />
+	<cc:attribute name="liveResize" default="false" />
+	<cc:attribute name="liveScroll" default="false" />
+	<cc:attribute name="liveScrollBuffer" default="0" />
+	<cc:attribute name="multiViewState" default="false" />
+	<cc:attribute name="nativeElements" default="false" />
+	<cc:attribute name="onExpandStart" />
+	<cc:attribute name="onRowClick" />
+	<cc:attribute name="pageLinks" default="10" />
+	<cc:attribute name="paginatorAlwaysVisible" default="true" />
+	<cc:attribute name="paginatorPosition" default="both" />
+	<cc:attribute name="paginatorTemplate"
+		default="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" />
+	<cc:attribute name="reflow" default="false" />
+	<cc:attribute name="rendered" default="true" />
+	<cc:attribute name="renderEmptyFacets" default="false" />
+	<cc:attribute name="resizableColumns" default="false" />
+	<cc:attribute name="resizeMode" default="fit" />
+	<cc:attribute name="rowDragSelector" default="td,span:not(.ui-c)" />
+	<cc:attribute name="rowEditMode" default="eager" />
+	<cc:attribute name="rowExpandMode" default="multiple" />
+	<cc:attribute name="rowHover" default="false" />
+	<cc:attribute name="rowIndexVar" />
+	<cc:attribute name="rowKey" required="false" default="#{item.id}" />
+	<cc:attribute name="rowSelectMode" default="new" />
+	<cc:attribute name="rowSelector" />
+	<cc:attribute name="rowStatePreserved" default="false" />
+	<cc:attribute name="rowStyleClass" />
+	<cc:attribute name="rowsPerPageLabel" />
+	<cc:attribute name="rowsPerPageTemplate" default="5,10,{ShowAll|'All'}" />
+	<cc:attribute name="saveOnCellBlur" default="true" />
+	<cc:attribute name="scrollHeight" />
+	<cc:attribute name="scrollRows" default="0" />
+	<cc:attribute name="scrollWidth" />
+	<cc:attribute name="scrollable" default="false" />
+
+	<cc:attribute name="selectionMode" type="java.lang.String" default="" />
+	<cc:attribute name="selection" type="java.lang.Object" required="false" />
+
+	<cc:attribute name="selectionPageOnly" default="true" />
+	<cc:attribute name="showGridlines" default="false" />
+	<cc:attribute name="size" default="regular" />
+	<cc:attribute name="sortBy" />
+	<cc:attribute name="skipChildren" default="false" />
+	<cc:attribute name="stickyHeader" default="false" />
+	<cc:attribute name="stickyTopAt" />
+	<cc:attribute name="stripedRows" default="false" />
+	<cc:attribute name="style" />
+	<cc:attribute name="styleClass" />
+	<cc:attribute name="summary" />
+	<cc:attribute name="tabindex" />
+	<cc:attribute name="tableStyle" />
+	<cc:attribute name="tableStyleClass" />
+	<cc:attribute name="value" required="true" />
+	<!-- <cc:attribute name="var" default="item" type=""/> -->
+	<cc:attribute name="virtualScroll" default="false" />
+	<cc:attribute name="touchable" default="false" />
+	<cc:attribute name="partialUpdate" default="true" />
+</cc:interface>
+
+<cc:implementation>
+	<style>
+.top-buttons {
+	margin-left: 8px;
+}
+</style>
+
+<!-- 	<ui:repeat value="#{cc.attrs.entrySet()}" var="attr">
+		<h:outputText value="#{attr.key}: #{attr.value}"
+			rendered="#{not empty attr.value}" />
+		<br />
+	</ui:repeat> -->
+	
+	<p:growl id="extendedTableMsg"></p:growl>
+
+	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
+		id="tableStatePanel">
+		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" />
+		<p:autoComplete id="stateNameInput" required="true"
+			value="#{cc.attrs.manageStateBean.stateName}"
+			completeMethod="#{cc.attrs.manageStateBean.completeStateName}"
+			dropdown="true" forceSelection="false" multiple="false"
+			placeholder="Enter or select state name" var="name"
+			itemLabel="#{name}" itemValue="#{name}" minQueryLength="0"
+			requiredMessage="#{cc.attrs.stateNameRequiredMsg}"
+			style="width:250px; margin: 0px 30px" />
+
+		<p:commandButton value="#{cc.attrs.saveStateLabel}"
+			styleClass="top-buttons"
+			action="#{cc.attrs.manageStateBean.saveTableState}"
+			process="#{cc.clientId}:stateNameInput"
+			update="#{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput" />
+
+		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
+			id="restoreStateButton" styleClass="top-buttons"
+			process="#{cc.clientId}:stateNameInput"
+			action="#{cc.attrs.manageStateBean.restoreTableState}"
+			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput"
+			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();PF('#{cc.attrs.widgetVar}').refresh()"
+			oncomplete="PF('#{cc.attrs.widgetVar}').filter();" />
+
+		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
+			styleClass="top-buttons"
+			action="#{cc.attrs.manageStateBean.deleteTableState}"
+			rendered="#{cc.attrs.showDeleteButton}" process="stateNameInput"
+			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput" />
+
+		<p:commandButton value="#{cc.attrs.resetTableLabel}" id="resetButton"
+			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
+			process="@this"
+			actionListener="#{cc.attrs.manageStateBean.resetTable}"
+			update="#{cc.clientId}:stateNameInput"
+			oncomplete="PF('#{cc.attrs.widgetVar}').clearFilters();">
+			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>
+		</p:commandButton>
+	</p:outputPanel>
+
+	<c:choose>
+		<c:when
+			test="#{(cc.attrs.selectionMode eq 'single' or cc.attrs.selectionMode eq 'multiple')}">
+			<p:dataTable id="#{cc.attrs.tableId}"
+				widgetVar="#{cc.attrs.widgetVar}" value="#{cc.attrs.value}"
+				var="item" rowKey="#{cc.attrs.rowKey}"
+				selection="#{cc.attrs.selection}"
+				selectionMode="#{cc.attrs.selectionMode}" multiViewState="true"
+				paginator="#{cc.attrs.paginator}" rows="#{cc.attrs.rows}"
+				sortMode="#{cc.attrs.sortMode}"
+				emptyMessage="#{cc.attrs.emptyMessage}"
+				allowUnsorting="#{allowUnsorting}" ariaRowLabel="#{ariaRowLabel}"
+				binding="#{cc.attrs.binding}"
+				cellEditMode="#{cc.attrs.cellEditMode}"
+				cellSeparator="#{cc.attrs.cellSeparator}"
+				clientCache="#{cc.attrs.clientCache}"
+				currentPageReportTemplate="#{cc.attrs.currentPageReportTemplate}"
+				dataLocale="#{cc.attrs.dataLocale}" dir="#{cc.attrs.dir}"
+				disableContextMenuIfEmpty="#{cc.attrs.disableContextMenuIfEmpty}"
+				disabledSelection="#{cc.attrs.disabledSelection}"
+				disabledTextSelection="#{cc.attrs.disabledTextSelection}"
+				draggableColumns="#{cc.attrs.draggableColumns}"
+				draggableRows="#{cc.attrs.draggableRows}"
+				draggableRowsFunction="#{cc.attrs.draggableRowsFunction}"
+				editInitEvent="#{cc.attrs.editInitEvent}"
+				editMode="#{cc.attrs.editMode}" editable="#{cc.attrs.editable}"
+				editingRow="#{cc.attrs.editingRow}"
+				escapeText="#{cc.attrs.escapeText}"
+				expandedRow="#{cc.attrs.expandedRow}"
+				filterBy="#{cc.attrs.filterBy}"
+				filterDelay="#{cc.attrs.filterDelay}"
+				filterEvent="#{cc.attrs.filterEvent}"
+				filteredValue="#{cc.attrs.filteredValue}" first="#{cc.attrs.first}"
+				frozenColumns="#{cc.attrs.frozenColumns}"
+				frozenRows="#{cc.attrs.frozenRows}"
+				globalFilter="#{cc.attrs.globalFilter}"
+				globalFilterOnly="#{cc.attrs.globalFilterOnly}"
+				globalFilterFunction="#{cc.attrs.globalFilterFunction}"
+				lazy="#{cc.attrs.lazy}" liveResize="#{cc.attrs.liveResize}"
+				liveScroll="#{cc.attrs.liveScroll}"
+				liveScrollBuffer="#{cc.attrs.liveScrollBuffer}"
+				initMode="#{cc.attrs.initMode}"
+				nativeElements="#{cc.attrs.nativeElements}"
+				onExpandStart="#{cc.attrs.onExpandStart}"
+				onRowClick="#{cc.attrs.onRowClick}"
+				pageLinks="#{cc.attrs.pageLinks}"
+				paginatorAlwaysVisible="#{cc.attrs.paginatorAlwaysVisible}"
+				paginatorPosition="#{cc.attrs.paginatorPosition}"
+				paginatorTemplate="#{cc.attrs.paginatorTemplate}"
+				reflow="#{cc.attrs.reflow}" rendered="#{cc.attrs.rendered}"
+				renderEmptyFacets="#{cc.attrs.renderEmptyFacets}"
+				resizableColumns="#{cc.attrs.resizableColumns}"
+				resizeMode="#{cc.attrs.resizeMode}"
+				rowDragSelector="#{cc.attrs.rowDragSelector}"
+				rowEditMode="#{cc.attrs.rowEditMode}"
+				rowExpandMode="#{cc.attrs.rowExpandMode}"
+				rowHover="#{cc.attrs.rowHover}"
+				rowIndexVar="#{cc.attrs.rowIndexVar}"
+				rowSelectMode="#{cc.attrs.rowSelectMode}"
+				rowSelector="#{cc.attrs.rowSelector}"
+				rowStatePreserved="#{cc.attrs.rowStatePreserved}"
+				rowStyleClass="#{cc.attrs.rowStyleClass}"
+				rowsPerPageLabel="#{cc.attrs.rowsPerPageLabel}"
+				rowsPerPageTemplate="#{cc.attrs.rowsPerPageTemplate}"
+				saveOnCellBlur="#{cc.attrs.saveOnCellBlur}"
+				scrollHeight="#{cc.attrs.scrollHeight}"
+				scrollRows="#{cc.attrs.scrollRows}"
+				scrollWidth="#{cc.attrs.scrollWidth}"
+				scrollable="#{cc.attrs.scrollable}"
+				selectionPageOnly="#{cc.attrs.selectionPageOnly}"
+				showGridlines="#{cc.attrs.showGridlines}"
+				showSelectAll="#{cc.attrs.showSelectAll}" size="#{cc.attrs.size}"
+				sortBy="#{cc.attrs.sortBy}" skipChildren="#{cc.attrs.skipChildren}"
+				stickyHeader="#{cc.attrs.stickyHeader}"
+				stickyTopAt="#{cc.attrs.stickyTopAt}"
+				stripedRows="#{cc.attrs.stripedRows}" style="#{cc.attrs.style}"
+				styleClass="#{cc.attrs.styleClass}" summary="#{cc.attrs.summary}"
+				tabindex="#{cc.attrs.tabindex}" tableStyle="#{cc.attrs.tableStyle}"
+				tableStyleClass="#{cc.attrs.tableStyleClass}"
+				virtualScroll="#{cc.attrs.virtualScroll}"
+				touchable="#{cc.attrs.touchable}"
+				partialUpdate="#{cc.attrs.partialUpdate}">
+
+				<cc:insertFacet name="event" />
+				<cc:insertChildren />
+				<cc:insertFacet name="header" />
+				<cc:insertFacet name="footer" />
+
+			</p:dataTable>
+		</c:when>
+		<c:otherwise>
+			<p:dataTable id="#{cc.attrs.tableId}"
+				widgetVar="#{cc.attrs.widgetVar}" value="#{cc.attrs.value}"
+				var="item" multiViewState="true" paginator="#{cc.attrs.paginator}"
+				rows="#{cc.attrs.rows}" sortMode="#{cc.attrs.sortMode}"
+				emptyMessage="#{cc.attrs.emptyMessage}"
+				allowUnsorting="#{allowUnsorting}" ariaRowLabel="#{ariaRowLabel}"
+				binding="#{cc.attrs.binding}"
+				cellEditMode="#{cc.attrs.cellEditMode}"
+				cellSeparator="#{cc.attrs.cellSeparator}"
+				clientCache="#{cc.attrs.clientCache}"
+				currentPageReportTemplate="#{cc.attrs.currentPageReportTemplate}"
+				dataLocale="#{cc.attrs.dataLocale}" dir="#{cc.attrs.dir}"
+				disableContextMenuIfEmpty="#{cc.attrs.disableContextMenuIfEmpty}"
+				disabledSelection="#{cc.attrs.disabledSelection}"
+				disabledTextSelection="#{cc.attrs.disabledTextSelection}"
+				draggableColumns="#{cc.attrs.draggableColumns}"
+				draggableRows="#{cc.attrs.draggableRows}"
+				draggableRowsFunction="#{cc.attrs.draggableRowsFunction}"
+				editInitEvent="#{cc.attrs.editInitEvent}"
+				editMode="#{cc.attrs.editMode}" editable="#{cc.attrs.editable}"
+				editingRow="#{cc.attrs.editingRow}"
+				escapeText="#{cc.attrs.escapeText}"
+				expandedRow="#{cc.attrs.expandedRow}"
+				filterBy="#{cc.attrs.filterBy}"
+				filterDelay="#{cc.attrs.filterDelay}"
+				filterEvent="#{cc.attrs.filterEvent}"
+				filteredValue="#{cc.attrs.filteredValue}" first="#{cc.attrs.first}"
+				frozenColumns="#{cc.attrs.frozenColumns}"
+				frozenRows="#{cc.attrs.frozenRows}"
+				globalFilter="#{cc.attrs.globalFilter}"
+				globalFilterOnly="#{cc.attrs.globalFilterOnly}"
+				globalFilterFunction="#{cc.attrs.globalFilterFunction}"
+				lazy="#{cc.attrs.lazy}" liveResize="#{cc.attrs.liveResize}"
+				liveScroll="#{cc.attrs.liveScroll}"
+				liveScrollBuffer="#{cc.attrs.liveScrollBuffer}"
+				initMode="#{cc.attrs.initMode}"
+				nativeElements="#{cc.attrs.nativeElements}"
+				onExpandStart="#{cc.attrs.onExpandStart}"
+				onRowClick="#{cc.attrs.onRowClick}"
+				pageLinks="#{cc.attrs.pageLinks}"
+				paginatorAlwaysVisible="#{cc.attrs.paginatorAlwaysVisible}"
+				paginatorPosition="#{cc.attrs.paginatorPosition}"
+				paginatorTemplate="#{cc.attrs.paginatorTemplate}"
+				reflow="#{cc.attrs.reflow}" rendered="#{cc.attrs.rendered}"
+				renderEmptyFacets="#{cc.attrs.renderEmptyFacets}"
+				resizableColumns="#{cc.attrs.resizableColumns}"
+				resizeMode="#{cc.attrs.resizeMode}"
+				rowDragSelector="#{cc.attrs.rowDragSelector}"
+				rowEditMode="#{cc.attrs.rowEditMode}"
+				rowExpandMode="#{cc.attrs.rowExpandMode}"
+				rowHover="#{cc.attrs.rowHover}"
+				rowIndexVar="#{cc.attrs.rowIndexVar}"
+				rowSelectMode="#{cc.attrs.rowSelectMode}"
+				rowSelector="#{cc.attrs.rowSelector}"
+				rowStatePreserved="#{cc.attrs.rowStatePreserved}"
+				rowStyleClass="#{cc.attrs.rowStyleClass}"
+				rowsPerPageLabel="#{cc.attrs.rowsPerPageLabel}"
+				rowsPerPageTemplate="#{cc.attrs.rowsPerPageTemplate}"
+				saveOnCellBlur="#{cc.attrs.saveOnCellBlur}"
+				scrollHeight="#{cc.attrs.scrollHeight}"
+				scrollRows="#{cc.attrs.scrollRows}"
+				scrollWidth="#{cc.attrs.scrollWidth}"
+				scrollable="#{cc.attrs.scrollable}"
+				showGridlines="#{cc.attrs.showGridlines}"
+				showSelectAll="#{cc.attrs.showSelectAll}" size="#{cc.attrs.size}"
+				sortBy="#{cc.attrs.sortBy}" skipChildren="#{cc.attrs.skipChildren}"
+				stickyHeader="#{cc.attrs.stickyHeader}"
+				stickyTopAt="#{cc.attrs.stickyTopAt}"
+				stripedRows="#{cc.attrs.stripedRows}" style="#{cc.attrs.style}"
+				styleClass="#{cc.attrs.styleClass}" summary="#{cc.attrs.summary}"
+				tabindex="#{cc.attrs.tabindex}" tableStyle="#{cc.attrs.tableStyle}"
+				tableStyleClass="#{cc.attrs.tableStyleClass}"
+				virtualScroll="#{cc.attrs.virtualScroll}"
+				touchable="#{cc.attrs.touchable}"
+				partialUpdate="#{cc.attrs.partialUpdate}">
+
+				<cc:insertFacet name="event" />
+				<cc:insertChildren />
+				<cc:insertFacet name="header" />
+				<cc:insertFacet name="footer" />
+
+			</p:dataTable>
+		</c:otherwise>
+	</c:choose>
+
+</cc:implementation>
+
+</html>

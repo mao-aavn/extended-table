@@ -1,0 +1,5 @@
+Databases:
+  entended_table_demo:
+    Url: jdbc:hsqldb:mem:sa
+    Driver: org.hsqldb.jdbc.JDBCDriver
+    Password: ${decrypt:}

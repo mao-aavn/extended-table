@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/README.md">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/README.md" />
+              <option name="originalContent" value="# Extended Table&#10;&#10;## Description&#10;&#10;Extended Table is a JSF component for Axon.ivy that extends the `p:dataTable` component from PrimeFaces. Its main goal is to provide users with the ability to save the state of a table (such as filters, sorting, pagination, and column order) and restore it at any time and from anywhere within the application. This feature enhances user experience by allowing personalized table views to be persisted and reused.&#10;&#10;## Features&#10;&#10;- Save table state (filters, sorting, pagination, column order, etc.)&#10;- Restore saved table state on demand&#10;- Delete saved states from the list&#10;- Reset the table to its default state&#10;- Seamless integration with Axon.ivy and PrimeFaces&#10;" />
+              <option name="updatedContent" value="# Extended Table&#10;&#10;## Description&#10;&#10;Extended Table is a JSF component for Axon.ivy that extends the `p:dataTable` component from PrimeFaces. Its main goal is to provide users with the ability to save the state of a table (such as filters, sorting, pagination, and column order) and restore it at any time and from anywhere within the application. This feature enhances user experience by allowing personalized table views to be persisted and reused.&#10;&#10;In the background, the table state is persisted as a JSON string in the user's session property map.&#10;&#10;## Features&#10;&#10;- Save table state (filters, sorting, pagination, column order, etc.)&#10;- Restore saved table state on demand&#10;- Delete saved states from the list&#10;- Reset the table to its default state&#10;- Seamless integration with Axon.ivy and PrimeFaces" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

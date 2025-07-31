@@ -1,0 +1,76 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:body>
+	<ui:composition template="/layouts/basic-10.xhtml">
+		<ui:define name="title">Extended Table Showcase</ui:define>
+		<ui:define name="content">
+
+			<h:form id="columnTogglerForm">
+				<p:messages />
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="columnTogglerTable" manageStateBean="#{dataTableStateBean}"
+					widgetVar="columnTogglerTable" id="extendedTable"
+					value="#{columnTogglerShowcaseBean.items}" showDeleteButton="true"
+					paginator="true" rows="10"
+					filteredValue="#{noneLazyShowcaseBean.filteredItems}"
+					showResetButton="true"
+					>
+
+					<f:facet name="header">
+						<div class="p-d-flex p-jc-between p-ai-center" id="xxx">
+							Columns
+
+							<div>
+								<p:commandButton id="toggler" type="button" value="Columns"
+									icon="pi pi-align-justify" />
+								<p:columnToggler id="bbb"
+									datasource="columnTogglerForm:extendedTable:columnTogglerTable"
+									trigger="toggler" />
+							</div>
+						</div>
+					</f:facet>
+
+					<!-- Name column -->
+					<p:column headerText="Name" filterBy="#{item.name}" id="name"
+						sortBy="#{item.name}" filterMatchMode="contains">
+						<h:outputText value="#{item.name}" id="nameText"/>
+					</p:column>
+
+					<!-- Country column -->
+					<p:column headerText="Country" filterBy="#{item.country.name}" id="country"
+						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+						<span class="flag flag-#{item.country.code}"
+							style="width: 30px; height: 20px" />
+						<h:outputText style="vertical-align: middle; margin-left: .5rem"
+							value="#{item.country.name}" id="countryNameText"/>
+					</p:column>
+
+					<!-- Representative column -->
+					<p:column headerText="Representative" id="representative"
+						filterBy="#{item.representative.name}"
+						sortBy="#{item.representative.name}" filterMatchMode="startsWith">
+						<h:outputText style="vertical-align: middle; margin-left: .5rem"
+							value="#{item.representative.name}" id="reText" />
+					</p:column>
+
+
+					<!-- Status column with custom filter -->
+					<p:column headerText="Status" filterBy="#{item.status}" id="status"
+						sortBy="#{item.status}" filterMatchMode="exact">
+						<span
+							class="customer-badge status-#{item.status.name().toLowerCase()}">
+							#{item.status} </span>
+					</p:column>
+				</ic:com.axonivy.market.extendedtable.ExtendedTable>
+			</h:form>
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

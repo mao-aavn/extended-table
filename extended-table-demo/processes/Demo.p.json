@@ -1,0 +1,171 @@
+{
+  "format" : "10.0.0",
+  "id" : "1985EB7E66D272A7",
+  "config" : {
+    "data" : "com.axonivy.market.extendedtable.demo.Data"
+  },
+  "elements" : [ {
+      "id" : "f10",
+      "type" : "RequestStart",
+      "name" : "noneLazy.ivp",
+      "config" : {
+        "callSignature" : "noneLazy",
+        "outLink" : "noneLazy.ivp",
+        "startName" : "None Lazy Table",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 328 }
+      },
+      "connect" : { "id" : "f26", "to" : "f12" }
+    }, {
+      "id" : "f11",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 328 }
+      }
+    }, {
+      "id" : "f12",
+      "type" : "DialogCall",
+      "name" : "MultiViewStateDialog1",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.NoneLazy",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 328 }
+      },
+      "connect" : { "id" : "f25", "to" : "f11" }
+    }, {
+      "id" : "f15",
+      "type" : "RequestStart",
+      "name" : "lazy.ivp",
+      "config" : {
+        "callSignature" : "lazy",
+        "outLink" : "lazy.ivp",
+        "startName" : "Lazy Table",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 456 }
+      },
+      "connect" : { "id" : "f18", "to" : "f17" }
+    }, {
+      "id" : "f16",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 456 }
+      }
+    }, {
+      "id" : "f17",
+      "type" : "DialogCall",
+      "name" : "MultiViewStateDialog1",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.Lazy",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 456 }
+      },
+      "connect" : { "id" : "f19", "to" : "f16" }
+    }, {
+      "id" : "f3",
+      "type" : "RequestStart",
+      "name" : "ColumnToggler",
+      "config" : {
+        "callSignature" : "ColumnToggler",
+        "outLink" : "ColumnToggler.ivp",
+        "startName" : "Column Toggler",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 576 }
+      },
+      "connect" : { "id" : "f9", "to" : "f4" }
+    }, {
+      "id" : "f4",
+      "type" : "DialogCall",
+      "name" : "MultiViewStateDialog1",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.ColumnToggler",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 576 }
+      },
+      "connect" : { "id" : "f27", "to" : "f5" }
+    }, {
+      "id" : "f5",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 576 }
+      }
+    }, {
+      "id" : "f6",
+      "type" : "RequestStart",
+      "name" : "Row Selection",
+      "config" : {
+        "callSignature" : "RowSelection",
+        "outLink" : "RowSelection.ivp",
+        "startName" : "Row Selection",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 712 }
+      },
+      "connect" : { "id" : "f13", "to" : "f7" }
+    }, {
+      "id" : "f7",
+      "type" : "DialogCall",
+      "name" : "MultiViewStateDialog1",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.RowSelection",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 712 }
+      },
+      "connect" : { "id" : "f14", "to" : "f8" }
+    }, {
+      "id" : "f8",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 712 }
+      }
+    } ]
+}

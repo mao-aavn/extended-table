@@ -180,7 +180,7 @@
 			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
 			process="@this"
 			actionListener="#{cc.attrs.manageStateBean.resetTable}"
-			update="#{cc.clientId}:stateNameInput"
+			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId}"
 			oncomplete="PF('#{cc.attrs.widgetVar}').clearFilters();">
 			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>
 		</p:commandButton>

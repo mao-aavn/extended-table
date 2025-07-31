@@ -1,11 +1,11 @@
 package com.axonivy.market.extendedtable.beans;
 
+import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.el.ValueExpression;
 import javax.faces.bean.ManagedBean;
@@ -20,10 +20,8 @@ import org.primefaces.component.datatable.DataTableState;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
-import org.primefaces.util.ComponentTraversalUtils;
 
 import com.axonivy.market.extendedtable.utils.Attrs;
-import com.axonivy.market.extendedtable.utils.JSFUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,34 +34,28 @@ import ch.ivyteam.ivy.security.IUser;
 
 @ViewScoped
 @ManagedBean(name = "dataTableStateBean")
-public class DataTableStateBean<T> implements Serializable {
+public class DataTableStateBean implements Serializable {
 
+	private static final String TABLE_ID = "tableId";
 	private static final long serialVersionUID = -5460403522329131748L;
 	private static final String STATE_KEY_PREFIX = "DATATABLE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
 	private List<String> stateNames = new ArrayList<>();
 
-	protected String getTableClientId() {
-		UIComponent tableComponent = findComponent((String) Attrs.currentContext().get("tableId"));
+	private String getTableClientId() {
+		UIComponent tableComponent = findComponent((String) Attrs.currentContext().get(TABLE_ID));
 
 		if (tableComponent == null) {
 			throw new IllegalStateException(
-					"Component with id '" + Attrs.currentContext().get("tableId") + "' not found in view.");
+					"Component with id '" + Attrs.currentContext().get(TABLE_ID) + "' not found in view.");
 		}
 
 		return tableComponent.getClientId();
 	}
 
-	public static UIComponent findComponent(String localId) {
-		FacesContext context = FacesContext.getCurrentInstance();
-		UIComponent root = context.getViewRoot();
-
-		return ComponentTraversalUtils.firstWithId(localId, root);
-	}
-
 	public void saveTableState() {
-		DataTable table = (DataTable) FacesContext.getCurrentInstance().getViewRoot().findComponent(getTableClientId());
+		DataTable table = (DataTable) getViewRoot().findComponent(getTableClientId());
 
 		if (table != null) {
 			DataTableState state = table.getMultiViewState(false);
@@ -75,12 +67,10 @@ public class DataTableStateBean<T> implements Serializable {
 		}
 
 		stateNames = getAllCurrentTableStateNames();
-		PrimeFaces.current().ajax().update("stateNameInput");
 	}
 
 	public void restoreTableState() {
-		FacesContext context = FacesContext.getCurrentInstance();
-		UIViewRoot viewRoot = context.getViewRoot();
+		UIViewRoot viewRoot = getViewRoot();
 
 		DataTable currentTable = (DataTable) viewRoot.findComponent(getTableClientId());
 
@@ -89,47 +79,38 @@ public class DataTableStateBean<T> implements Serializable {
 			return;
 		}
 
-		// Ensure filteredValue is never null
 		if (currentTable.getFilteredValue() == null) {
 			currentTable.setFilteredValue(new ArrayList<>());
 		}
 
 		currentTable.reset();
 
-		DataTableState saved = getTableStateFromIvyUser();
+		DataTableState persistedState = getTableStateFromIvyUser();
 
-		if (saved != null) {
+		if (persistedState != null) {
 			DataTableState currentState = currentTable.getMultiViewState(true); // force create
+			currentState.setFilterBy(persistedState.getFilterBy());
+			currentState.setSortBy(persistedState.getSortBy());
+			currentState.setFirst(persistedState.getFirst());
+			currentState.setColumnMeta(persistedState.getColumnMeta());
+			currentState.setExpandedRowKeys(persistedState.getExpandedRowKeys());
+			currentState.setRows(persistedState.getRows());
+			currentState.setSelectedRowKeys(persistedState.getSelectedRowKeys());
+			currentState.setWidth(persistedState.getWidth());
+			currentTable.setFirst(persistedState.getFirst());
 
-			Map<String, FilterMeta> filterBy = saved.getFilterBy();
-      currentState.setFilterBy(saved.getFilterBy());
-			currentState.setSortBy(saved.getSortBy());
-			currentState.setFirst(saved.getFirst());
-			currentState.setColumnMeta(saved.getColumnMeta());
-			currentState.setExpandedRowKeys(saved.getExpandedRowKeys());
-			currentState.setRows(saved.getRows());
-			currentState.setSelectedRowKeys(saved.getSelectedRowKeys());
-			currentState.setWidth(saved.getWidth());
-
-			// Jump to the restored page
-			currentTable.setFirst(saved.getFirst());
-
-			// Explicitly trigger filter and sort after restoring state
 			currentTable.filterAndSort();
 			currentTable.resetColumns();
-			PrimeFaces.current().ajax().update(currentTable);
-
 		} else {
-			Ivy.log().warn("No saved table state to restore for the table %s and state %s", getTableClientId(), stateName);
+			Ivy.log().warn("No saved table state to restore for the table %s and state %s", getTableClientId(),
+					stateName);
 		}
 	}
 
 	public void resetTable() {
-		FacesContext context = FacesContext.getCurrentInstance();
-		String viewId = context.getViewRoot().getViewId();
+		String viewId = getViewRoot().getViewId();
 		PrimeFaces.current().multiViewState().clearAll(viewId, true, null);
 		stateName = null;
-		JSFUtils.updateComponents(getTableClientId());
 	}
 
 	private void saveTableStateToIvyUser(DataTableState state) {
@@ -149,22 +130,6 @@ public class DataTableStateBean<T> implements Serializable {
 		}
 
 		getTableStateFromIvyUser();
-	}
-
-	protected String getCachingData(String stateKey) {
-		IUser currentUser = Ivy.session().getSessionUser();
-		String stateJson = currentUser.getProperty(stateKey);
-
-		return stateJson;
-	}
-
-	protected void setCachingData(String stateKey, String stateJson) {
-		IUser currentUser = Ivy.session().getSessionUser();
-		currentUser.setProperty(stateKey, stateJson);
-	}
-
-	protected List<String> getCacheKeys() {
-		return Ivy.session().getSessionUser().getAllPropertyNames();
 	}
 
 	public DataTableState getTableStateFromIvyUser() {
@@ -202,14 +167,13 @@ public class DataTableStateBean<T> implements Serializable {
 			stateNames = getAllCurrentTableStateNames();
 		}
 
-		return stateNames.stream()
-				.filter(name -> name != null && name.toLowerCase().contains(query.toLowerCase()))
+		return stateNames.stream().filter(name -> name != null && name.toLowerCase().contains(query.toLowerCase()))
 				.toList();
 	}
 
 	public void deleteTableState() {
 		String stateKey = getStateKey();
-		IUser currentUser = Ivy.session().getSessionUser();
+		IUser currentUser = getSessionUser();
 		currentUser.removeProperty(stateKey);
 
 		// Update stateNames list after deletion
@@ -217,7 +181,30 @@ public class DataTableStateBean<T> implements Serializable {
 		if (stateNames.size() > 0) {
 			stateName = stateNames.get(0);
 		}
-		PrimeFaces.current().ajax().update("@form");
+	}
+
+	private String getCachingData(String stateKey) {
+		IUser currentUser = getSessionUser();
+		String stateJson = currentUser.getProperty(stateKey);
+
+		return stateJson;
+	}
+
+	protected void setCachingData(String stateKey, String stateJson) {
+		IUser currentUser = getSessionUser();
+		currentUser.setProperty(stateKey, stateJson);
+	}
+
+	protected List<String> getCacheKeys() {
+		return getSessionUser().getAllPropertyNames();
+	}
+
+	private UIViewRoot getViewRoot() {
+		return FacesContext.getCurrentInstance().getViewRoot();
+	}
+
+	private IUser getSessionUser() {
+		return Ivy.session().getSessionUser();
 	}
 
 	private String getStateKey() {

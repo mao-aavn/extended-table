@@ -137,17 +137,11 @@
 
 <cc:implementation>
 	<style>
-.top-buttons {
-	margin-left: 8px;
-}
+	.top-buttons {
+		margin-left: 8px;
+	}
 </style>
 
-<!-- 	<ui:repeat value="#{cc.attrs.entrySet()}" var="attr">
-		<h:outputText value="#{attr.key}: #{attr.value}"
-			rendered="#{not empty attr.value}" />
-		<br />
-	</ui:repeat> -->
-	
 	<p:growl id="extendedTableMsg"></p:growl>
 
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
@@ -286,7 +280,8 @@
 			<p:dataTable id="#{cc.attrs.tableId}"
 				widgetVar="#{cc.attrs.widgetVar}" value="#{cc.attrs.value}"
 				var="item" multiViewState="true" paginator="#{cc.attrs.paginator}"
-				rows="#{cc.attrs.rows}" sortMode="#{cc.attrs.sortMode}"
+				rows="#{cc.attrs.rows}" rowKey="#{cc.attrs.rowKey}"
+				sortMode="#{cc.attrs.sortMode}"
 				emptyMessage="#{cc.attrs.emptyMessage}"
 				allowUnsorting="#{allowUnsorting}" ariaRowLabel="#{ariaRowLabel}"
 				binding="#{cc.attrs.binding}"

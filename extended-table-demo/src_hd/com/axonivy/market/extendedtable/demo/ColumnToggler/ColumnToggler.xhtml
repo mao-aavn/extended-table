@@ -13,13 +13,13 @@
 			<h:form id="columnTogglerForm">
 				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="columnTogglerTable" manageStateBean="#{dataTableStateBean}"
+					tableId="columnTogglerTable"
+					manageStateBean="#{dataTableStateBean}"
 					widgetVar="columnTogglerTable" id="extendedTable"
 					value="#{columnTogglerShowcaseBean.items}" showDeleteButton="true"
 					paginator="true" rows="10"
 					filteredValue="#{noneLazyShowcaseBean.filteredItems}"
-					showResetButton="true"
-					>
+					showResetButton="true">
 
 					<f:facet name="header">
 						<div class="p-d-flex p-jc-between p-ai-center" id="xxx">
@@ -38,16 +38,17 @@
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}" id="name"
 						sortBy="#{item.name}" filterMatchMode="contains">
-						<h:outputText value="#{item.name}" id="nameText"/>
+						<h:outputText value="#{item.name}" id="nameText" />
 					</p:column>
 
 					<!-- Country column -->
-					<p:column headerText="Country" filterBy="#{item.country.name}" id="country"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+					<p:column headerText="Country" filterBy="#{item.country.name}"
+						id="country" sortBy="#{item.country.name}"
+						filterMatchMode="startsWith">
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.country.name}" id="countryNameText"/>
+							value="#{item.country.name}" id="countryNameText" />
 					</p:column>
 
 					<!-- Representative column -->

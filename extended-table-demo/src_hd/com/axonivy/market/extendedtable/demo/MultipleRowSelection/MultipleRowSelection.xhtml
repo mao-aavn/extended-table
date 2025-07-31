@@ -14,7 +14,8 @@
 				<p:growl id="msgs" showDetail="true"></p:growl>
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
 					manageStateBean="#{dataTableStateBean}"
-					tableId="multiRowSelectionTable" widgetVar="multiRowSelectionTable"
+					tableId="multiRowSelectionTable" 
+					widgetVar="multiRowSelectionTable"
 					id="multiRowSelectionTableWrapper"
 					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
 					allowUnsorting="true"
@@ -69,7 +70,6 @@
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"
 							value="#{item.representative.name}" />
 					</p:column>
-
 
 					<!-- Status column with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"

@@ -1,18 +1,25 @@
 package com.axonivy.market.extendedtable.beans;
 
+import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.getAllSessionPropertieNames;
+import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.getPropertyDataFromSession;
+import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.removeProperty;
+import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.setPropertyDataToSession;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.el.ValueExpression;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
@@ -30,49 +37,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import ch.ivyteam.ivy.environment.Ivy;
-import ch.ivyteam.ivy.security.IUser;
 
 @ViewScoped
 @ManagedBean(name = "dataTableStateBean")
 public class DataTableStateBean implements Serializable {
 
 	private static final String TABLE_ID = "tableId";
+	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final long serialVersionUID = -5460403522329131748L;
 	private static final String STATE_KEY_PREFIX = "DATATABLE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
 	private List<String> stateNames = new ArrayList<>();
 
-	private String getTableClientId() {
-		UIComponent tableComponent = findComponent((String) Attrs.currentContext().get(TABLE_ID));
-
-		if (tableComponent == null) {
-			throw new IllegalStateException(
-					"Component with id '" + Attrs.currentContext().get(TABLE_ID) + "' not found in view.");
-		}
-
-		return tableComponent.getClientId();
-	}
-
 	public void saveTableState() {
-		DataTable table = (DataTable) getViewRoot().findComponent(getTableClientId());
+		String tableClientId = getTableClientId();
+		DataTable table = (DataTable) findComponentFromClientId(tableClientId);
 
 		if (table != null) {
 			DataTableState state = table.getMultiViewState(false);
 			if (state != null) {
-				saveTableStateToIvyUser(state);
+				saveTableStateToUserSession(state);
 			} else {
 				Ivy.log().warn("State is null for the table: %s", getTableClientId());
 			}
 		}
 
 		stateNames = getAllCurrentTableStateNames();
+		addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
 	}
 
 	public void restoreTableState() {
-		UIViewRoot viewRoot = getViewRoot();
-
-		DataTable currentTable = (DataTable) viewRoot.findComponent(getTableClientId());
+		DataTable currentTable = (DataTable) findComponentFromClientId(getTableClientId());
 
 		if (currentTable == null) {
 			Ivy.log().warn("Table not found with the given id: {0}", getTableClientId());
@@ -109,11 +105,55 @@ public class DataTableStateBean implements Serializable {
 
 	public void resetTable() {
 		String viewId = getViewRoot().getViewId();
+		String tableClientId = getTableClientId();
 		PrimeFaces.current().multiViewState().clearAll(viewId, true, null);
 		stateName = null;
+		DataTable currentTable = (DataTable) findComponentFromClientId(tableClientId);
+
+		if (currentTable == null) {
+			Ivy.log().warn("Table not found with the given id: {0}", tableClientId);
+			return;
+		}
+
+		currentTable.clearInitialState();
+		currentTable.resetColumns();
+		addInfoMsg(GROWL_MSG_ID, "Reset the table successfully", null);
 	}
 
-	private void saveTableStateToIvyUser(DataTableState state) {
+	public void deleteTableState() {
+		String stateKey = getStateKey();
+		if (removeProperty(stateKey) == null) {
+			addErrorMsg(stateKey, "No existing name " + stateKey, stateKey);
+		} else {
+			stateNames = getAllCurrentTableStateNames();
+			if (stateNames.size() > 0) {
+				stateName = stateNames.get(0);
+			} else {
+				stateName = null;
+			}
+		}
+		addInfoMsg(GROWL_MSG_ID, "Delete the state successfully", null);
+	}
+
+	public List<String> completeStateName(String query) {
+		if (stateNames == null || stateNames.isEmpty()) {
+			stateNames = getAllCurrentTableStateNames();
+			Ivy.log().info("stateNames : " + stateNames);
+		}
+		if (stateNames == null || stateNames.isEmpty()) {
+			Ivy.log().info("stateNames are tempty: ");
+			return Collections.emptyList();
+		}
+
+		if (query == null || query.trim().isEmpty()) {
+			return stateNames;
+		}
+
+		return stateNames.stream().filter(name -> name != null && name.toLowerCase().contains(query.toLowerCase()))
+				.toList();
+	}
+
+	private void saveTableStateToUserSession(DataTableState state) {
 		String stateKey = getStateKey();
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -123,24 +163,25 @@ public class DataTableStateBean implements Serializable {
 
 		try {
 			String stateJson = mapper.writeValueAsString(state);
-			setCachingData(stateKey, stateJson);
-
+			setPropertyDataToSession(stateKey, stateJson);
 		} catch (JsonProcessingException e) {
 			Ivy.log().error("Couldn't serialize TableState to JSON", e);
 		}
-
-		getTableStateFromIvyUser();
 	}
 
-	public DataTableState getTableStateFromIvyUser() {
+	private DataTableState getTableStateFromIvyUser() {
 		String stateKey = getStateKey();
-		String stateJson = getCachingData(stateKey);
+		String stateJson = getPropertyDataFromSession(stateKey);
+
+		Ivy.log().info(stateKey);
+		Ivy.log().info(stateJson);
 
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new JavaTimeModule()).addMixIn(FilterMeta.class, FilterDataTableMixin.class)
 				.addMixIn(SortMeta.class, SortDataTableMixin.class);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		DataTableState tableState = null;
+
 		try {
 			tableState = mapper.readValue(stateJson, new TypeReference<DataTableState>() {
 			});
@@ -151,8 +192,9 @@ public class DataTableStateBean implements Serializable {
 		return tableState;
 	}
 
-	public List<String> getAllCurrentTableStateNames() {
-		return getCacheKeys().stream().filter(name -> name.startsWith(STATE_KEY_PREFIX + getTableClientId()))
+	private List<String> getAllCurrentTableStateNames() {
+		String tableId = getTableClientId();
+		return getAllSessionPropertieNames().stream().filter(name -> name.startsWith(STATE_KEY_PREFIX + tableId))
 				.map(name -> {
 					// Remove prefix
 					String remainder = name.substring(STATE_KEY_PREFIX.length());
@@ -162,53 +204,19 @@ public class DataTableStateBean implements Serializable {
 				}).filter(value -> !value.isEmpty()).toList();
 	}
 
-	public List<String> completeStateName(String query) {
-		if (stateNames.isEmpty()) {
-			stateNames = getAllCurrentTableStateNames();
-		}
-
-		return stateNames.stream().filter(name -> name != null && name.toLowerCase().contains(query.toLowerCase()))
-				.toList();
-	}
-
-	public void deleteTableState() {
-		String stateKey = getStateKey();
-		IUser currentUser = getSessionUser();
-		currentUser.removeProperty(stateKey);
-
-		// Update stateNames list after deletion
-		stateNames = getAllCurrentTableStateNames();
-		if (stateNames.size() > 0) {
-			stateName = stateNames.get(0);
-		}
-	}
-
-	private String getCachingData(String stateKey) {
-		IUser currentUser = getSessionUser();
-		String stateJson = currentUser.getProperty(stateKey);
-
-		return stateJson;
-	}
-
-	protected void setCachingData(String stateKey, String stateJson) {
-		IUser currentUser = getSessionUser();
-		currentUser.setProperty(stateKey, stateJson);
-	}
-
-	protected List<String> getCacheKeys() {
-		return getSessionUser().getAllPropertyNames();
-	}
-
-	private UIViewRoot getViewRoot() {
-		return FacesContext.getCurrentInstance().getViewRoot();
-	}
-
-	private IUser getSessionUser() {
-		return Ivy.session().getSessionUser();
-	}
-
 	private String getStateKey() {
 		return String.format(STATE_KEY_PATTERN, getTableClientId(), stateName);
+	}
+
+	private String getTableClientId() {
+		UIComponent tableComponent = findComponent((String) Attrs.currentContext().get(TABLE_ID));
+
+		if (tableComponent == null) {
+			throw new IllegalStateException(
+					"Component with id '" + Attrs.currentContext().get(TABLE_ID) + "' not found in view.");
+		}
+
+		return tableComponent.getClientId();
 	}
 
 	public String getStateName() {

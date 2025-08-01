@@ -11,7 +11,7 @@
 	<!-- 
 	PROBLEMS: 
 	1. var="item" is fixed => rowKey="#{item.id}" is not flexible in naming
-	2. Must switch for row selection/none selection 
+	2. Must switch for row selection/none selection
 	 -->
 
 	<!-- Beans -->
@@ -46,7 +46,7 @@
 	<cc:attribute name="binding" />
 	<cc:attribute name="cellEditMode" default="eager" />
 	<cc:attribute name="cellSeparator" />
-	<cc:attribute name="clientCache" default="false" />
+	<!-- <cc:attribute name="clientCache" default="false" /> -->
 	<cc:attribute name="currentPageReportTemplate"
 		default="{startRecord}-{endRecord} of {totalRecords} records" />
 	<cc:attribute name="dataLocale" />
@@ -55,8 +55,8 @@
 	<cc:attribute name="disabledSelection" default="false" />
 	<cc:attribute name="disabledTextSelection" default="true" />
 	<cc:attribute name="draggableColumns" default="false" />
-	<cc:attribute name="draggableRows" default="false" />
-	<cc:attribute name="draggableRowsFunction" />
+	<!-- <cc:attribute name="draggableRows" default="false" /> -->
+	<!-- <cc:attribute name="draggableRowsFunction" /> -->
 	<cc:attribute name="editInitEvent" />
 	<cc:attribute name="editMode" default="row" />
 	<cc:attribute name="editable" default="false" />
@@ -142,7 +142,7 @@
 	}
 </style>
 
-	<p:growl id="extendedTableMsg"></p:growl>
+	<p:growl id="extendedTableGrowlMsg"></p:growl>
 
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
 		id="tableStatePanel">
@@ -152,36 +152,36 @@
 			completeMethod="#{cc.attrs.manageStateBean.completeStateName}"
 			dropdown="true" forceSelection="false" multiple="false"
 			placeholder="Enter or select state name" var="name"
-			itemLabel="#{name}" itemValue="#{name}" minQueryLength="0"
+			itemLabel="#{name}" itemValue="#{name}" minQueryLength="3"
 			requiredMessage="#{cc.attrs.stateNameRequiredMsg}"
 			style="width:250px; margin: 0px 30px" />
 
 		<p:commandButton value="#{cc.attrs.saveStateLabel}"
 			styleClass="top-buttons"
 			action="#{cc.attrs.manageStateBean.saveTableState}"
-			process="#{cc.clientId}:stateNameInput"
-			update="#{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput" />
+			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId}"
+			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
 
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
 			id="restoreStateButton" styleClass="top-buttons"
 			process="#{cc.clientId}:stateNameInput"
 			action="#{cc.attrs.manageStateBean.restoreTableState}"
-			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput"
-			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();PF('#{cc.attrs.widgetVar}').refresh()"
-			oncomplete="PF('#{cc.attrs.widgetVar}').filter();" />
+			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
+			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();"
+			 />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"
 			action="#{cc.attrs.manageStateBean.deleteTableState}"
 			rendered="#{cc.attrs.showDeleteButton}" process="stateNameInput"
-			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableMsg #{cc.clientId}:stateNameInput" />
+			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
 
 		<p:commandButton value="#{cc.attrs.resetTableLabel}" id="resetButton"
 			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
 			process="@this"
 			actionListener="#{cc.attrs.manageStateBean.resetTable}"
-			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId}"
-			oncomplete="PF('#{cc.attrs.widgetVar}').clearFilters();">
+			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg"
+			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();">
 			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>
 		</p:commandButton>
 	</p:outputPanel>

@@ -1,4 +1,4 @@
-package com.axonivy.market.entendedtable.test;
+package com.axonivy.market.entendedtable.beans;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

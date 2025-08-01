@@ -16,29 +16,25 @@
 				<p:growl id="msgs" showDetail="true"></p:growl>
 
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="singleRowSelectionTable"
+					tableId="checkboxSelectionTable"
 					manageStateBean="#{dataTableStateBean}"
-					widgetVar="singleRowSelectionTable"
-					id="singleRowSelectionTableWrapper"
+					widgetVar="checkboxSelectionTable"
+					id="checkboxSelectionTableWrapper"
 					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
 					allowUnsorting="true"
 					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
 					showResetButton="true" paginator="true" rows="10"
-					selectionMode="single"
 					selection="#{rowSelectionShowcaseBean.selectedCustomer}"
-					rowKey="#{item.id}">
+					selectionPageOnly="false" rowKey="#{item.id}">
 
-					<f:facet name="event">
-						<p:ajax event="rowSelect"
-							listener="#{rowSelectionShowcaseBean.onRowSelect}"
-							update="form:msgs" />
-					</f:facet>
+					<p:column id="checkbox" selectionMode="multiple"
+						style="width:16px;text-align:center" />
 
 					<!-- Id column -->
 					<p:column headerText="Id" filterBy="#{item.id}" sortBy="#{item.id}"
-						filterMatchMode="contains">
+						id="idColumn" filterMatchMode="contains">
 						<f:facet name="filter">
-							<p:inputText onchange="PF('singleRowSelectionTable').filter()"
+							<p:inputText onchange="PF('checkboxSelectionTable').filter()"
 								id="idFilter" styleClass="custom-filter" />
 						</f:facet>
 
@@ -50,7 +46,7 @@
 					<p:column headerText="Name" filterBy="#{item.name}"
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
-							<p:inputText id="nameFilter" styleClass="custom-filter" />
+							<p:inputText id="nameFilter" styleClass="custom-filter" onkeydown="if(event.key==='Enter'){return false;}"/>
 						</f:facet>
 
 						<h:outputText value="#{item.name}" />
@@ -78,8 +74,7 @@
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:selectOneMenu
-								onchange="PF('singleRowSelectionTable').filter()"
+							<p:selectOneMenu onchange="PF('checkboxSelectionTable').filter()"
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
@@ -93,6 +88,12 @@
 					</p:column>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>
+
+			<script>
+				$(document).ready(function() {
+					console.log("selectedIds");
+				});
+			</script>
 		</ui:define>
 	</ui:composition>
 </h:body>

@@ -208,5 +208,46 @@
       "visual" : {
         "at" : { "x" : 352, "y" : 816 }
       }
+    }, {
+      "id" : "f22",
+      "type" : "RequestStart",
+      "name" : "Checkbox Selection",
+      "config" : {
+        "callSignature" : "CheckboxSelection",
+        "outLink" : "CheckboxSelection.ivp",
+        "startName" : "Checkbox Selection",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 944 }
+      },
+      "connect" : { "id" : "f28", "to" : "f23" }
+    }, {
+      "id" : "f23",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.CheckboxSelection",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 944 }
+      },
+      "connect" : { "id" : "f29", "to" : "f24" }
+    }, {
+      "id" : "f24",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 944 }
+      }
     } ]
 }

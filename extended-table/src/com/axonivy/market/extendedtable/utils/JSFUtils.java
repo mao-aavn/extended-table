@@ -1,81 +1,52 @@
 package com.axonivy.market.extendedtable.utils;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
-import org.primefaces.component.fieldset.Fieldset;
-import org.primefaces.component.outputlabel.OutputLabel;
-import org.primefaces.model.FilterMeta;
 import org.primefaces.util.ComponentTraversalUtils;
 
 import ch.ivyteam.ivy.environment.Ivy;
 
 public final class JSFUtils {
-	public static final String JSF_SOURCE_PARAM = "javax.faces.source";
-	private static final int TREE_DEPTH_SEACH_LEVEL = 10;
 
 	private JSFUtils() {
+	}
+
+	public static void addErrorMsg(String clientId, String summaryMsg, String detailMsg) {
+		addMessage(clientId, FacesMessage.SEVERITY_ERROR, summaryMsg, detailMsg);
+	}
+
+	public static void addInfoMsg(String clientId, String summaryMsg, String detailMsg) {
+		addMessage(clientId, FacesMessage.SEVERITY_INFO, summaryMsg, detailMsg);
+	}
+
+	private static void addMessage(String clientId, Severity severity, String summaryMsg, String detailMsg) {
+		currentContext().addMessage(clientId, new FacesMessage(severity, summaryMsg, detailMsg));
 	}
 
 	private static FacesContext currentContext() {
 		return FacesContext.getCurrentInstance();
 	}
 
-	public static Object findSubmittingValue(String clientId) {
-		UIInput component = (UIInput) currentContext().getViewRoot().findComponent(clientId);
-
-		return component.getSubmittedValue();
+	public static UIViewRoot getViewRoot() {
+		return currentContext().getViewRoot();
 	}
 
-	public static void showDialog(String dialogName) {
-		PrimeFaces.current().executeScript("PF('" + dialogName + "').show();");
-	}
-
-	public static void hideDialog(String dialogName) {
-		PrimeFaces.current().executeScript("PF('" + dialogName + "').hide();");
+	public static UIComponent findComponentFromClientId(String clientId) {
+		return getViewRoot().findComponent(clientId);
 	}
 
 	/**
 	 * Update a list of expressions or clientIds.
-	 * 
+	 *
 	 * @param expressions
 	 */
 	public static void updateComponents(String... expressions) {
 		PrimeFaces.current().ajax().update(expressions);
-	}
-
-	public static String getCurrentComponentId() {
-		return UIComponent.getCurrentComponent(FacesContext.getCurrentInstance()).getId();
-	}
-
-	public static Fieldset findClosestParentFieldset() {
-		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
-		if (currentComponent instanceof Fieldset) {
-			return null;
-		}
-
-		int counter = 0;
-
-		while (currentComponent != null && counter++ < TREE_DEPTH_SEACH_LEVEL
-				&& !(currentComponent instanceof Fieldset)) {
-			currentComponent = currentComponent.getParent();
-		}
-
-		return currentComponent instanceof Fieldset ? (Fieldset) currentComponent : null;
-	}
-
-	public static boolean isButtonClicked(FacesContext context, String buttonId) {
-		String[] sourceIds = context.getExternalContext().getRequestParameterValuesMap().get(JSF_SOURCE_PARAM);
-		if (sourceIds == null || sourceIds.length == 0) {
-			return false;
-		}
-
-		return sourceIds[0].contentEquals(buttonId);
 	}
 
 	/**
@@ -103,54 +74,6 @@ public final class JSFUtils {
 		} else {
 			Ivy.log().warn("Component with ID " + localId + " not found.");
 		}
-	}
-
-	public static void updateComponentWithClientId(String clientId) {
-		PrimeFaces.current().ajax().update(clientId);
-	}
-
-	public static void updateComponentWithWidgetVar(String widgetVar) {
-		PrimeFaces.current().executeScript("PF('" + widgetVar + "').update()");
-	}
-
-	public static void highLightErrorComponent(String id) {
-		final UIComponent c = findComponent(id);
-		highLightErrorComponent(c);
-	}
-
-	public static void highLightErrorComponent(UIComponent c) {
-		final String scriptPattern = "document.getElementById('%s').classList.add('%s');";
-		PrimeFaces.current().executeScript(String.format(scriptPattern, c.getClientId(), "error-component"));
-	}
-
-	public static UIComponent findOutputLabel(UIComponent root, String forValue) {
-		if (root == null || forValue == null) {
-			return null;
-		}
-
-		if (root instanceof OutputLabel && forValue.equals(root.getAttributes().get("for"))) {
-			return root;
-		}
-
-		// Recursively search through the children
-		for (UIComponent child : root.getChildren()) {
-			UIComponent found = findOutputLabel(child, forValue);
-			if (found != null) {
-				return found;
-			}
-		}
-
-		return null; // Not found
-	}
-
-	public static Map<String, Object> buildDatatableFilterMap(Map<String, FilterMeta> filterBy) {
-		Map<String, Object> filters = new HashMap<>();
-		if (filterBy != null) {
-			for (Map.Entry<String, FilterMeta> entry : filterBy.entrySet()) {
-				filters.put(entry.getKey(), entry.getValue().getFilterValue());
-			}
-		}
-		return filters;
 	}
 
 }

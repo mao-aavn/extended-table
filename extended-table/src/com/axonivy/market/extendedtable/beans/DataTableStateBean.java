@@ -1,9 +1,5 @@
 package com.axonivy.market.extendedtable.beans;
 
-import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.getAllSessionPropertieNames;
-import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.getPropertyDataFromSession;
-import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.removeProperty;
-import static com.axonivy.market.extendedtable.utils.IvySessionCacheUtils.setPropertyDataToSession;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
@@ -11,7 +7,6 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromC
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +23,8 @@ import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 
+import com.axonivy.market.extendedtable.repo.DataTableStateRepository;
+import com.axonivy.market.extendedtable.repo.SessionDataTableStateRepository;
 import com.axonivy.market.extendedtable.utils.Attrs;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -40,11 +37,11 @@ import ch.ivyteam.ivy.environment.Ivy;
 
 @ViewScoped
 @ManagedBean(name = "dataTableStateBean")
-public class DataTableStateBean implements Serializable {
+public class DataTableStateBean {
 
 	private static final String TABLE_ID = "tableId";
+	private static final String DATA_TABLE_STATE_REPOSITORY = "dataTableStateRepository";
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
-	private static final long serialVersionUID = -5460403522329131748L;
 	private static final String STATE_KEY_PREFIX = "DATATABLE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
@@ -57,13 +54,13 @@ public class DataTableStateBean implements Serializable {
 		if (table != null) {
 			DataTableState state = table.getMultiViewState(false);
 			if (state != null) {
-				saveTableStateToUserSession(state);
+				persistDataTableState(state);
 			} else {
-				Ivy.log().warn("State is null for the table: %s", getTableClientId());
+				Ivy.log().warn("State is null for the table: {0}", getTableClientId());
 			}
 		}
 
-		stateNames = getAllCurrentTableStateNames();
+		stateNames = fetchAllDataTableStateNames();
 		addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
 	}
 
@@ -81,7 +78,7 @@ public class DataTableStateBean implements Serializable {
 
 		currentTable.reset();
 
-		DataTableState persistedState = getTableStateFromIvyUser();
+		DataTableState persistedState = fetchDataTableState();
 
 		if (persistedState != null) {
 			DataTableState currentState = currentTable.getMultiViewState(true); // force create
@@ -122,10 +119,10 @@ public class DataTableStateBean implements Serializable {
 
 	public void deleteTableState() {
 		String stateKey = getStateKey();
-		if (removeProperty(stateKey) == null) {
+		if (!getStateRepository().delete(stateKey)) {
 			addErrorMsg(stateKey, "No existing name " + stateKey, stateKey);
 		} else {
-			stateNames = getAllCurrentTableStateNames();
+			stateNames = fetchAllDataTableStateNames();
 			if (stateNames.size() > 0) {
 				stateName = stateNames.get(0);
 			} else {
@@ -137,7 +134,7 @@ public class DataTableStateBean implements Serializable {
 
 	public List<String> completeStateName(String query) {
 		if (stateNames == null || stateNames.isEmpty()) {
-			stateNames = getAllCurrentTableStateNames();
+			stateNames = fetchAllDataTableStateNames();
 			Ivy.log().info("stateNames : " + stateNames);
 		}
 		if (stateNames == null || stateNames.isEmpty()) {
@@ -153,7 +150,7 @@ public class DataTableStateBean implements Serializable {
 				.toList();
 	}
 
-	private void saveTableStateToUserSession(DataTableState state) {
+	private void persistDataTableState(DataTableState state) {
 		String stateKey = getStateKey();
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -163,15 +160,15 @@ public class DataTableStateBean implements Serializable {
 
 		try {
 			String stateJson = mapper.writeValueAsString(state);
-			setPropertyDataToSession(stateKey, stateJson);
+			getStateRepository().save(stateKey, stateJson);
 		} catch (JsonProcessingException e) {
 			Ivy.log().error("Couldn't serialize TableState to JSON", e);
 		}
 	}
 
-	private DataTableState getTableStateFromIvyUser() {
+	private DataTableState fetchDataTableState() {
 		String stateKey = getStateKey();
-		String stateJson = getPropertyDataFromSession(stateKey);
+		String stateJson = getStateRepository().load(stateKey);
 
 		Ivy.log().info(stateKey);
 		Ivy.log().info(stateJson);
@@ -192,20 +189,30 @@ public class DataTableStateBean implements Serializable {
 		return tableState;
 	}
 
-	private List<String> getAllCurrentTableStateNames() {
+	private List<String> fetchAllDataTableStateNames() {
 		String tableId = getTableClientId();
-		return getAllSessionPropertieNames().stream().filter(name -> name.startsWith(STATE_KEY_PREFIX + tableId))
-				.map(name -> {
-					// Remove prefix
-					String remainder = name.substring(STATE_KEY_PREFIX.length());
-					// Get the part after the first underscore
-					int firstUnderscoreIndex = remainder.indexOf('_');
-					return firstUnderscoreIndex > 0 ? remainder.substring(firstUnderscoreIndex + 1) : "";
-				}).filter(value -> !value.isEmpty()).toList();
+		String prefix = STATE_KEY_PREFIX + tableId + "_";
+		
+		return getStateRepository().listKeys(prefix)
+				.stream()
+				.filter(name -> name.startsWith(prefix))
+				.map(name -> name.substring(prefix.length()))
+				.filter(value -> !value.isEmpty())
+				.toList();
 	}
 
 	private String getStateKey() {
 		return String.format(STATE_KEY_PATTERN, getTableClientId(), stateName);
+	}
+
+	private DataTableStateRepository getStateRepository() {
+		DataTableStateRepository repo = (DataTableStateRepository) Attrs.currentContext()
+				.get(DATA_TABLE_STATE_REPOSITORY);
+		if (repo instanceof DataTableStateRepository) {
+			return (DataTableStateRepository) repo;
+		}
+		// fallback to default
+		return new SessionDataTableStateRepository();
 	}
 
 	private String getTableClientId() {

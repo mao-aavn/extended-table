@@ -14,9 +14,14 @@
 	2. Must switch for row selection/none selection
 	 -->
 
-	<!-- Beans -->
+	<!-- Manage State Bean -->
 	<cc:attribute name="manageStateBean" required="true"
 		type="com.axonivy.market.extendedtable.DataTableStateBean" />
+
+	<!-- State Repository -->
+	<cc:attribute name="dataTableStateRepository" required="false"
+		type="com.axonivy.market.extendedtable.repo.DataTableStateRepository"
+		shortDescription="Repo to persist/fetch the table state, default will be the SessionDataTableStateRepository." />
 
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
@@ -137,9 +142,9 @@
 
 <cc:implementation>
 	<style>
-	.top-buttons {
-		margin-left: 8px;
-	}
+.top-buttons {
+	margin-left: 8px;
+}
 </style>
 
 	<p:growl id="extendedTableGrowlMsg"></p:growl>
@@ -167,8 +172,7 @@
 			process="#{cc.clientId}:stateNameInput"
 			action="#{cc.attrs.manageStateBean.restoreTableState}"
 			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
-			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();"
-			 />
+			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"

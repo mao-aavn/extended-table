@@ -28,7 +28,7 @@ public final class JSFUtils {
 		currentContext().addMessage(clientId, new FacesMessage(severity, summaryMsg, detailMsg));
 	}
 
-	private static FacesContext currentContext() {
+	public static FacesContext currentContext() {
 		return FacesContext.getCurrentInstance();
 	}
 

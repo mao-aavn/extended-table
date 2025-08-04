@@ -152,7 +152,8 @@
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
 		id="tableStatePanel">
 		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" />
-		<p:autoComplete id="stateNameInput" required="true"
+		<p:autoComplete id="stateNameInput"
+			required="false"
 			value="#{cc.attrs.manageStateBean.stateName}"
 			completeMethod="#{cc.attrs.manageStateBean.completeStateName}"
 			dropdown="true" forceSelection="false" multiple="false"
@@ -161,17 +162,22 @@
 			requiredMessage="#{cc.attrs.stateNameRequiredMsg}"
 			style="width:250px; margin: 0px 30px" />
 
+		<h:inputHidden id="saveButtonClicked"
+			value="#{cc.attrs.manageStateBean.saveButtonClicked}" />
+
 		<p:commandButton value="#{cc.attrs.saveStateLabel}"
-			styleClass="top-buttons"
+			styleClass="top-buttons" id="saveTableStateBtn"
 			action="#{cc.attrs.manageStateBean.saveTableState}"
-			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId}"
-			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
+			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:saveButtonClicked"
+			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
+			onclick="document.getElementById('#{cc.clientId}:saveButtonClicked').value='true'; alert('cliecked me')">
+		</p:commandButton>
 
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
-			id="restoreStateButton" styleClass="top-buttons"
+			id="restoreStateBtn" styleClass="top-buttons"
 			process="#{cc.clientId}:stateNameInput"
 			action="#{cc.attrs.manageStateBean.restoreTableState}"
-			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
+			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:saveButtonClicked"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"

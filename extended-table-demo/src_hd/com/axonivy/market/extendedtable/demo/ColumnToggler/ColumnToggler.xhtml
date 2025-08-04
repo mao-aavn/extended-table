@@ -56,14 +56,6 @@
 							value="#{item.country.name}" id="countryNameText" />
 					</p:column>
 
-					<!-- Representative column -->
-					<p:column headerText="Representative" id="representative"
-						filterBy="#{item.representative.name}"
-						sortBy="#{item.representative.name}" filterMatchMode="startsWith">
-						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.representative.name}" id="reText" />
-					</p:column>
-
 
 					<!-- Status column with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}" id="status"

@@ -15,16 +15,14 @@ public abstract class Customer_ extends com.axonivy.utils.persistence.beans.Audi
 	public static volatile SingularAttribute<Customer, Integer> activity;
 	public static volatile SingularAttribute<Customer, String> name;
 	public static volatile SingularAttribute<Customer, String> company;
-	public static volatile SingularAttribute<Customer, Representative> representative;
 	public static volatile SingularAttribute<Customer, CustomerStatus> status;
+	public static volatile SingularAttribute<Customer, CustomerGroup> group;
 
 	public static final String DATE = "date";
 	public static final String COUNTRY = "country";
 	public static final String ACTIVITY = "activity";
 	public static final String NAME = "name";
 	public static final String COMPANY = "company";
-	public static final String REPRESENTATIVE = "representative";
 	public static final String STATUS = "status";
-
+	public static final String GROUP = "group";
 }
-

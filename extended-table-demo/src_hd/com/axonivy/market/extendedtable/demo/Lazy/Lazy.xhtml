@@ -10,10 +10,11 @@
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
 			<h:form id="lazyForm">
-				<ic:com.axonivy.market.extendedtable.ExtendedTable tableId="lazyTable"
-					manageStateBean="#{dataTableStateBean}" widgetVar="lazyTable"
-					id="extendedTable" showDeleteButton="true" showResetButton="true"
-					paginator="true" rows="10" allowUnsorting="true"
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="lazyTable" manageStateBean="#{dataTableStateBean}"
+					widgetVar="lazyTable" id="extendedTable" showDeleteButton="true"
+					showResetButton="true" paginator="true" rows="10"
+					allowUnsorting="true"
 					filteredValue="#{lazyShowcaseBean.filteredItems}" lazy="true"
 					value="#{lazyShowcaseBean.lazyModel}">
 
@@ -30,19 +31,30 @@
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+						sortBy="#{item.country.name}" filterMatchMode="contains"
+						id="countryColumn">
+						<f:facet name="filter">
+							<p:inputText id="countryFilter" styleClass="custom-filter"
+								onchange="PF('lazyTable').filter()" />
+						</f:facet>
+
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"
 							value="#{item.country.name}" />
 					</p:column>
 
-					<!-- Representative column -->
-					<p:column headerText="Representative"
-						filterBy="#{item.representative.name}"
-						sortBy="#{item.representative.name}" filterMatchMode="startsWith">
+					<!-- Customer Group column -->
+					<p:column headerText="Group" filterBy="#{item.group.name}"
+						sortBy="#{item.group.name}" filterMatchMode="contains">
+						<f:facet name="filter">
+							<p:inputText id="groupFilter" styleClass="custom-filter"
+								onchange="PF('lazyTable').filter()" />
+						</f:facet>
+						<span class="flag flag-#{item.group.name}"
+							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.representative.name}" />
+							value="#{item.group.name}" />
 					</p:column>
 
 

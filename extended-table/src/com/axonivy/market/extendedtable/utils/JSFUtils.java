@@ -40,6 +40,10 @@ public final class JSFUtils {
 		return getViewRoot().findComponent(clientId);
 	}
 
+	public static String getRequestParameterValue(String key) {
+		return currentContext().getExternalContext().getRequestParameterMap().get(key);
+	}
+
 	/**
 	 * Update a list of expressions or clientIds.
 	 *

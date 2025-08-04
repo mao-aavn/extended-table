@@ -4,6 +4,7 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.getRequestParameterValue;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 
+import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datatable.DataTableState;
@@ -32,10 +34,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.inject.servlet.RequestScoped;
 
 import ch.ivyteam.ivy.environment.Ivy;
 
 @ViewScoped
+// @RequestScoped
 @ManagedBean(name = "dataTableStateBean")
 public class DataTableStateBean {
 
@@ -46,22 +50,36 @@ public class DataTableStateBean {
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
 	private List<String> stateNames = new ArrayList<>();
+	private String saveButtonClicked = null;
 
 	public void saveTableState() {
-		String tableClientId = getTableClientId();
-		DataTable table = (DataTable) findComponentFromClientId(tableClientId);
-
-		if (table != null) {
-			DataTableState state = table.getMultiViewState(false);
-			if (state != null) {
-				persistDataTableState(state);
-			} else {
-				Ivy.log().warn("State is null for the table: {0}", getTableClientId());
-			}
+		// String saveButtonClick = getRequestParameterValue("saveButtonClick");
+		// Ignore save if not called from the explicit save button
+		Ivy.log().info("saveButtonClicked");
+		Ivy.log().info(saveButtonClicked);
+		if (StringUtils.isEmpty(saveButtonClicked)) {
+			return;
 		}
+		
+		if (stateName == null || stateName.isEmpty()) {
+			addErrorMsg(GROWL_MSG_ID, "State name is required!", null);
+		} else {
+			String tableClientId = getTableClientId();
+			DataTable table = (DataTable) findComponentFromClientId(tableClientId);
 
-		stateNames = fetchAllDataTableStateNames();
-		addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
+			if (table != null) {
+				DataTableState state = table.getMultiViewState(false);
+				if (state != null) {
+					persistDataTableState(state);
+				} else {
+					Ivy.log().warn("State is null for the table: {0}", getTableClientId());
+				}
+			}
+
+			stateNames = fetchAllDataTableStateNames();
+			addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
+		}
+		saveButtonClicked = null;
 	}
 
 	public void restoreTableState() {
@@ -114,7 +132,6 @@ public class DataTableStateBean {
 
 		currentTable.clearInitialState();
 		currentTable.resetColumns();
-		addInfoMsg(GROWL_MSG_ID, "Reset the table successfully", null);
 	}
 
 	public void deleteTableState() {
@@ -192,13 +209,9 @@ public class DataTableStateBean {
 	private List<String> fetchAllDataTableStateNames() {
 		String tableId = getTableClientId();
 		String prefix = STATE_KEY_PREFIX + tableId + "_";
-		
-		return getStateRepository().listKeys(prefix)
-				.stream()
-				.filter(name -> name.startsWith(prefix))
-				.map(name -> name.substring(prefix.length()))
-				.filter(value -> !value.isEmpty())
-				.toList();
+
+		return getStateRepository().listKeys(prefix).stream().filter(name -> name.startsWith(prefix))
+				.map(name -> name.substring(prefix.length())).filter(value -> !value.isEmpty()).toList();
 	}
 
 	private String getStateKey() {
@@ -240,6 +253,14 @@ public class DataTableStateBean {
 
 	public void setStateNames(List<String> stateNames) {
 		this.stateNames = stateNames;
+	}
+
+	public String getSaveButtonClicked() {
+		return saveButtonClicked;
+	}
+
+	public void setSaveButtonClicked(String saveButtonClicked) {
+		this.saveButtonClicked = saveButtonClicked;
 	}
 
 	public abstract static class SortDataTableMixin {

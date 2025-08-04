@@ -3,7 +3,13 @@ package com.axonivy.market.extendedtable.demo.entities;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
 
 import com.axonivy.utils.persistence.beans.AuditableIdEntity;
 
@@ -14,24 +20,33 @@ public class Customer extends AuditableIdEntity {
 
 	private String name;
 	private String company;
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "country_id")
 	private Country country;
+
 	private LocalDate date;
+	
+	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
+	
 	private int activity;
-	private Representative representative;
+
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "group_id")
+	private CustomerGroup group;
 
 	public Customer() {
 	}
 
-	public Customer(int id, String name, String company, Country country, LocalDate date, CustomerStatus status,
-			int activity, Representative representative) {
+	public Customer(String name, String company, Country country, LocalDate date, CustomerStatus status,
+			int activity) {
 		this.name = name;
 		this.company = company;
 		this.country = country;
 		this.date = date;
 		this.status = status;
 		this.activity = activity;
-		this.representative = representative;
 	}
 
 	public String getName() {
@@ -82,12 +97,12 @@ public class Customer extends AuditableIdEntity {
 		this.activity = activity;
 	}
 
-	public Representative getRepresentative() {
-		return representative;
+	public CustomerGroup getGroup() {
+		return group;
 	}
 
-	public void setRepresentative(Representative representative) {
-		this.representative = representative;
+	public void setGroup(CustomerGroup group) {
+		this.group = group;
 	}
 
 	@Override
@@ -101,12 +116,11 @@ public class Customer extends AuditableIdEntity {
 		Customer customer = (Customer) o;
 		return id == customer.id && activity == customer.activity && Objects.equals(name, customer.name)
 				&& Objects.equals(company, customer.company) && Objects.equals(country, customer.country)
-				&& Objects.equals(date, customer.date) && status == customer.status
-				&& Objects.equals(representative, customer.representative);
+				&& Objects.equals(date, customer.date) && status == customer.status;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, company, country, date, status, activity, representative);
+		return Objects.hash(id, name, company, country, date, status, activity);
 	}
 }

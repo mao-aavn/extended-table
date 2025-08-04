@@ -19,8 +19,7 @@ public class LazyShowcaseBean extends GenericShowcaseBean {
 
 	@PostConstruct
 	public void init() {
-		lazyModel = new LazyCustomerDataModel(customerService.findAll());
-
+		lazyModel = new LazyCustomerDataModel();
 	}
 
 	public LazyDataModel<Customer> getLazyModel() {

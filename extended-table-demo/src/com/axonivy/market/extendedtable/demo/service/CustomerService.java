@@ -15,8 +15,8 @@ import org.primefaces.util.Constants;
 import com.axonivy.market.extendedtable.demo.daos.CustomerDAO;
 import com.axonivy.market.extendedtable.demo.entities.Country;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
+import com.axonivy.market.extendedtable.demo.entities.CustomerGroup;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
-import com.axonivy.market.extendedtable.demo.entities.Representative;
 
 import ch.ivyteam.ivy.environment.Ivy;
 
@@ -24,7 +24,6 @@ public class CustomerService {
 
 	private Random random = new SecureRandom();
 	private Country[] countries;
-	private Representative[] representatives;
 	private String[] firstNames;
 	private String[] lastNames;
 	private String[] companies;
@@ -32,29 +31,18 @@ public class CustomerService {
 	private CustomerDAO customerDAO = new CustomerDAO();
 
 	{
-		countries = new Country[] { new Country(0, "Argentina", "ar"), new Country(1, "Australia", "au"),
-				new Country(2, "Brazil", "br"), new Country(3, "Canada", "ca"), new Country(4, "Germany", "de"),
-				new Country(5, "France", "fr"), new Country(6, "India", "in"), new Country(7, "Italy", "it"),
-				new Country(8, "Japan", "jp"), new Country(9, "Russia", "ru"), new Country(10, "Spain", "es"),
-				new Country(11, "United Kingdom", "gb") };
+		countries = new Country[] { new Country("Argentina", "ar"), new Country("Australia", "au"),
+				new Country("Brazil", "br"), new Country("Canada", "ca"), new Country("Germany", "de"),
+				new Country("France", "fr"), new Country("India", "in"), new Country("Italy", "it"),
+				new Country("Japan", "jp"), new Country("Russia", "ru"), new Country("Spain", "es"),
+				new Country("United Kingdom", "gb") };
 
 		companies = new String[] { "Benton, John B Jr", "Chanay, Jeffrey A Esq", "Chemel, James L Cpa",
 				"Feltz Printing Service", "Printing Dimensions", "Chapman, Ross E Esq", "Morlong Associates",
 				"Commercial Press", "Truhlar And Truhlar Attys", "King, Christopher A Esq", "Dorl, James J Esq",
 				"Rangoni Of Florence", "Feiner Bros", "Buckley Miller Wright", "Rousseaux, Michael Esq" };
 
-		representatives = new Representative[] { new Representative("Amy Elsner", "amyelsner.png"),
-				new Representative("Anna Fali", "annafali.png"),
-				new Representative("Asiya Javayant", "asiyajavayant.png"),
-				new Representative("Bernardo Dominic", "bernardodominic.png"),
-				new Representative("Elwin Sharvill", "elwinsharvill.png"),
-				new Representative("Ioni Bowcher", "ionibowcher.png"),
-				new Representative("Ivan Magalhaes", "ivanmagalhaes.png"),
-				new Representative("Onyama Limba", "onyamalimba.png"),
-				new Representative("Stephen Shaw", "stephenshaw.png"),
-				new Representative("Xuxue Feng", "xuxuefeng.png") };
-
-		firstNames = new String[] { "James", "David", "Jeanfrancois", "Ivar", "Tony", "Adams", "Claire", "Costa",
+		firstNames = new String[] { "James", "David", "Jeanfrancois", "Ivar", "Tony", "AdAMS", "Claire", "Costa",
 				"Juan", "Maria", "Jennifer", "Stacey", "Leja", "Morrow", "Arvin", "Darci", "Izzy", "Ricardo",
 				"Clifford", "Emily", "Kadeem", "Mujtaba", "Aika", "Mayumi", "Misaki", "Silvio", "Nicolas", "Antonio",
 				"Deepesh", "Aditya", "Aruna", "Jones", "Julie", "Smith", "Johnson", "Francesco", "Salvatore", "Kaitlin",
@@ -69,21 +57,54 @@ public class CustomerService {
 	}
 
 	public void initCustomersIfNotExisting(int number) {
+
 		if (!customerDAO.findAll().isEmpty()) {
 			return;
 		}
 
 		List<Customer> customers = new ArrayList<>();
 		for (int i = 0; i < number; i++) {
-			customers.add(new Customer(i + 1000, getName(), getCompany(), getCountry(), getDate(),
-					CustomerStatus.random(), getActivity(), getRepresentative()));
+			customers.add(new Customer(getName(), getCompany(), getCountry(), getDate(), CustomerStatus.random(),
+					getActivity()));
 		}
+		assignGroupsToCustomers(customers);
 
 		try {
+			Ivy.log().info(customers.get(0));
 			customers = customerDAO.saveAll(customers);
 			Ivy.log().info("INIT COMPLETED: Records: " + customers.size());
 		} catch (TransactionRolledbackException e) {
 			Ivy.log().error(e);
+		}
+
+	}
+
+	private void assignGroupsToCustomers(List<Customer> customers) {
+		CustomerGroup groupA = new CustomerGroup("Enterprise Customers");
+		groupA.setDescription("Large enterprise clients");
+		groupA.setLeader("Alice Smith");
+
+		CustomerGroup groupB = new CustomerGroup("SMB Customers");
+		groupB.setDescription("Small and medium businesses");
+		groupB.setLeader("Bob Johnson");
+
+		CustomerGroup groupC = new CustomerGroup("VIP Customers");
+		groupC.setDescription("High value VIP clients");
+		groupC.setLeader("Carol White");
+
+		// Example: Assign groups to customers during initialization
+		for (int i = 0; i < customers.size(); i++) {
+			Customer customer = customers.get(i);
+			if (i % 3 == 0) {
+				customer.setGroup(groupA);
+				// groupA.getCustomers().add(customer);
+			} else if (i % 3 == 1) {
+				customer.setGroup(groupB);
+				// groupB.getCustomers().add(customer);
+			} else {
+				customer.setGroup(groupC);
+				// groupC.getCustomers().add(customer);
+			}
 		}
 	}
 
@@ -93,10 +114,6 @@ public class CustomerService {
 
 	public CustomerStatus[] getCustomerStatus() {
 		return CustomerStatus.values();
-	}
-
-	public List<Representative> getRepresentatives() {
-		return Arrays.asList(representatives);
 	}
 
 	private String getName() {
@@ -120,10 +137,6 @@ public class CustomerService {
 
 	private int getActivity() {
 		return random.nextInt(100);
-	}
-
-	private Representative getRepresentative() {
-		return representatives[random.nextInt(representatives.length)];
 	}
 
 	public List<Customer> findAll() {

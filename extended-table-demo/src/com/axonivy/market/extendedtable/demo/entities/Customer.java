@@ -26,28 +26,82 @@ public class Customer extends AuditableIdEntity {
 	private Country country;
 
 	private LocalDate date;
-	
+
 	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
-	
-	private int activity;
+
+	private int rank;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "group_id")
 	private CustomerGroup group;
 
+	private boolean isNew = false;
+
+	// Builder pattern
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+		private String name;
+		private String company;
+		private Country country;
+		private LocalDate date;
+		private CustomerStatus status;
+		private int rank;
+		private CustomerGroup group;
+		private boolean isNew = false;
+
+		public Builder name(String name) {
+			this.name = name;
+			return this;
+		}
+		public Builder company(String company) {
+			this.company = company;
+			return this;
+		}
+		public Builder country(Country country) {
+			this.country = country;
+			return this;
+		}
+		public Builder date(LocalDate date) {
+			this.date = date;
+			return this;
+		}
+		public Builder status(CustomerStatus status) {
+			this.status = status;
+			return this;
+		}
+		public Builder rank(int rank) {
+			this.rank = rank;
+			return this;
+		}
+		public Builder group(CustomerGroup group) {
+			this.group = group;
+			return this;
+		}
+		public Builder isNew(boolean isNew) {
+			this.isNew = isNew;
+			return this;
+		}
+		public Customer build() {
+			Customer c = new Customer();
+			c.setName(name);
+			c.setCompany(company);
+			c.setCountry(country);
+			c.setDate(date);
+			c.setStatus(status);
+			c.setRank(rank);
+			c.setGroup(group);
+			c.setNew(isNew);
+			return c;
+		}
+	}
+
 	public Customer() {
 	}
 
-	public Customer(String name, String company, Country country, LocalDate date, CustomerStatus status,
-			int activity) {
-		this.name = name;
-		this.company = company;
-		this.country = country;
-		this.date = date;
-		this.status = status;
-		this.activity = activity;
-	}
 
 	public String getName() {
 		return name;
@@ -89,12 +143,12 @@ public class Customer extends AuditableIdEntity {
 		this.status = status;
 	}
 
-	public int getActivity() {
-		return activity;
+	public int getRank() {
+		return rank;
 	}
 
-	public void setActivity(int activity) {
-		this.activity = activity;
+	public void setRank(int rank) {
+		this.rank = rank;
 	}
 
 	public CustomerGroup getGroup() {
@@ -103,6 +157,14 @@ public class Customer extends AuditableIdEntity {
 
 	public void setGroup(CustomerGroup group) {
 		this.group = group;
+	}
+
+	public boolean isNew() {
+		return isNew;
+	}
+
+	public void setNew(boolean isNew) {
+		this.isNew = isNew;
 	}
 
 	@Override
@@ -114,13 +176,13 @@ public class Customer extends AuditableIdEntity {
 			return false;
 		}
 		Customer customer = (Customer) o;
-		return id == customer.id && activity == customer.activity && Objects.equals(name, customer.name)
+	return id == customer.id && rank == customer.rank && Objects.equals(name, customer.name)
 				&& Objects.equals(company, customer.company) && Objects.equals(country, customer.country)
 				&& Objects.equals(date, customer.date) && status == customer.status;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, company, country, date, status, activity);
+	return Objects.hash(id, name, company, country, date, status, rank);
 	}
 }

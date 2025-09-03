@@ -12,6 +12,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.event.SelectEvent;
 
 import com.axonivy.market.extendedtable.demo.entities.Customer;
+import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
 @ViewScoped
 @ManagedBean(name = "rowSelectionShowcaseBean")
@@ -21,14 +22,22 @@ public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 	private Customer selectedCustomer;
 	private List<Customer> selectedCustomers = new ArrayList<>();
 
+	private List<Customer> filteredItems;
+	private List<CustomerStatus> selectedStatuses;
+
 	@PostConstruct
 	public void init() {
 		customerService.initCustomersIfNotExisting(500);
 		items = customerService.findAll();
+		filteredItems = new ArrayList<>(items);
 	}
 
 	public List<Customer> getItems() {
 		return items;
+	}
+
+	public List<Customer> getFilteredItems() {
+		return filteredItems;
 	}
 
 	public Customer getSelectedCustomer() {
@@ -45,6 +54,18 @@ public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 
 	public void setSelectedCustomers(List<Customer> selectedCustomers) {
 		this.selectedCustomers = selectedCustomers;
+	}
+
+	public List<CustomerStatus> getSelectedStatuses() {
+		return selectedStatuses;
+	}
+
+	public void setSelectedStatuses(List<CustomerStatus> selectedStatuses) {
+		this.selectedStatuses = selectedStatuses;
+	}
+
+	public void setFilteredItems(List<Customer> filteredItems) {
+		this.filteredItems = filteredItems;
 	}
 
 	public void onRowSelect(SelectEvent<Customer> event) {

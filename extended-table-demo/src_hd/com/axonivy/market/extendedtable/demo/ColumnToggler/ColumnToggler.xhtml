@@ -24,7 +24,6 @@
 					<f:facet name="header">
 						<div class="p-d-flex p-jc-between p-ai-center">
 							Columns
-
 							<div>
 								<p:commandButton id="toggler" type="button" value="Columns"
 									icon="pi pi-align-justify" />
@@ -40,11 +39,31 @@
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
 							<p:inputText id="nameFilter" styleClass="custom-filter"
-								onchange="PF('columnTogglerTable').filter()"/>
+								onchange="PF('columnTogglerTable').filter()" />
 						</f:facet>
 
 						<h:outputText value="#{item.name}" id="nameText" />
 					</p:column>
+
+					<!-- Date-->
+					<p:column field="date" headerText="Date" filterMatchMode="between">
+						<f:facet name="filter">
+							<p:datePicker selectionMode="single"
+								onchange="PF('checkboxSelectionTable').filter()" />
+						</f:facet>
+					</p:column>
+															
+					<!-- Rank column with range filter -->
+					<p:column headerText="Rank" sortBy="#{item.rank}" filterBy="#{item.rank}" filterMatchMode="between">
+						<f:facet name="filter">
+							<h:panelGrid columns="2" cellpadding="5">
+								<p:inputText id="rankFrom" value="#{columnTogglerShowcaseBean.rankFrom}" label="From" style="width:60px" onchange="PF('columnTogglerTable').filter()"/>
+								<p:inputText id="rankTo" value="#{columnTogglerShowcaseBean.rankTo}" label="To" style="width:60px" onchange="PF('columnTogglerTable').filter()"/>
+							</h:panelGrid>
+						</f:facet>
+						<h:outputText value="#{item.rank}" />
+					</p:column>
+
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"

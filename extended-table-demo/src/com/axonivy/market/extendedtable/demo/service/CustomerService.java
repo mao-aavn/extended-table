@@ -64,8 +64,8 @@ public class CustomerService {
 
 		List<Customer> customers = new ArrayList<>();
 		for (int i = 0; i < number; i++) {
-			customers.add(new Customer(getName(), getCompany(), getCountry(), getDate(), CustomerStatus.random(),
-					getActivity()));
+			customers.add(Customer.builder().name(getName()).company(getCompany()).country(getCountry()).date(getDate())
+					.status(CustomerStatus.random()).rank(getRank()).isNew(random.nextBoolean()).build());
 		}
 		assignGroupsToCustomers(customers);
 
@@ -135,7 +135,7 @@ public class CustomerService {
 		return LocalDate.ofEpochDay(randomDay);
 	}
 
-	private int getActivity() {
+	private int getRank() {
 		return random.nextInt(100);
 	}
 

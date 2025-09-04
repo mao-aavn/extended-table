@@ -84,7 +84,6 @@
 	<cc:attribute name="liveResize" default="false" />
 	<cc:attribute name="liveScroll" default="false" />
 	<cc:attribute name="liveScrollBuffer" default="0" />
-	<cc:attribute name="multiViewState" default="false" />
 	<cc:attribute name="nativeElements" default="false" />
 	<cc:attribute name="onExpandStart" />
 	<cc:attribute name="onRowClick" />
@@ -170,7 +169,7 @@
 			action="#{cc.attrs.manageStateBean.saveTableState}"
 			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:saveButtonClicked"
 			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
-			onclick="document.getElementById('#{cc.clientId}:saveButtonClicked').value='true'; alert('cliecked me')">
+			onclick="document.getElementById('#{cc.clientId}:saveButtonClicked').value='true';">
 		</p:commandButton>
 
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"

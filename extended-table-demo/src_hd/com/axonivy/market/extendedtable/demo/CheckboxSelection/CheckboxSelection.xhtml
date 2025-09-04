@@ -6,7 +6,7 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:pe="http://primefaces.org/ui/extensions">
 <h:body>
-	<ui:composition template="/layouts/basic-10.xhtml">
+	<ui:composition template="/layouts/frame-10.xhtml">
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
 
@@ -41,12 +41,12 @@
 						<h:outputText value="#{item.id}" />
 					</p:column>
 
-					<!-- Data Range -->
-					<p:column field="date" headerText="Date Range"
-						filterMatchMode="between">
+				    <!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+				    <p:column headerText="Date Range" filterBy="#{item.date}" field="date"
+							  filterMatchMode="custom"
+							  filterFunction="#{rowSelectionShowcaseBean.filterDate}">
 						<f:facet name="filter">
-							<p:datePicker selectionMode="range"
-								onchange="PF('checkboxSelectionTable').filter()" />
+							<p:datePicker selectionMode="range" onchange="PF('checkboxSelectionTable').filter()" />
 						</f:facet>
 					</p:column>
 										

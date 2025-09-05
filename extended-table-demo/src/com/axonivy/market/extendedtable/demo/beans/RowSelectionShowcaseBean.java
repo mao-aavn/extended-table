@@ -1,23 +1,20 @@
 package com.axonivy.market.extendedtable.demo.beans;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.time.LocalDate;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.event.SelectEvent;
 
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
-import com.google.inject.servlet.RequestScoped;
 
-@RequestScoped
 @ManagedBean(name = "rowSelectionShowcaseBean")
 public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 

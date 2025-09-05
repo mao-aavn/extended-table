@@ -10,8 +10,6 @@ import org.primefaces.model.SortMeta;
 import com.axonivy.market.extendedtable.demo.daos.CustomerDAO;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 
-import ch.ivyteam.ivy.environment.Ivy;
-
 public class LazyCustomerDataModel extends LazyDataModel<Customer> {
 
 	private static final long serialVersionUID = 1L;
@@ -40,9 +38,7 @@ public class LazyCustomerDataModel extends LazyDataModel<Customer> {
 	@Override
 	public List<Customer> load(int offset, int pageSize, Map<String, SortMeta> sortBy,
 			Map<String, FilterMeta> filterBy) {
-		// Use DAO for lazy loading, following the DAO pattern
 		List<Customer> result = customerDAO.find(offset, pageSize, sortBy, filterBy);
-		Ivy.log().info(result.size());
 		this.setRowCount(customerDAO.count(filterBy));
 		return result;
 	}

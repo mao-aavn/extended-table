@@ -2,10 +2,13 @@ package com.axonivy.market.extendedtable.demo.beans;
 
 import java.util.List;
 
+import javax.faces.bean.ViewScoped;
+
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 import com.axonivy.market.extendedtable.demo.service.CustomerService;
 
+@ViewScoped
 public abstract class GenericShowcaseBean {
 
 	protected CustomerService customerService = new CustomerService();

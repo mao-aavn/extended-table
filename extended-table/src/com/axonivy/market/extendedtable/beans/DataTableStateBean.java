@@ -4,7 +4,6 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
-import static com.axonivy.market.extendedtable.utils.JSFUtils.getRequestParameterValue;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
@@ -60,7 +59,7 @@ public class DataTableStateBean {
 		if (StringUtils.isEmpty(saveButtonClicked)) {
 			return;
 		}
-		
+
 		if (stateName == null || stateName.isEmpty()) {
 			addErrorMsg(GROWL_MSG_ID, "State name is required!", null);
 		} else {
@@ -218,6 +217,13 @@ public class DataTableStateBean {
 		return String.format(STATE_KEY_PATTERN, getTableClientId(), stateName);
 	}
 
+	/**
+	 * In case dataTableStateRepository attribute is passed to the ExtendedTable
+	 * component, it will be used for persisting the table state, otherwise it will
+	 * fallback to the default SessionDataTableStateRepository which persists the state data to the Ivy User's
+	 * property map.
+	 * 
+	 */
 	private DataTableStateRepository getStateRepository() {
 		DataTableStateRepository repo = (DataTableStateRepository) Attrs.currentContext()
 				.get(DATA_TABLE_STATE_REPOSITORY);

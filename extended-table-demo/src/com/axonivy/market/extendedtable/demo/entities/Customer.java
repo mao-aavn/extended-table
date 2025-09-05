@@ -30,7 +30,7 @@ public class Customer extends AuditableIdEntity {
 	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
 
-	private int rank;
+	private int customerRank;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "group_id")
@@ -49,7 +49,7 @@ public class Customer extends AuditableIdEntity {
 		private Country country;
 		private LocalDate date;
 		private CustomerStatus status;
-		private int rank;
+		private int customerRank;
 		private CustomerGroup group;
 		private boolean isNew = false;
 
@@ -73,10 +73,18 @@ public class Customer extends AuditableIdEntity {
 			this.status = status;
 			return this;
 		}
+
+		// keep backward compatibility with previous API used in services/UI
 		public Builder rank(int rank) {
-			this.rank = rank;
+			this.customerRank = rank;
 			return this;
 		}
+
+		public Builder customerRank(int customerRank) {
+			this.customerRank = customerRank;
+			return this;
+		}
+
 		public Builder group(CustomerGroup group) {
 			this.group = group;
 			return this;
@@ -92,7 +100,7 @@ public class Customer extends AuditableIdEntity {
 			c.setCountry(country);
 			c.setDate(date);
 			c.setStatus(status);
-			c.setRank(rank);
+			c.setCustomerRank(customerRank);
 			c.setGroup(group);
 			c.setNew(isNew);
 			return c;
@@ -143,13 +151,24 @@ public class Customer extends AuditableIdEntity {
 		this.status = status;
 	}
 
+	public int getCustomerRank() {
+		return customerRank;
+	}
+
+	public void setCustomerRank(int customerRank) {
+		this.customerRank = customerRank;
+	}
+
+	// convenience accessors for UI bindings to "rank"
 	public int getRank() {
-		return rank;
+		return customerRank;
 	}
 
 	public void setRank(int rank) {
-		this.rank = rank;
+		this.customerRank = rank;
 	}
+
+
 
 	public CustomerGroup getGroup() {
 		return group;
@@ -176,13 +195,13 @@ public class Customer extends AuditableIdEntity {
 			return false;
 		}
 		Customer customer = (Customer) o;
-	return id == customer.id && rank == customer.rank && Objects.equals(name, customer.name)
+	return id == customer.id && customerRank == customer.customerRank && Objects.equals(name, customer.name)
 				&& Objects.equals(company, customer.company) && Objects.equals(country, customer.country)
 				&& Objects.equals(date, customer.date) && status == customer.status;
 	}
 
 	@Override
 	public int hashCode() {
-	return Objects.hash(id, name, company, country, date, status, rank);
+	return Objects.hash(id, name, company, country, date, status, customerRank);
 	}
 }

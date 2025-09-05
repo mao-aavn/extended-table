@@ -249,5 +249,46 @@
       "visual" : {
         "at" : { "x" : 352, "y" : 944 }
       }
+    }, {
+      "id" : "f35",
+      "type" : "RequestStart",
+      "name" : "databaseTableState.ivp",
+      "config" : {
+        "callSignature" : "databaseTableState",
+        "outLink" : "databaseTableState.ivp",
+        "startName" : "DatabaseTableState",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 216 }
+      },
+      "connect" : { "id" : "f38", "to" : "f37" }
+    }, {
+      "id" : "f36",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 216 }
+      }
+    }, {
+      "id" : "f37",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.DatabaseRepo",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 216 }
+      },
+      "connect" : { "id" : "f39", "to" : "f36" }
     } ]
 }

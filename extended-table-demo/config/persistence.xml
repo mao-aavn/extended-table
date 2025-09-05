@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.2" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
-    <persistence-unit name="entended_table_demo">
-        <non-jta-data-source>entended_table_demo</non-jta-data-source>
+    <persistence-unit name="extended_table_demo">
+        <non-jta-data-source>extended_table_demo</non-jta-data-source>
         <class>com.axonivy.market.extendedtable.demo.entities.Country</class>
         <class>com.axonivy.market.extendedtable.demo.entities.Customer</class>
         <class>com.axonivy.market.extendedtable.demo.entities.CustomerGroup</class>

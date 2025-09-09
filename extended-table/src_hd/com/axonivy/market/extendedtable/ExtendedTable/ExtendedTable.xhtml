@@ -14,14 +14,10 @@
 	2. Must switch for row selection/none selection
 	 -->
 
-	<!-- Manage State Bean -->
-	<cc:attribute name="manageStateBean" required="true"
-		type="com.axonivy.market.extendedtable.DataTableStateBean" />
-
-	<!-- State Repository -->
-	<cc:attribute name="dataTableStateRepository" required="false"
-		type="com.axonivy.market.extendedtable.repo.DataTableStateRepository"
-		shortDescription="Repo to persist/fetch the table state, default will be the SessionDataTableStateRepository." />
+	<!-- Data table controller -->
+	<cc:attribute name="extendedDataTableController" required="false"
+		type="com.axonivy.market.extendedtable.repo.ExtendedDataTableController"
+		shortDescription="Controller to persist/fetch the table state ect, default will be the IvySessionExtendedDataTableController" />
 
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
@@ -153,8 +149,8 @@
 		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" />
 		<p:autoComplete id="stateNameInput"
 			required="false"
-			value="#{cc.attrs.manageStateBean.stateName}"
-			completeMethod="#{cc.attrs.manageStateBean.completeStateName}"
+			value="#{extendedDataTableBean.stateName}"
+			completeMethod="#{extendedDataTableBean.completeStateName}"
 			dropdown="true" forceSelection="false" multiple="false"
 			placeholder="Enter or select state name" var="name"
 			itemLabel="#{name}" itemValue="#{name}" minQueryLength="3"
@@ -162,11 +158,11 @@
 			style="width:250px; margin: 0px 30px" />
 
 		<h:inputHidden id="saveButtonClicked"
-			value="#{cc.attrs.manageStateBean.saveButtonClicked}" />
+			value="#{extendedDataTableBean.saveButtonClicked}" />
 
 		<p:commandButton value="#{cc.attrs.saveStateLabel}"
 			styleClass="top-buttons" id="saveTableStateBtn"
-			action="#{cc.attrs.manageStateBean.saveTableState}"
+			action="#{extendedDataTableBean.saveTableState}"
 			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:saveButtonClicked"
 			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
 			onclick="document.getElementById('#{cc.clientId}:saveButtonClicked').value='true';">
@@ -175,20 +171,20 @@
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
 			id="restoreStateBtn" styleClass="top-buttons"
 			process="#{cc.clientId}:stateNameInput"
-			action="#{cc.attrs.manageStateBean.restoreTableState}"
+			action="#{extendedDataTableBean.restoreTableState}"
 			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:saveButtonClicked"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"
-			action="#{cc.attrs.manageStateBean.deleteTableState}"
+			action="#{extendedDataTableBean.deleteTableState}"
 			rendered="#{cc.attrs.showDeleteButton}" process="stateNameInput"
 			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
 
 		<p:commandButton value="#{cc.attrs.resetTableLabel}" id="resetButton"
 			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
 			process="@this"
-			actionListener="#{cc.attrs.manageStateBean.resetTable}"
+			actionListener="#{extendedDataTableBean.resetTable}"
 			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();">
 			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>

@@ -11,6 +11,13 @@
       "name" : "start()",
       "config" : {
         "callSignature" : "start",
+        "input" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.repo.DatabaseExtendedDataTableController;",
+            "",
+            "out.controller = new DatabaseExtendedDataTableController();"
+          ]
+        },
         "guid" : "1982C7972CC1A67B"
       },
       "visual" : {

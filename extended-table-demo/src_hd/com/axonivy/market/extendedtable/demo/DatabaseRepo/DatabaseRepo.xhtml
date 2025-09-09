@@ -13,11 +13,12 @@
 			<h:form id="noneLazyForm" style="margin-top: 100px;">
 				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="noneLazyTable" manageStateBean="#{dataTableStateBean}"
+					tableId="noneLazyTable"
 					widgetVar="noneLazyTable" id="extendedTable"
 					value="#{noneLazyShowcaseBean.items}" showDeleteButton="true"
 					showResetButton="true" paginator="true" rows="10" sortMode="multiple"
-					filteredValue="#{noneLazyShowcaseBean.filteredItems}" dataTableStateRepository="#{databaseDataTableStateRepository}"
+					filteredValue="#{noneLazyShowcaseBean.filteredItems}" 
+					extendedDataTableController="#{data.controller}"
 					allowUnsorting="true">
 
 					<!-- Name column -->

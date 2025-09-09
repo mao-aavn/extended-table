@@ -2,14 +2,11 @@ package com.axonivy.market.extendedtable.demo.repo;
 
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-
 import com.axonivy.market.extendedtable.demo.daos.DataTableStateDAO;
 import com.axonivy.market.extendedtable.demo.entities.DataTableState;
-import com.axonivy.market.extendedtable.repo.DataTableStateRepository;
+import com.axonivy.market.extendedtable.repo.ExtendedDataTableController;
 
-@ManagedBean
-public class DatabaseDataTableStateRepository implements DataTableStateRepository {
+public class DatabaseExtendedDataTableController implements ExtendedDataTableController {
 	private DataTableStateDAO dao = new DataTableStateDAO();
 
 	@Override

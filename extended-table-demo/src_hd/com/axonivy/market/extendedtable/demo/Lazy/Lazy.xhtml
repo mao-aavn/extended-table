@@ -11,10 +11,9 @@
 		<ui:define name="content">
 			<h:form id="lazyForm">
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="lazyTable" manageStateBean="#{dataTableStateBean}"
-					widgetVar="lazyTable" id="extendedTable" showDeleteButton="true"
-					showResetButton="true" paginator="true" rows="10"
-					allowUnsorting="true"
+					tableId="lazyTable" widgetVar="lazyTable" id="extendedTable"
+					showDeleteButton="true" showResetButton="true" paginator="true"
+					rows="10" allowUnsorting="true"
 					filteredValue="#{lazyShowcaseBean.filteredItems}" lazy="true"
 					value="#{lazyShowcaseBean.lazyModel}">
 

@@ -3,10 +3,10 @@ package com.axonivy.market.extendedtable.repo;
 import java.util.List;
 
 /**
- * Repository to handle the data table state operations
+ * Controller to handle the data table state operations and so on.
  *
  */
-public interface DataTableStateRepository {
+public interface ExtendedDataTableController {
 
 	/**
 	 * Save the state JSON string with key

@@ -24,8 +24,8 @@ import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 
-import com.axonivy.market.extendedtable.repo.DataTableStateRepository;
-import com.axonivy.market.extendedtable.repo.SessionDataTableStateRepository;
+import com.axonivy.market.extendedtable.repo.ExtendedDataTableController;
+import com.axonivy.market.extendedtable.repo.IvySessionExtendedDataTableController;
 import com.axonivy.market.extendedtable.utils.Attrs;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,14 +33,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.inject.servlet.RequestScoped;
 
 import ch.ivyteam.ivy.environment.Ivy;
 
 @ViewScoped
-// @RequestScoped
-@ManagedBean(name = "dataTableStateBean")
-public class DataTableStateBean {
+@ManagedBean(name = "extendedDataTableBean")
+public class ExtendedDataTableBean {
 
 	private static final String TABLE_ID = "tableId";
 	private static final String DATA_TABLE_STATE_REPOSITORY = "dataTableStateRepository";
@@ -224,14 +222,17 @@ public class DataTableStateBean {
 	 * property map.
 	 * 
 	 */
-	private DataTableStateRepository getStateRepository() {
-		DataTableStateRepository repo = (DataTableStateRepository) Attrs.currentContext()
+	private ExtendedDataTableController getStateRepository() {
+		ExtendedDataTableController repo = (ExtendedDataTableController) Attrs.currentContext()
 				.get(DATA_TABLE_STATE_REPOSITORY);
-		if (repo instanceof DataTableStateRepository) {
-			return (DataTableStateRepository) repo;
+		if (repo instanceof ExtendedDataTableController) {
+			return (ExtendedDataTableController) repo;
 		}
+		
+		// TODO throw
+		
 		// fallback to default
-		return new SessionDataTableStateRepository();
+		return new IvySessionExtendedDataTableController();
 	}
 
 	private String getTableClientId() {

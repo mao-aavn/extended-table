@@ -24,8 +24,8 @@ import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 
-import com.axonivy.market.extendedtable.repo.ExtendedDataTableController;
-import com.axonivy.market.extendedtable.repo.IvySessionExtendedDataTableController;
+import com.axonivy.market.extendedtable.controllers.ExtendedDataTableController;
+import com.axonivy.market.extendedtable.controllers.IvySessionExtendedDataTableController;
 import com.axonivy.market.extendedtable.utils.Attrs;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -133,7 +133,7 @@ public class ExtendedDataTableBean {
 
 	public void deleteTableState() {
 		String stateKey = getStateKey();
-		if (!getStateRepository().delete(stateKey)) {
+		if (!getController().delete(stateKey)) {
 			addErrorMsg(stateKey, "No existing name " + stateKey, stateKey);
 		} else {
 			stateNames = fetchAllDataTableStateNames();
@@ -142,8 +142,8 @@ public class ExtendedDataTableBean {
 			} else {
 				stateName = null;
 			}
+			addInfoMsg(GROWL_MSG_ID, "Delete the state successfully", null);
 		}
-		addInfoMsg(GROWL_MSG_ID, "Delete the state successfully", null);
 	}
 
 	public List<String> completeStateName(String query) {
@@ -174,7 +174,7 @@ public class ExtendedDataTableBean {
 
 		try {
 			String stateJson = mapper.writeValueAsString(state);
-			getStateRepository().save(stateKey, stateJson);
+			getController().save(stateKey, stateJson);
 		} catch (JsonProcessingException e) {
 			Ivy.log().error("Couldn't serialize TableState to JSON", e);
 		}
@@ -182,7 +182,7 @@ public class ExtendedDataTableBean {
 
 	private DataTableState fetchDataTableState() {
 		String stateKey = getStateKey();
-		String stateJson = getStateRepository().load(stateKey);
+		String stateJson = getController().load(stateKey);
 
 		Ivy.log().info(stateKey);
 		Ivy.log().info(stateJson);
@@ -207,7 +207,7 @@ public class ExtendedDataTableBean {
 		String tableId = getTableClientId();
 		String prefix = STATE_KEY_PREFIX + tableId + "_";
 
-		return getStateRepository().listKeys(prefix).stream().filter(name -> name.startsWith(prefix))
+		return getController().listKeys(prefix).stream().filter(name -> name.startsWith(prefix))
 				.map(name -> name.substring(prefix.length())).filter(value -> !value.isEmpty()).toList();
 	}
 
@@ -222,16 +222,14 @@ public class ExtendedDataTableBean {
 	 * property map.
 	 * 
 	 */
-	private ExtendedDataTableController getStateRepository() {
+	private ExtendedDataTableController getController() {
 		ExtendedDataTableController repo = (ExtendedDataTableController) Attrs.currentContext()
 				.get(DATA_TABLE_STATE_REPOSITORY);
-		if (repo instanceof ExtendedDataTableController) {
+		if (repo != null && repo instanceof ExtendedDataTableController) {
 			return (ExtendedDataTableController) repo;
 		}
-		
-		// TODO throw
-		
-		// fallback to default
+
+		// Fallback to default in case no overriding controller is set
 		return new IvySessionExtendedDataTableController();
 	}
 

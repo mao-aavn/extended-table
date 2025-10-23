@@ -6,10 +6,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
-import org.primefaces.PrimeFaces;
 import org.primefaces.util.ComponentTraversalUtils;
-
-import ch.ivyteam.ivy.environment.Ivy;
 
 public final class JSFUtils {
 
@@ -40,19 +37,6 @@ public final class JSFUtils {
 		return getViewRoot().findComponent(clientId);
 	}
 
-	public static String getRequestParameterValue(String key) {
-		return currentContext().getExternalContext().getRequestParameterMap().get(key);
-	}
-
-	/**
-	 * Update a list of expressions or clientIds.
-	 *
-	 * @param expressions
-	 */
-	public static void updateComponents(String... expressions) {
-		PrimeFaces.current().ajax().update(expressions);
-	}
-
 	/**
 	 * @param localId: short id, not clientId (full path)
 	 * @return
@@ -62,22 +46,6 @@ public final class JSFUtils {
 		UIComponent root = context.getViewRoot();
 
 		return ComponentTraversalUtils.firstWithId(localId, root);
-	}
-
-	/**
-	 * @param localId: short id (e.g buttonSave), not client id (full id: e.g
-	 *                 requestForm:buttonSave)
-	 */
-	public static void updateComponent(String localId) {
-		UIComponent component = findComponent(localId);
-
-		if (component != null) {
-			FacesContext context = FacesContext.getCurrentInstance();
-			String clientId = component.getClientId(context);
-			context.getPartialViewContext().getRenderIds().add(clientId);
-		} else {
-			Ivy.log().warn("Component with ID " + localId + " not found.");
-		}
 	}
 
 }

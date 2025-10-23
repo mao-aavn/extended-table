@@ -1,10 +1,15 @@
-package com.axonivy.market.extendedtable.repo;
+package com.axonivy.market.extendedtable.controllers;
 
 import java.util.List;
 
 import ch.ivyteam.ivy.environment.Ivy;
 import ch.ivyteam.ivy.security.IUser;
 
+/**
+ * Default controller for the ExtendedTable. It will use the property map of
+ * current Ivy user for handling the table state operations.
+ *
+ */
 public class IvySessionExtendedDataTableController implements ExtendedDataTableController {
 
 	private IUser getSessionUser() {
@@ -34,11 +39,7 @@ public class IvySessionExtendedDataTableController implements ExtendedDataTableC
 
 	@Override
 	public List<String> listKeys(String prefix) {
-		return getSessionUser()
-				.getAllPropertyNames()
-				.stream()
-				.filter(name -> name.startsWith(prefix))
-				.toList();
+		return getSessionUser().getAllPropertyNames().stream().filter(name -> name.startsWith(prefix)).toList();
 	}
 
 }

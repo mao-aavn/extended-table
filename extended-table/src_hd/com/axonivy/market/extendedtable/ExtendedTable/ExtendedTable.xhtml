@@ -8,16 +8,11 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:pe="http://primefaces.org/ui/extensions">
 <cc:interface componentType="IvyComponent">
-	<!-- 
-	PROBLEMS: 
-	1. var="item" is fixed => rowKey="#{item.id}" is not flexible in naming
-	2. Must switch for row selection/none selection
-	 -->
 
 	<!-- Data table controller -->
 	<cc:attribute name="extendedDataTableController" required="false"
-		type="com.axonivy.market.extendedtable.repo.ExtendedDataTableController"
-		shortDescription="Controller to persist/fetch the table state ect, default will be the IvySessionExtendedDataTableController" />
+		type="com.axonivy.market.extendedtable.controllers.ExtendedDataTableController"
+		shortDescription="Controller to persist/fetch the table state ect, default will be IvySessionExtendedDataTableController" />
 
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
@@ -137,10 +132,10 @@
 
 <cc:implementation>
 	<style>
-.top-buttons {
-	margin-left: 8px;
-}
-</style>
+		.top-buttons {
+			margin-left: 8px;
+		}
+	</style>
 
 	<p:growl id="extendedTableGrowlMsg"></p:growl>
 

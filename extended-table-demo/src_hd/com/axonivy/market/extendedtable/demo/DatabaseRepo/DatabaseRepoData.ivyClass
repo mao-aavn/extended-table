@@ -1,4 +1,4 @@
 DatabaseRepoData #class
 com.axonivy.market.extendedtable.demo.DatabaseRepo #namespace
-controller com.axonivy.market.extendedtable.repo.ExtendedDataTableController #field
+controller com.axonivy.market.extendedtable.controllers.ExtendedDataTableController #field
 controller PERSISTENT #fieldModifier

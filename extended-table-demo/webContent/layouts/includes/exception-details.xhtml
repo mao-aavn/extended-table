@@ -17,8 +17,6 @@
   <ui:fragment rendered="#{errorPage.isIvyException()}">
     <h4 class="list-group-item-heading" style="margin-top: 20px">Error id</h4>
     <p>#{errorPage.exceptionId}</p>
-    <h4 class="list-group-item-heading" style="margin-top: 20px">Error Timestamp</h4>
-    <p>#{errorPage.createdAt}</p>
   </ui:fragment>
 
   <ui:fragment rendered="#{errorPage.showDetails}">

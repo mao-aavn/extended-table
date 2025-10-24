@@ -8,6 +8,7 @@ import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.event.SelectEvent;
@@ -15,6 +16,7 @@ import org.primefaces.event.SelectEvent;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
+@ViewScoped
 @ManagedBean(name = "rowSelectionShowcaseBean")
 public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 

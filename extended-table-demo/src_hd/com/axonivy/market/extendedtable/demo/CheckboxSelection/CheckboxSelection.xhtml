@@ -40,16 +40,16 @@
 						<h:outputText value="#{item.id}" />
 					</p:column>
 
-				    <!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
-				    <p:column headerText="Date Range" filterBy="#{item.date}" field="date"
-							  filterMatchMode="custom"
-							  filterFunction="#{rowSelectionShowcaseBean.filterDate}">
-						<f:facet name="filter">
-							<p:datePicker selectionMode="range" onchange="PF('checkboxSelectionTable').filter()" />
-						</f:facet>
-					</p:column>
-										
-					<!-- Rank column -->
+			    <!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+			    <p:column headerText="Date Range" filterBy="#{item.date}" field="date"
+						  filterMatchMode="custom"
+						  filterFunction="#{rowSelectionShowcaseBean.filterDate}">
+					<f:facet name="filter">
+						<p:datePicker selectionMode="range" 
+							value="#{rowSelectionShowcaseBean.dateRangeFilter}"
+							onchange="PF('checkboxSelectionTable').filter()" />
+					</f:facet>
+				</p:column>					<!-- Rank column -->
 					<p:column headerText="Rank" sortBy="#{item.rank}" filterBy="#{item.rank}" filterMatchMode="equals">
 						<f:facet name="filter">
 							<p:inputText onchange="PF('checkboxSelectionTable').filter()" styleClass="custom-filter" />
@@ -94,7 +94,7 @@
 						sortBy="#{item.status}" filterMatchMode="in">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{rowSelectionShowcaseBean.selectedStatuses}" 
-								onchange="PF('checkboxSelectionTable').filter()" multiple="true"
+								onchange="PF('checkboxSelectionTable').filter()" multiple="false"
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItems value="#{rowSelectionShowcaseBean.customerStatus}" />
 							</p:selectCheckboxMenu>

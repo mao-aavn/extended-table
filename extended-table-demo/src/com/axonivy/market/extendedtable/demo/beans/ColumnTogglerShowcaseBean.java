@@ -9,6 +9,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
 import com.axonivy.market.extendedtable.demo.entities.Customer;
+import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
 @ViewScoped
 @ManagedBean(name = "columnTogglerShowcaseBean")
@@ -18,6 +19,7 @@ public class ColumnTogglerShowcaseBean extends GenericShowcaseBean {
 	// Properties for rank range filtering
 	private Integer rankFrom;
 	private Integer rankTo;
+	private List<CustomerStatus> selectedStatuses;
 
 	@PostConstruct
 	public void init() {
@@ -44,7 +46,16 @@ public class ColumnTogglerShowcaseBean extends GenericShowcaseBean {
 		this.rankTo = rankTo;
 	}
 
-	// Custom filter function for rank with syntax: "x..y", "..y", "x..", or single value "x"
+	public List<CustomerStatus> getSelectedStatuses() {
+		return selectedStatuses;
+	}
+
+	public void setSelectedStatuses(List<CustomerStatus> selectedStatuses) {
+		this.selectedStatuses = selectedStatuses;
+	}
+
+	// Custom filter function for rank with syntax: "x..y", "..y", "x..", or single
+	// value "x"
 	public boolean filterRank(Object value, Object filter, Locale locale) {
 		if (value == null) {
 			return false;

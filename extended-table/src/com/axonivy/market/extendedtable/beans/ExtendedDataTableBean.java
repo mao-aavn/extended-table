@@ -7,12 +7,16 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromC
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
@@ -47,14 +51,15 @@ public class ExtendedDataTableBean {
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
 	private List<String> stateNames = new ArrayList<>();
-	private String saveButtonClicked = null;
 
 	public void saveTableState() {
-		// String saveButtonClick = getRequestParameterValue("saveButtonClick");
-		// Ignore save if not called from the explicit save button
-		Ivy.log().info("saveButtonClicked");
-		Ivy.log().info(saveButtonClicked);
-		if (StringUtils.isEmpty(saveButtonClicked)) {
+		// Only save if explicitly triggered by the Save button via the explicitSave parameter
+		// This prevents accidental saves when filtering or other actions trigger form submission
+		String explicitSave = FacesContext.getCurrentInstance().getExternalContext()
+				.getRequestParameterMap().get("explicitSave");
+		
+		if (!"true".equals(explicitSave)) {
+			Ivy.log().debug("saveTableState called but explicitSave parameter is not 'true', skipping save. Value: {0}", explicitSave);
 			return;
 		}
 
@@ -68,15 +73,13 @@ public class ExtendedDataTableBean {
 				DataTableState state = table.getMultiViewState(false);
 				if (state != null) {
 					persistDataTableState(state);
+					stateNames = fetchAllDataTableStateNames();
+					addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
 				} else {
 					Ivy.log().warn("State is null for the table: {0}", getTableClientId());
 				}
 			}
-
-			stateNames = fetchAllDataTableStateNames();
-			addInfoMsg(GROWL_MSG_ID, "Saved the table state successfully", null);
 		}
-		saveButtonClicked = null;
 	}
 
 	public void restoreTableState() {
@@ -96,6 +99,9 @@ public class ExtendedDataTableBean {
 		DataTableState persistedState = fetchDataTableState();
 
 		if (persistedState != null) {
+			// Convert date strings back to LocalDate objects for proper filtering
+			convertDateStringsToLocalDates(persistedState);
+			
 			DataTableState currentState = currentTable.getMultiViewState(true); // force create
 			currentState.setFilterBy(persistedState.getFilterBy());
 			currentState.setSortBy(persistedState.getSortBy());
@@ -168,9 +174,12 @@ public class ExtendedDataTableBean {
 		String stateKey = getStateKey();
 
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule()).addMixIn(FilterMeta.class, FilterDataTableMixin.class)
-				.addMixIn(SortMeta.class, SortDataTableMixin.class);
+		mapper.registerModule(new JavaTimeModule())
+			.addMixIn(FilterMeta.class, FilterDataTableMixin.class)
+			.addMixIn(SortMeta.class, SortDataTableMixin.class);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		// Write dates as ISO-8601 strings (e.g., "2025-10-01") instead of arrays
+		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
 		try {
 			String stateJson = mapper.writeValueAsString(state);
@@ -188,9 +197,13 @@ public class ExtendedDataTableBean {
 		Ivy.log().info(stateJson);
 
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule()).addMixIn(FilterMeta.class, FilterDataTableMixin.class)
-				.addMixIn(SortMeta.class, SortDataTableMixin.class);
+		mapper.registerModule(new JavaTimeModule())
+			.addMixIn(FilterMeta.class, FilterDataTableMixin.class)
+			.addMixIn(SortMeta.class, SortDataTableMixin.class);
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		// Read dates from ISO-8601 strings
+		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		
 		DataTableState tableState = null;
 
 		try {
@@ -201,6 +214,59 @@ public class ExtendedDataTableBean {
 		}
 
 		return tableState;
+	}
+
+	/**
+	 * Converts date string values in FilterMeta back to LocalDate objects.
+	 * After deserialization, date values are strings (e.g., "2025-10-19"),
+	 * but PrimeFaces filtering expects LocalDate objects for proper comparison.
+	 * 
+	 * @param state The DataTableState containing filter metadata
+	 */
+	private void convertDateStringsToLocalDates(DataTableState state) {
+		if (state == null || state.getFilterBy() == null) {
+			return;
+		}
+		
+		Map<String, FilterMeta> filterBy = state.getFilterBy();
+		for (FilterMeta filterMeta : filterBy.values()) {
+			Object filterValue = filterMeta.getFilterValue();
+			
+			if (filterValue instanceof List) {
+				List<?> filterList = (List<?>) filterValue;
+				List<Object> convertedList = new ArrayList<>();
+				boolean hasChanges = false;
+				
+				for (Object item : filterList) {
+					if (item instanceof String) {
+						try {
+							// Try to parse as LocalDate (ISO-8601 format: "2025-10-19")
+							LocalDate date = LocalDate.parse((String) item);
+							convertedList.add(date);
+							hasChanges = true;
+						} catch (DateTimeParseException e) {
+							// Not a date string, keep as is
+							convertedList.add(item);
+						}
+					} else {
+						convertedList.add(item);
+					}
+				}
+				
+				// Update the filter value if we converted any dates
+				if (hasChanges) {
+					filterMeta.setFilterValue(convertedList);
+				}
+			} else if (filterValue instanceof String) {
+				try {
+					// Try to parse single value as LocalDate
+					LocalDate date = LocalDate.parse((String) filterValue);
+					filterMeta.setFilterValue(date);
+				} catch (DateTimeParseException e) {
+					// Not a date string, leave as is
+				}
+			}
+		}
 	}
 
 	private List<String> fetchAllDataTableStateNames() {
@@ -258,14 +324,6 @@ public class ExtendedDataTableBean {
 
 	public void setStateNames(List<String> stateNames) {
 		this.stateNames = stateNames;
-	}
-
-	public String getSaveButtonClicked() {
-		return saveButtonClicked;
-	}
-
-	public void setSaveButtonClicked(String saveButtonClicked) {
-		this.saveButtonClicked = saveButtonClicked;
 	}
 
 	public abstract static class SortDataTableMixin {

@@ -67,6 +67,10 @@
 					<p:column headerText="Country" filterBy="#{item.country.name}"
 						id="country" sortBy="#{item.country.name}"
 						filterMatchMode="startsWith">
+						<f:facet name="filter">
+							<p:inputText id="countryFilter"
+								onchange="PF('columnTogglerTable').filter()" />
+						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"

@@ -56,6 +56,10 @@
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
 						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+						<f:facet name="filter">
+							<p:inputText id="countryFilter" styleClass="custom-filter"
+								onchange="PF('multiRowSelectionTable').filter()" />
+						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"

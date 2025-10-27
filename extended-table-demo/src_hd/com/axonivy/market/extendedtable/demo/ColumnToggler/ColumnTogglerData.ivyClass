@@ -1,2 +1,4 @@
 ColumnTogglerData #class
 com.axonivy.market.extendedtable.demo.ColumnToggler #namespace
+bean com.axonivy.market.extendedtable.demo.beans.ColumnTogglerBean #field
+bean PERSISTENT #fieldModifier

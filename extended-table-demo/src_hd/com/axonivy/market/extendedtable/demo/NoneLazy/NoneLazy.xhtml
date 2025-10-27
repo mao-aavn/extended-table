@@ -15,9 +15,9 @@
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
 					tableId="noneLazyTable" 
 					widgetVar="noneLazyTable" id="extendedTable"
-					value="#{noneLazyShowcaseBean.items}" showDeleteButton="true"
+					value="#{data.bean.items}" showDeleteButton="true"
 					showResetButton="true" paginator="true" rows="10" sortMode="multiple"
-					filteredValue="#{noneLazyShowcaseBean.filteredItems}"
+					filteredValue="#{data.bean.filteredItems}"
 					allowUnsorting="true">
 
 					<!-- Name column -->
@@ -51,7 +51,7 @@
 								id="statusSelection" style="width:100%; box-sizing: border-box;">
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
-								<f:selectItems value="#{noneLazyShowcaseBean.customerStatus}" />
+								<f:selectItems value="#{data.bean.customerStatus}" />
 							</p:selectOneMenu>
 						</f:facet>
 						<span

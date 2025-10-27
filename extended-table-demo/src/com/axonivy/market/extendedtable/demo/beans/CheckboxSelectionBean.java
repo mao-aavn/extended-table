@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.event.SelectEvent;
@@ -15,9 +12,7 @@ import org.primefaces.event.SelectEvent;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
-@ViewScoped
-@ManagedBean(name = "rowSelectionShowcaseBean")
-public class RowSelectionShowcaseBean extends GenericShowcaseBean {
+public class CheckboxSelectionBean extends GenericDemoBean {
 
 	private List<Customer> items;
 	private Customer selectedCustomer;
@@ -27,9 +22,7 @@ public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 	private List<CustomerStatus> selectedStatuses;
 	private List<LocalDate> dateRangeFilter; // holds 0..2 dates from the date picker
 
-	@PostConstruct
 	public void init() {
-		customerService.initCustomersIfNotExisting(500);
 		items = customerService.findAll();
 		filteredItems = new ArrayList<>(items);
 	}
@@ -101,50 +94,6 @@ public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 
 		FacesMessage msg = new FacesMessage("Row Selection", "Selected: " + names);
 		FacesContext.getCurrentInstance().addMessage(null, msg);
-	}
-
-	// Custom filter function for status column to handle enum filtering correctly
-	public boolean filterStatus(Object value, Object filter, java.util.Locale locale) {
-		if (value == null) {
-			return false;
-		}
-		
-		if (filter == null) {
-			return true;
-		}
-		
-		CustomerStatus status = (CustomerStatus) value;
-		
-		// Handle List of selected statuses
-		if (filter instanceof List) {
-			List<?> filterList = (List<?>) filter;
-			if (filterList.isEmpty()) {
-				return true;
-			}
-			
-			for (Object filterItem : filterList) {
-				if (filterItem instanceof CustomerStatus) {
-					if (status == filterItem) {
-						return true;
-					}
-				} else if (filterItem instanceof String) {
-					// Handle string comparison (after deserialization)
-					if (status.name().equals(filterItem) || status.toString().equals(filterItem)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		
-		// Handle single value
-		if (filter instanceof CustomerStatus) {
-			return status == filter;
-		} else if (filter instanceof String) {
-			return status.name().equals(filter) || status.toString().equals(filter);
-		}
-		
-		return true;
 	}
 
 }

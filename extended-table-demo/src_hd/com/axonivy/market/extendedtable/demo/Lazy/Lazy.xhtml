@@ -14,8 +14,8 @@
 					tableId="lazyTable" widgetVar="lazyTable" id="extendedTable"
 					showDeleteButton="true" showResetButton="true" paginator="true"
 					rows="10" allowUnsorting="true"
-					filteredValue="#{lazyShowcaseBean.filteredItems}" lazy="true"
-					value="#{lazyShowcaseBean.lazyModel}">
+					filteredValue="#{data.bean.filteredItems}" lazy="true"
+					value="#{data.bean.lazyModel}">
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
@@ -57,7 +57,7 @@
 					</p:column>
 
 
-					<!-- Status column with custom filter -->
+					<!-- Status column -->
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="exact">
 						<f:facet name="filter">
@@ -65,7 +65,7 @@
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
-								<f:selectItems value="#{lazyShowcaseBean.customerStatus}" />
+								<f:selectItems value="#{data.bean.customerStatus}" />
 							</p:selectOneMenu>
 						</f:facet>
 						<span

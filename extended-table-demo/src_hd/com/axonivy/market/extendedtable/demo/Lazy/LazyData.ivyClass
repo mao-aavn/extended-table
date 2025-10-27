@@ -1,2 +1,4 @@
 LazyData #class
 com.axonivy.market.extendedtable.demo.Lazy #namespace
+bean com.axonivy.market.extendedtable.demo.beans.LazyBean #field
+bean PERSISTENT #fieldModifier

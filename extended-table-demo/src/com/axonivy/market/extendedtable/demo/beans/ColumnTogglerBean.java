@@ -4,16 +4,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
-@ViewScoped
-@ManagedBean(name = "columnTogglerShowcaseBean")
-public class ColumnTogglerShowcaseBean extends GenericShowcaseBean {
+public class ColumnTogglerBean extends GenericDemoBean {
 	private List<Customer> items;
 
 	// Properties for rank range filtering
@@ -21,7 +15,6 @@ public class ColumnTogglerShowcaseBean extends GenericShowcaseBean {
 	private Integer rankTo;
 	private List<CustomerStatus> selectedStatuses;
 
-	@PostConstruct
 	public void init() {
 		items = customerService.findAll();
 	}

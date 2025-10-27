@@ -16,17 +16,17 @@
 					tableId="multiRowSelectionTable" 
 					widgetVar="multiRowSelectionTable"
 					id="multiRowSelectionTableWrapper"
-					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
+					value="#{data.bean.items}" showDeleteButton="true"
 					allowUnsorting="true"
-					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
+					filteredValue="#{data.bean.filteredItems}"
 					showResetButton="true" paginator="true" rows="10"
 					selectionMode="multiple"
-					selection="#{rowSelectionShowcaseBean.selectedCustomers}"
+					selection="#{data.bean.selectedCustomers}"
 					rowKey="#{item.id}">
 
 					<f:facet name="event">
 						<p:ajax event="rowSelect"
-							listener="#{rowSelectionShowcaseBean.onRowSelect}"
+							listener="#{data.bean.onRowSelect}"
 							update="form:msgs" />
 					</f:facet>
 
@@ -63,7 +63,7 @@
 					</p:column>
 
 
-					<!-- Status column with custom filter -->
+					<!-- Status column -->
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="exact">
 						<f:facet name="filter">
@@ -72,7 +72,7 @@
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
 								<f:selectItems
-									value="#{rowSelectionShowcaseBean.customerStatus}" />
+									value="#{data.bean.customerStatus}" />
 							</p:selectOneMenu>
 						</f:facet>
 						<span

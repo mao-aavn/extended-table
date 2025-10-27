@@ -19,17 +19,17 @@
 					tableId="singleRowSelectionTable"
 					widgetVar="singleRowSelectionTable"
 					id="singleRowSelectionTableWrapper"
-					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
+					value="#{data.bean.items}" showDeleteButton="true"
 					allowUnsorting="true"
-					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
+					filteredValue="#{data.bean.filteredItems}"
 					showResetButton="true" paginator="true" rows="10"
 					selectionMode="single"
-					selection="#{rowSelectionShowcaseBean.selectedCustomer}"
+					selection="#{data.bean.selectedCustomer}"
 					rowKey="#{item.id}">
 
 					<f:facet name="event">
 						<p:ajax event="rowSelect"
-							listener="#{rowSelectionShowcaseBean.onRowSelect}"
+							listener="#{data.bean.onRowSelect}"
 							update="form:msgs" />
 					</f:facet>
 
@@ -43,7 +43,6 @@
 
 						<h:outputText value="#{item.id}" />
 					</p:column>
-
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
@@ -74,7 +73,7 @@
 								<f:selectItem itemLabel="Select One" itemValue="#{null}"
 									noSelectionOption="true" />
 								<f:selectItems
-									value="#{rowSelectionShowcaseBean.customerStatus}" />
+									value="#{data.bean.customerStatus}" />
 							</p:selectOneMenu>
 						</f:facet>
 						<span

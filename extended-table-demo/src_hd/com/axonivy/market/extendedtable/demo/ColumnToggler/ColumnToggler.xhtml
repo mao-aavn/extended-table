@@ -14,10 +14,9 @@
 				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
 					tableId="columnTogglerTable" widgetVar="columnTogglerTable"
-					id="extendedTable" value="#{columnTogglerShowcaseBean.items}"
+					id="extendedTable" value="#{data.bean.items}"
 					showDeleteButton="true" paginator="true" rows="10"
-					filteredValue="#{columnTogglerShowcaseBean.filteredItems}"
-					showResetButton="true">
+					filteredValue="#{data.bean.filteredItems}" showResetButton="true">
 
 					<f:facet name="header">
 						<div class="p-d-flex p-jc-between p-ai-center">
@@ -45,8 +44,7 @@
 
 					<!-- Date with custom range filter to support range input from DatePicker -->
 					<p:column field="date" headerText="Date" filterBy="#{item.date}"
-						filterMatchMode="custom"
-						filterFunction="#{columnTogglerShowcaseBean.filterDate}">
+						filterMatchMode="custom" filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="range"
 								onchange="PF('columnTogglerTable').filter()" />
@@ -56,7 +54,7 @@
 					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
-						filterFunction="#{columnTogglerShowcaseBean.filterRank}">
+						filterFunction="#{data.bean.filterRank}">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="e.g. 4..6 or 5"
 								style="width:120px" onchange="PF('columnTogglerTable').filter()" />
@@ -76,16 +74,16 @@
 					</p:column>
 
 
-					<!-- Status column with custom filter -->
+					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}" id="status"
-						sortBy="#{item.status}" filterMatchMode="in">
+						sortBy="#{item.status}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
-							<p:selectCheckboxMenu
-								value="#{columnTogglerShowcaseBean.selectedStatuses}"
-								onchange="PF('columnTogglerTable').filter()"
-								multiple="true" style="width:100%; box-sizing: border-box;">
-								<f:selectItems
-									value="#{columnTogglerShowcaseBean.customerStatus}" var="item" itemLabel="#{item}" itemValue="#{item}"/>
+							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
+								onchange="PF('columnTogglerTable').filter()" multiple="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItems value="#{data.bean.customerStatus}" var="item"
+									itemLabel="#{item}" itemValue="#{item}" />
 							</p:selectCheckboxMenu>
 						</f:facet>
 						<span

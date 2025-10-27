@@ -1,2 +1,4 @@
 MultipleRowSelectionData #class
 com.axonivy.market.extendedtable.demo.MultipleRowSelection #namespace
+bean com.axonivy.market.extendedtable.demo.beans.MultipleRowSelectionBean #field
+bean PERSISTENT #fieldModifier

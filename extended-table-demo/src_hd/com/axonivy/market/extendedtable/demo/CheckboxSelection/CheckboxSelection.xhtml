@@ -16,14 +16,13 @@
 				<p:growl id="msgs" showDetail="true"></p:growl>
 
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="checkboxSelectionTable"
-					widgetVar="checkboxSelectionTable"
+					tableId="checkboxSelectionTable" widgetVar="checkboxSelectionTable"
 					id="checkboxSelectionTableWrapper"
-					value="#{rowSelectionShowcaseBean.items}" showDeleteButton="true"
+					value="#{data.bean.items}" showDeleteButton="true"
 					allowUnsorting="true"
-					filteredValue="#{rowSelectionShowcaseBean.filteredItems}"
+					filteredValue="#{data.bean.filteredItems}"
 					showResetButton="true" paginator="true" rows="10"
-					selection="#{rowSelectionShowcaseBean.selectedCustomer}"
+					selection="#{data.bean.selectedCustomer}"
 					selectionPageOnly="false" rowKey="#{item.id}">
 
 					<p:column id="checkbox" selectionMode="multiple"
@@ -40,28 +39,34 @@
 						<h:outputText value="#{item.id}" />
 					</p:column>
 
-			    <!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
-			    <p:column headerText="Date Range" filterBy="#{item.date}" field="date"
-						  filterMatchMode="custom"
-						  filterFunction="#{rowSelectionShowcaseBean.filterDate}">
-					<f:facet name="filter">
-						<p:datePicker selectionMode="range" 
-							value="#{rowSelectionShowcaseBean.dateRangeFilter}"
-							onchange="PF('checkboxSelectionTable').filter()" />
-					</f:facet>
-				</p:column>					<!-- Rank column -->
-					<p:column headerText="Rank" sortBy="#{item.rank}" filterBy="#{item.rank}" filterMatchMode="equals">
+					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+					<p:column headerText="Date Range" filterBy="#{item.date}"
+						field="date" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
-							<p:inputText onchange="PF('checkboxSelectionTable').filter()" styleClass="custom-filter" />
+							<p:datePicker selectionMode="range"
+								value="#{data.bean.dateRangeFilter}"
+								onchange="PF('checkboxSelectionTable').filter()" />
+						</f:facet>
+					</p:column>
+					
+					<!-- Rank column -->
+					<p:column headerText="Rank" sortBy="#{item.rank}"
+						filterBy="#{item.rank}" filterMatchMode="equals">
+						<f:facet name="filter">
+							<p:inputText onchange="PF('checkboxSelectionTable').filter()"
+								styleClass="custom-filter" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
 					</p:column>
 
 					<!-- Is New column -->
-					<p:column headerText="Is New" sortBy="#{item.new}" filterBy="#{item.new}">
+					<p:column headerText="Is New" sortBy="#{item.new}"
+						filterBy="#{item.new}">
 						<f:facet name="filter">
 							<p:selectOneMenu onchange="PF('checkboxSelectionTable').filter()">
-								<f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
 								<f:selectItem itemLabel="True" itemValue="true" />
 								<f:selectItem itemLabel="False" itemValue="false" />
 							</p:selectOneMenu>
@@ -89,20 +94,22 @@
 							value="#{item.country.name}" />
 					</p:column>
 
-					<!-- Status column with custom filter -->
+					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="custom"
-						filterFunction="#{rowSelectionShowcaseBean.filterStatus}">
+						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
-							<p:selectCheckboxMenu value="#{rowSelectionShowcaseBean.selectedStatuses}" 
+							<p:selectCheckboxMenu
+								value="#{data.bean.selectedStatuses}"
 								onchange="PF('checkboxSelectionTable').filter()" multiple="true"
 								style="width:100%; box-sizing: border-box;">
-								<f:selectItems value="#{rowSelectionShowcaseBean.customerStatus}" />
+								<f:selectItems
+									value="#{data.bean.customerStatus}" />
 							</p:selectCheckboxMenu>
 						</f:facet>
-						<span class="customer-badge status-#{item.status.name().toLowerCase()}">
-							#{item.status}
-						</span>
+						<span
+							class="customer-badge status-#{item.status.name().toLowerCase()}">
+							#{item.status} </span>
 					</p:column>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>

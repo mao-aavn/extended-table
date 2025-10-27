@@ -91,7 +91,8 @@
 
 					<!-- Status column with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="in">
+						sortBy="#{item.status}" filterMatchMode="custom"
+						filterFunction="#{rowSelectionShowcaseBean.filterStatus}">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{rowSelectionShowcaseBean.selectedStatuses}" 
 								onchange="PF('checkboxSelectionTable').filter()" multiple="true"

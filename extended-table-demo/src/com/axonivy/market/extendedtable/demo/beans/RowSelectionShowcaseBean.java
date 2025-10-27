@@ -103,6 +103,48 @@ public class RowSelectionShowcaseBean extends GenericShowcaseBean {
 		FacesContext.getCurrentInstance().addMessage(null, msg);
 	}
 
-	
+	// Custom filter function for status column to handle enum filtering correctly
+	public boolean filterStatus(Object value, Object filter, java.util.Locale locale) {
+		if (value == null) {
+			return false;
+		}
+		
+		if (filter == null) {
+			return true;
+		}
+		
+		CustomerStatus status = (CustomerStatus) value;
+		
+		// Handle List of selected statuses
+		if (filter instanceof List) {
+			List<?> filterList = (List<?>) filter;
+			if (filterList.isEmpty()) {
+				return true;
+			}
+			
+			for (Object filterItem : filterList) {
+				if (filterItem instanceof CustomerStatus) {
+					if (status == filterItem) {
+						return true;
+					}
+				} else if (filterItem instanceof String) {
+					// Handle string comparison (after deserialization)
+					if (status.name().equals(filterItem) || status.toString().equals(filterItem)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
+		// Handle single value
+		if (filter instanceof CustomerStatus) {
+			return status == filter;
+		} else if (filter instanceof String) {
+			return status.name().equals(filter) || status.toString().equals(filter);
+		}
+		
+		return true;
+	}
 
 }

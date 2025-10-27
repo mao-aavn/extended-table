@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.el.ValueExpression;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,8 +34,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import ch.ivyteam.ivy.environment.Ivy;
 
-@ViewScoped
-@ManagedBean(name = "extendedDataTableBean")
+/**
+ * Bean for ExtendedTable HTML component.
+ *
+ */
 public class ExtendedDataTableBean {
 
 	private static final String TABLE_ID = "tableId";

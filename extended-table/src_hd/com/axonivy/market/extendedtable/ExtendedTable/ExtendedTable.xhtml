@@ -144,8 +144,8 @@
 		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" />
 		<p:autoComplete id="stateNameInput"
 			required="false"
-			value="#{extendedDataTableBean.stateName}"
-			completeMethod="#{extendedDataTableBean.completeStateName}"
+			value="#{data.bean.stateName}"
+			completeMethod="#{data.bean.completeStateName}"
 			dropdown="true" forceSelection="false" multiple="false"
 			placeholder="Enter or select state name" var="name"
 			itemLabel="#{name}" itemValue="#{name}" minQueryLength="3"
@@ -153,11 +153,11 @@
 			style="width:250px; margin: 0px 30px" />
 
 		<h:inputHidden id="saveButtonClicked"
-			value="#{extendedDataTableBean.saveButtonClicked}" />
+			value="#{data.bean.saveButtonClicked}" />
 
 		<p:commandButton value="#{cc.attrs.saveStateLabel}"
 			styleClass="top-buttons" id="saveTableStateBtn"
-			action="#{extendedDataTableBean.saveTableState}"
+			action="#{data.bean.saveTableState}"
 			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:saveButtonClicked"
 			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
 			onclick="document.getElementById('#{cc.clientId}:saveButtonClicked').value='true';">
@@ -166,20 +166,20 @@
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
 			id="restoreStateBtn" styleClass="top-buttons"
 			process="#{cc.clientId}:stateNameInput"
-			action="#{extendedDataTableBean.restoreTableState}"
+			action="#{data.bean.restoreTableState}"
 			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:saveButtonClicked"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"
-			action="#{extendedDataTableBean.deleteTableState}"
+			action="#{data.bean.deleteTableState}"
 			rendered="#{cc.attrs.showDeleteButton}" process="stateNameInput"
 			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
 
 		<p:commandButton value="#{cc.attrs.resetTableLabel}" id="resetButton"
 			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
 			process="@this"
-			actionListener="#{extendedDataTableBean.resetTable}"
+			actionListener="#{data.bean.resetTable}"
 			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();">
 			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>

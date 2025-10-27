@@ -1,6 +1,6 @@
 Databases:
   extended_table_demo:
-    Url: jdbc:mysql://localhost:3308/extended_table_demo
-    Driver: com.mysql.cj.jdbc.Driver
+    Url: jdbc:hsqldb:mem:extended_table_demo
+    Driver: org.hsqldb.jdbc.JDBCDriver
     UserName: ivy
     Password: ${decrypt:\u0023\u00DB\u005C\u0025\u00EB\u004A\u00E3\u00E8\u009C\u00E2\u0078\u003A\u007D\u00A4\u008C\u008D\u0097\u00BD\u008B\u00D4\u0073\u00EF\u00DB\u000D\u001D\u0025\u004E\u00A5\u0028\u0014\u0020\u00C8}

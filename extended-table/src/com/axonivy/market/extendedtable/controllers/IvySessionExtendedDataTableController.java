@@ -11,20 +11,20 @@ import ch.ivyteam.ivy.security.IUser;
  *
  */
 public class IvySessionExtendedDataTableController implements ExtendedDataTableController {
-
-	private IUser getSessionUser() {
-		return Ivy.session().getSessionUser();
+	
+	private final IUser currentUser;
+	
+	public IvySessionExtendedDataTableController() {
+		currentUser = Ivy.session().getSessionUser();
 	}
 
 	@Override
 	public void save(String key, String stateAsJSON) {
-		IUser currentUser = getSessionUser();
 		currentUser.setProperty(key, stateAsJSON);
 	}
 
 	@Override
 	public String load(String key) {
-		IUser currentUser = getSessionUser();
 		String stateJson = currentUser.getProperty(key);
 
 		return stateJson;
@@ -32,14 +32,12 @@ public class IvySessionExtendedDataTableController implements ExtendedDataTableC
 
 	@Override
 	public boolean delete(String key) {
-		IUser currentUser = getSessionUser();
-
 		return currentUser.removeProperty(key) != null;
 	}
 
 	@Override
 	public List<String> listKeys(String prefix) {
-		return getSessionUser().getAllPropertyNames().stream().filter(name -> name.startsWith(prefix)).toList();
+		return currentUser.getAllPropertyNames().stream().filter(name -> name.startsWith(prefix)).toList();
 	}
 
 }

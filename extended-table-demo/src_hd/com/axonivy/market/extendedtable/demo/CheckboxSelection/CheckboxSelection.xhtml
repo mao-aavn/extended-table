@@ -94,7 +94,7 @@
 						sortBy="#{item.status}" filterMatchMode="in">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{rowSelectionShowcaseBean.selectedStatuses}" 
-								onchange="PF('checkboxSelectionTable').filter()" multiple="false"
+								onchange="PF('checkboxSelectionTable').filter()" multiple="true"
 								style="width:100%; box-sizing: border-box;">
 								<f:selectItems value="#{rowSelectionShowcaseBean.customerStatus}" />
 							</p:selectCheckboxMenu>

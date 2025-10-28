@@ -1,0 +1,4 @@
+NonePaginationData #class
+com.axonivy.market.extendedtable.demo.NonePagination #namespace
+bean com.axonivy.market.extendedtable.demo.beans.NonePaginationBean #field
+bean PERSISTENT #fieldModifier

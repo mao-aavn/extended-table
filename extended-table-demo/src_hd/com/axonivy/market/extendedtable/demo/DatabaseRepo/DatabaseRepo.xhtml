@@ -12,31 +12,77 @@
 
 			<h:form id="noneLazyForm" style="margin-top: 100px;">
 				<p:messages />
+				<p>This demo shows the usage of database controller to persist
+					for table state, instead of Ivy user map as default.</p>
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="noneLazyTable"
-					widgetVar="noneLazyTable" id="extendedTable"
-					value="#{data.bean.items}" showDeleteButton="true"
-					showResetButton="true" paginator="true" rows="10" sortMode="multiple"
-					filteredValue="#{data.bean.filteredItems}" 
+					tableId="noneLazyTable" widgetVar="noneLazyTable"
+					id="extendedTable" value="#{data.bean.items}"
+					showDeleteButton="true" showResetButton="true" paginator="true"
+					rows="10" sortMode="multiple"
+					filteredValue="#{data.bean.filteredItems}"
 					extendedDataTableController="#{data.controller}"
 					allowUnsorting="true">
 
 					<!-- Name column -->
-					<p:column headerText="Name" filterBy="#{item.name}" id="nameColumn"
+					<p:column headerText="Name" filterBy="#{item.name}"
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
 							<p:inputText id="nameFilter" styleClass="custom-filter"
-								onchange="PF('noneLazyTable').filter()" />
+								onchange="filterTable()" />
 						</f:facet>
+
 						<h:outputText value="#{item.name}" />
 					</p:column>
 
-					<!-- Country column -->
-					<p:column headerText="Country" filterBy="#{item.country.name}" id="countryColumn"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+					<p:column headerText="Date Range" filterBy="#{item.date}"
+						field="date" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
-							<p:inputText id="countryFilter" styleClass="custom-filter"
-								onchange="PF('noneLazyTable').filter()" />
+							<p:datePicker selectionMode="range"
+								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.formattedDate}" />
+					</p:column>
+
+					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->
+					<p:column headerText="Number Rank" field="rank"
+						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterRank}">
+						<f:facet name="filter">
+							<p:inputText id="rankFilter" placeholder="e.g. 4..6 or 5"
+								style="width:120px" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.rank}" />
+					</p:column>
+
+					<!-- Has Representative column -->
+					<p:column headerText="Has Representative"
+						sortBy="#{item.hasRepresentative}"
+						filterBy="#{item.hasRepresentative}">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItem itemLabel="True" itemValue="true" />
+								<f:selectItem itemLabel="False" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{item.hasRepresentative ? 'True' : 'False'}" />
+					</p:column>
+
+
+					<!-- Country column -->
+					<p:column headerText="Country" filterBy="#{item.country.name}"
+						sortBy="#{item.country.name}" filterMatchMode="exact">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()" filter="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{data.bean.countries}" var="country"
+									itemLabel="#{country.name}" itemValue="#{country.name}" />
+							</p:selectOneMenu>
 						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
@@ -44,16 +90,16 @@
 							value="#{item.country.name}" />
 					</p:column>
 
-					<!-- Status column -->
+					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="exact" id="statusColumn">
+						sortBy="#{item.status}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
-							<p:selectOneMenu onchange="PF('noneLazyTable').filter()"
-								id="statusSelection" style="width:100%; box-sizing: border-box;">
-								<f:selectItem itemLabel="Select One" itemValue="#{null}"
-									noSelectionOption="true" />
+							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
+								onchange="filterTable()" multiple="true"
+								style="width:100%; box-sizing: border-box;">
 								<f:selectItems value="#{data.bean.customerStatus}" />
-							</p:selectOneMenu>
+							</p:selectCheckboxMenu>
 						</f:facet>
 						<span
 							class="customer-badge status-#{item.status.name().toLowerCase()}">
@@ -62,7 +108,11 @@
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>
 
-
+			<script>
+				function filterTable() {
+					PF('checkboxSelectionTable').filter();
+				}
+			</script>
 		</ui:define>
 	</ui:composition>
 </h:body>

@@ -3,7 +3,7 @@
   "id" : "19831F32A7E1150F",
   "kind" : "HTML_DIALOG",
   "config" : {
-    "data" : "com.axonivy.market.extendedtable.demo.NoneLazy.NoneLazyData"
+    "data" : "com.axonivy.market.extendedtable.demo.NonePagination.NonePaginationData"
   },
   "elements" : [ {
       "id" : "f0",

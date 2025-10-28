@@ -4,7 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+
+import org.primefaces.component.datatable.DataTable;
+import org.primefaces.event.SelectEvent;
+
+import com.axonivy.market.extendedtable.demo.entities.Country;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
 import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 import com.axonivy.market.extendedtable.demo.service.CustomerService;
@@ -15,27 +23,82 @@ public abstract class GenericDemoBean {
 
 	protected CustomerService customerService = new CustomerService();
 
-	public CustomerStatus[] getCustomerStatus() {
-		return CustomerStatus.values();
+	protected List<Customer> items;
+	protected List<Customer> filteredItems;
+	protected List<Customer> selectedItems;
+
+	protected List<CustomerStatus> selectedStatuses;
+	protected final CustomerStatus[] customerStatus = CustomerStatus.values();
+	protected List<Country> countries = null;
+
+	protected List<LocalDate> dateRangeFilter; // holds 0..2 dates from the date picker
+	protected Integer rankFrom;
+	protected Integer rankTo;
+
+	/**
+	 * Template method that defines the initialization flow.
+	 * Subclasses cannot override this method due to final modifier.
+	 * To customize initialization, override the loadItems() hook method instead.
+	 */
+	public final void init() {
+		loadItems();
+		countries = customerService.getCountries();
 	}
 
-	private List<Customer> filteredItems;
-	private List<Customer> selectedItems;
-
-	public List<Customer> getFilteredItems() {
-		return filteredItems;
+	/**
+	 * Hook method for subclasses to load their specific data.
+	 * By default, loads all customers from the service.
+	 * Override this method to customize data loading behavior.
+	 */
+	protected void loadItems() {
+		items = customerService.findAll();
 	}
 
-	public void setFilteredItems(List<Customer> filteredItems) {
-		this.filteredItems = filteredItems;
+	/**
+	 * Handles row selection events from the data table.
+	 * Displays a FacesMessage with the names of selected customers.
+	 * Supports both single and multiple selection modes.
+	 * 
+	 * @param event The SelectEvent containing the selection information
+	 */
+	public void onRowSelect(SelectEvent<Customer> event) {
+		Object source = event.getSource();
+		if (!(source instanceof DataTable)) {
+			return;
+		}
+		
+		Object selection = ((DataTable) source).getSelection();
+		String selectedNames = getSelectedCustomerNames(selection);
+		
+		if (!selectedNames.isEmpty()) {
+			FacesMessage msg = new FacesMessage("Row Selection", "Selected: " + selectedNames);
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+		}
 	}
 
-	public List<Customer> getSelectedItems() {
-		return selectedItems;
-	}
-
-	public void setSelectedItems(List<Customer> selectedItems) {
-		this.selectedItems = selectedItems;
+	/**
+	 * Extracts customer names from the selection object.
+	 * Handles both single Customer objects and Lists of Customers.
+	 * 
+	 * @param selection The selection object from the data table
+	 * @return A comma-separated string of customer names
+	 */
+	private String getSelectedCustomerNames(Object selection) {
+		if (selection == null) {
+			return "";
+		}
+		
+		if (selection instanceof List) {
+			List<?> list = (List<?>) selection;
+			return list.stream()
+					.filter(obj -> obj instanceof Customer)
+					.map(obj -> ((Customer) obj).getName())
+					.collect(Collectors.joining(", "));
+		} else if (selection instanceof Customer) {
+			return ((Customer) selection).getName();
+		}
+		
+		return "";
 	}
 
 	// Custom date filter supporting selectionMode="range" from DatePicker
@@ -230,6 +293,120 @@ public abstract class GenericDemoBean {
 		} catch (NumberFormatException ex) {
 			return false;
 		}
+	}
+
+	/**
+	 * Custom filter function for country names that handles multiple selection.
+	 * Filters by country name (String).
+	 * 
+	 * @param value  The actual country name from the data row
+	 * @param filter The filter value(s) from the selectCheckboxMenu (List of
+	 *               String)
+	 * @param locale The locale (not used but required by PrimeFaces filter
+	 *               signature)
+	 * @return true if the value matches the filter criteria, false otherwise
+	 */
+	public boolean filterCountry(Object value, Object filter, Locale locale) {
+		// Null value never matches
+		if (value == null) {
+			return false;
+		}
+
+		// No filter means show all
+		if (filter == null) {
+			return true;
+		}
+
+		String countryName = value.toString();
+
+		// Handle List of filter values (multi-select)
+		if (filter instanceof List) {
+			List<?> filterList = (List<?>) filter;
+
+			// Empty list means no filter applied
+			if (filterList.isEmpty()) {
+				return true;
+			}
+
+			// Check if countryName matches any item in the filter list
+			for (Object filterItem : filterList) {
+				if (filterItem != null && countryName.equals(filterItem.toString())) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Handle single filter value
+		return countryName.equals(filter.toString());
+	}
+
+	public List<LocalDate> getDateRangeFilter() {
+		return dateRangeFilter;
+	}
+
+	public void setDateRangeFilter(List<LocalDate> dateRangeFilter) {
+		this.dateRangeFilter = dateRangeFilter;
+	}
+
+	public List<CustomerStatus> getSelectedStatuses() {
+		return selectedStatuses;
+	}
+
+	public void setSelectedStatuses(List<CustomerStatus> selectedStatuses) {
+		this.selectedStatuses = selectedStatuses;
+	}
+
+	public Integer getRankFrom() {
+		return rankFrom;
+	}
+
+	public void setRankFrom(Integer rankFrom) {
+		this.rankFrom = rankFrom;
+	}
+
+	public Integer getRankTo() {
+		return rankTo;
+	}
+
+	public void setRankTo(Integer rankTo) {
+		this.rankTo = rankTo;
+	}
+
+	public List<Customer> getFilteredItems() {
+		return filteredItems;
+	}
+
+	public void setFilteredItems(List<Customer> filteredItems) {
+		this.filteredItems = filteredItems;
+	}
+
+	public List<Customer> getSelectedItems() {
+		return selectedItems;
+	}
+
+	public void setSelectedItems(List<Customer> selectedItems) {
+		this.selectedItems = selectedItems;
+	}
+
+	public List<Customer> getItems() {
+		return items;
+	}
+
+	public void setItems(List<Customer> items) {
+		this.items = items;
+	}
+
+	public List<Country> getCountries() {
+		return countries;
+	}
+
+	public void setCountries(List<Country> countries) {
+		this.countries = countries;
+	}
+
+	public CustomerStatus[] getCustomerStatus() {
+		return customerStatus;
 	}
 
 }

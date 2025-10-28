@@ -7,11 +7,11 @@
   "elements" : [ {
       "id" : "f10",
       "type" : "RequestStart",
-      "name" : "noneLazy.ivp",
+      "name" : "nonePagination.ivp",
       "config" : {
-        "callSignature" : "noneLazy",
-        "outLink" : "noneLazy.ivp",
-        "startName" : "None Lazy Table",
+        "callSignature" : "nonePagination",
+        "outLink" : "nonePagination.ivp",
+        "startName" : "None Pagination Table",
         "case" : { }
       },
       "visual" : {
@@ -29,7 +29,7 @@
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.NoneLazy",
+        "dialogId" : "com.axonivy.market.extendedtable.demo.NonePagination",
         "startMethod" : "start()",
         "call" : {
           "code" : [

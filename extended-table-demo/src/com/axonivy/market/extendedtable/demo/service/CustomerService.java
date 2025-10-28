@@ -65,7 +65,7 @@ public class CustomerService {
 		List<Customer> customers = new ArrayList<>();
 		for (int i = 0; i < number; i++) {
 			customers.add(Customer.builder().name(getName()).company(getCompany()).country(getCountry()).date(getDate())
-					.status(CustomerStatus.random()).rank(getRank()).isNew(random.nextBoolean()).build());
+					.status(CustomerStatus.random()).rank(getRank()).hasRepresentative(random.nextBoolean()).build());
 		}
 		assignGroupsToCustomers(customers);
 

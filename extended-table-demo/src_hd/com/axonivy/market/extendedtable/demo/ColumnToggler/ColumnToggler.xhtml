@@ -15,8 +15,8 @@
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
 					tableId="columnTogglerTable" widgetVar="columnTogglerTable"
 					id="extendedTable" value="#{data.bean.items}"
-					showDeleteButton="true" paginator="true" rows="10"
-					filteredValue="#{data.bean.filteredItems}" showResetButton="true">
+					paginator="true" rows="10"
+					filteredValue="#{data.bean.filteredItems}">
 
 					<f:facet name="header">
 						<div class="p-d-flex p-jc-between p-ai-center">
@@ -32,23 +32,25 @@
 					</f:facet>
 
 					<!-- Name column -->
-					<p:column headerText="Name" filterBy="#{item.name}" id="name"
+					<p:column headerText="Name" filterBy="#{item.name}"
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
 							<p:inputText id="nameFilter" styleClass="custom-filter"
-								onchange="PF('columnTogglerTable').filter()" />
+								onchange="filterTable()" />
 						</f:facet>
 
-						<h:outputText value="#{item.name}" id="nameText" />
+						<h:outputText value="#{item.name}" />
 					</p:column>
 
-					<!-- Date with custom range filter to support range input from DatePicker -->
-					<p:column field="date" headerText="Date" filterBy="#{item.date}"
-						filterMatchMode="custom" filterFunction="#{data.bean.filterDate}">
+					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+					<p:column headerText="Date Range" filterBy="#{item.date}"
+						field="date" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="range"
-								onchange="PF('columnTogglerTable').filter()" />
+								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
 						</f:facet>
+						<h:outputText value="#{item.formattedDate}" />
 					</p:column>
 
 					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->
@@ -57,37 +59,53 @@
 						filterFunction="#{data.bean.filterRank}">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="e.g. 4..6 or 5"
-								style="width:120px" onchange="PF('columnTogglerTable').filter()" />
+								style="width:120px" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
 					</p:column>
 
+					<!-- Has Representative column -->
+					<p:column headerText="Has Representative"
+						sortBy="#{item.hasRepresentative}"
+						filterBy="#{item.hasRepresentative}">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItem itemLabel="True" itemValue="true" />
+								<f:selectItem itemLabel="False" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{item.hasRepresentative ? 'True' : 'False'}" />
+					</p:column>
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						id="country" sortBy="#{item.country.name}"
-						filterMatchMode="startsWith">
+						sortBy="#{item.country.name}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:inputText id="countryFilter"
-								onchange="PF('columnTogglerTable').filter()" />
+							<p:selectOneMenu onchange="filterTable()" filter="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{data.bean.countries}" var="country"
+									itemLabel="#{country.name}" itemValue="#{country.name}" />
+							</p:selectOneMenu>
 						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
 						<h:outputText style="vertical-align: middle; margin-left: .5rem"
-							value="#{item.country.name}" id="countryNameText" />
+							value="#{item.country.name}" />
 					</p:column>
 
-
 					<!-- Status column (Multiple selection) with custom filter -->
-					<p:column headerText="Status" filterBy="#{item.status}" id="status"
+					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="custom"
 						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
-								onchange="PF('columnTogglerTable').filter()" multiple="true"
+								onchange="filterTable()" multiple="true"
 								style="width:100%; box-sizing: border-box;">
-								<f:selectItems value="#{data.bean.customerStatus}" var="item"
-									itemLabel="#{item}" itemValue="#{item}" />
+								<f:selectItems value="#{data.bean.customerStatus}" />
 							</p:selectCheckboxMenu>
 						</f:facet>
 						<span
@@ -96,6 +114,12 @@
 					</p:column>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>
+
+			<script>
+				function filterTable() {
+					PF('columnTogglerTable').filter();
+				}
+			</script>
 
 		</ui:define>
 	</ui:composition>

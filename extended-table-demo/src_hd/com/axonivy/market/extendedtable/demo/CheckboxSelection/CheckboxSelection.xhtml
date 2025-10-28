@@ -17,26 +17,26 @@
 
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
 					tableId="checkboxSelectionTable" widgetVar="checkboxSelectionTable"
-					id="checkboxSelectionTableWrapper"
-					value="#{data.bean.items}" showDeleteButton="true"
-					allowUnsorting="true"
-					filteredValue="#{data.bean.filteredItems}"
-					showResetButton="true" paginator="true" rows="10"
-					selection="#{data.bean.selectedCustomer}"
-					selectionPageOnly="false" rowKey="#{item.id}">
+					id="checkboxSelectionTableWrapper" value="#{data.bean.items}"
+					showDeleteButton="true" allowUnsorting="true"
+					filteredValue="#{data.bean.filteredItems}" showResetButton="true"
+					paginator="true" rows="10"
+					selection="#{data.bean.selectedCustomers}" selectionPageOnly="false"
+					rowKey="#{item.id}">
 
 					<p:column id="checkbox" selectionMode="multiple"
 						style="width:16px;text-align:center" />
 
-					<!-- Id column -->
-					<p:column headerText="Id" filterBy="#{item.id}" sortBy="#{item.id}"
-						id="idColumn" filterMatchMode="contains">
+
+					<!-- Name column -->
+					<p:column headerText="Name" filterBy="#{item.name}"
+						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
-							<p:inputText onchange="PF('checkboxSelectionTable').filter()"
-								id="idFilter" styleClass="custom-filter" />
+							<p:inputText id="nameFilter" styleClass="custom-filter"
+								onchange="filterTable()" />
 						</f:facet>
 
-						<h:outputText value="#{item.id}" />
+						<h:outputText value="#{item.name}" />
 					</p:column>
 
 					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
@@ -45,53 +45,49 @@
 						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="range"
-								value="#{data.bean.dateRangeFilter}"
-								onchange="PF('checkboxSelectionTable').filter()" />
+								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
 						</f:facet>
+						<h:outputText value="#{item.formattedDate}" />
 					</p:column>
-					
+
 					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
 						filterFunction="#{data.bean.filterRank}">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="e.g. 4..6 or 5"
-								style="width:120px" onchange="PF('checkboxSelectionTable').filter()" />
+								style="width:120px" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
 					</p:column>
 
-					<!-- Is New column -->
-					<p:column headerText="Is New" sortBy="#{item.new}"
-						filterBy="#{item.new}">
+					<!-- Has Representative column -->
+					<p:column headerText="Has Representative"
+						sortBy="#{item.hasRepresentative}"
+						filterBy="#{item.hasRepresentative}">
 						<f:facet name="filter">
-							<p:selectOneMenu onchange="PF('checkboxSelectionTable').filter()">
+							<p:selectOneMenu onchange="filterTable()">
 								<f:selectItem itemLabel="All" itemValue="#{null}"
 									noSelectionOption="true" />
 								<f:selectItem itemLabel="True" itemValue="true" />
 								<f:selectItem itemLabel="False" itemValue="false" />
 							</p:selectOneMenu>
 						</f:facet>
-						<h:outputText value="#{item.new ? 'True' : 'False'}" />
+						<h:outputText value="#{item.hasRepresentative ? 'True' : 'False'}" />
 					</p:column>
 
-					<!-- Name column -->
-					<p:column headerText="Name" filterBy="#{item.name}"
-						sortBy="#{item.name}" filterMatchMode="contains">
-						<f:facet name="filter">
-							<p:inputText id="nameFilter" styleClass="custom-filter"
-								onchange="PF('checkboxSelectionTable').filter()" />
-						</f:facet>
-
-						<h:outputText value="#{item.name}" />
-					</p:column>
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+						sortBy="#{item.country.name}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:inputText id="countryFilter" styleClass="custom-filter"
-								onchange="PF('checkboxSelectionTable').filter()" />
+							<p:selectOneMenu onchange="filterTable()" filter="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{data.bean.countries}" var="country"
+									itemLabel="#{country.name}" itemValue="#{country.name}" />
+							</p:selectOneMenu>
 						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
@@ -104,12 +100,10 @@
 						sortBy="#{item.status}" filterMatchMode="custom"
 						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
-							<p:selectCheckboxMenu
-								value="#{data.bean.selectedStatuses}"
-								onchange="PF('checkboxSelectionTable').filter()" multiple="true"
+							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
+								onchange="filterTable()" multiple="true"
 								style="width:100%; box-sizing: border-box;">
-								<f:selectItems
-									value="#{data.bean.customerStatus}" />
+								<f:selectItems value="#{data.bean.customerStatus}" />
 							</p:selectCheckboxMenu>
 						</f:facet>
 						<span
@@ -120,9 +114,9 @@
 			</h:form>
 
 			<script>
-				$(document).ready(function() {
-					console.log("selectedIds");
-				});
+				function filterTable() {
+					PF('checkboxSelectionTable').filter();
+				}
 			</script>
 		</ui:define>
 	</ui:composition>

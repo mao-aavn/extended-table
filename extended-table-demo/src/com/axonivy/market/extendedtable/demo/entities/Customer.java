@@ -36,7 +36,7 @@ public class Customer extends AuditableIdEntity {
 	@JoinColumn(name = "group_id")
 	private CustomerGroup group;
 
-	private boolean isNew = false;
+	private boolean hasRepresentative = false;
 
 	// Builder pattern
 	public static Builder builder() {
@@ -51,24 +51,28 @@ public class Customer extends AuditableIdEntity {
 		private CustomerStatus status;
 		private int customerRank;
 		private CustomerGroup group;
-		private boolean isNew = false;
+		private boolean hasRepresentative = false;
 
 		public Builder name(String name) {
 			this.name = name;
 			return this;
 		}
+
 		public Builder company(String company) {
 			this.company = company;
 			return this;
 		}
+
 		public Builder country(Country country) {
 			this.country = country;
 			return this;
 		}
+
 		public Builder date(LocalDate date) {
 			this.date = date;
 			return this;
 		}
+
 		public Builder status(CustomerStatus status) {
 			this.status = status;
 			return this;
@@ -89,10 +93,12 @@ public class Customer extends AuditableIdEntity {
 			this.group = group;
 			return this;
 		}
-		public Builder isNew(boolean isNew) {
-			this.isNew = isNew;
+
+		public Builder hasRepresentative(boolean hasRepresentative) {
+			this.hasRepresentative = hasRepresentative;
 			return this;
 		}
+
 		public Customer build() {
 			Customer c = new Customer();
 			c.setName(name);
@@ -102,14 +108,13 @@ public class Customer extends AuditableIdEntity {
 			c.setStatus(status);
 			c.setCustomerRank(customerRank);
 			c.setGroup(group);
-			c.setNew(isNew);
+			c.setHasRepresentative(hasRepresentative);
 			return c;
 		}
 	}
 
 	public Customer() {
 	}
-
 
 	public String getName() {
 		return name;
@@ -137,6 +142,13 @@ public class Customer extends AuditableIdEntity {
 
 	public LocalDate getDate() {
 		return date;
+	}
+
+	public String getFormattedDate() {
+		if (date == null) {
+			return "";
+		}
+		return date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
 
 	public void setDate(LocalDate date) {
@@ -168,8 +180,6 @@ public class Customer extends AuditableIdEntity {
 		this.customerRank = rank;
 	}
 
-
-
 	public CustomerGroup getGroup() {
 		return group;
 	}
@@ -178,12 +188,12 @@ public class Customer extends AuditableIdEntity {
 		this.group = group;
 	}
 
-	public boolean isNew() {
-		return isNew;
+	public boolean isHasRepresentative() {
+		return hasRepresentative;
 	}
 
-	public void setNew(boolean isNew) {
-		this.isNew = isNew;
+	public void setHasRepresentative(boolean hasRepresentative) {
+		this.hasRepresentative = hasRepresentative;
 	}
 
 	@Override
@@ -195,13 +205,13 @@ public class Customer extends AuditableIdEntity {
 			return false;
 		}
 		Customer customer = (Customer) o;
-	return id == customer.id && customerRank == customer.customerRank && Objects.equals(name, customer.name)
+		return id == customer.id && customerRank == customer.customerRank && Objects.equals(name, customer.name)
 				&& Objects.equals(company, customer.company) && Objects.equals(country, customer.country)
 				&& Objects.equals(date, customer.date) && status == customer.status;
 	}
 
 	@Override
 	public int hashCode() {
-	return Objects.hash(id, name, company, country, date, status, customerRank);
+		return Objects.hash(id, name, company, country, date, status, customerRank);
 	}
 }

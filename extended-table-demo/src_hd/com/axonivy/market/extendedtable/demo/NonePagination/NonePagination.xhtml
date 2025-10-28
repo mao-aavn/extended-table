@@ -9,21 +9,15 @@
 	<ui:composition template="/layouts/frame-10-full-width.xhtml">
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
-			<h2>Multiple Row Selection</h2>
-			<h:form id="form" style="margin-top: 100px;">
-				<p:growl id="msgs" showDetail="true"></p:growl>
-				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="multiRowSelectionTable" widgetVar="multiRowSelectionTable"
-					id="multiRowSelectionTableWrapper" value="#{data.bean.items}"
-					showDeleteButton="true" allowUnsorting="true"
-					filteredValue="#{data.bean.filteredItems}" showResetButton="true"
-					paginator="true" rows="10" selectionMode="multiple"
-					selection="#{data.bean.selectedCustomers}" rowKey="#{item.id}">
 
-					<f:facet name="event">
-						<p:ajax event="rowSelect" listener="#{data.bean.onRowSelect}"
-							update="form:msgs" />
-					</f:facet>
+			<h:form id="nonePaginationForm" style="margin-top: 100px;">
+				<p:messages />
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="nonePaginationTable" widgetVar="nonePaginationTable"
+					id="extendedTable" value="#{data.bean.items}"
+					showDeleteButton="true" showResetButton="true" paginator="false"
+					sortMode="multiple" filteredValue="#{data.bean.filteredItems}"
+					allowUnsorting="true">
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
@@ -111,10 +105,12 @@
 
 				<script>
 					function filterTable() {
-						PF('multiRowSelectionTable').filter();
+						PF('nonePaginationTable').filter();
 					}
 				</script>
 			</h:form>
+
+
 		</ui:define>
 	</ui:composition>
 </h:body>

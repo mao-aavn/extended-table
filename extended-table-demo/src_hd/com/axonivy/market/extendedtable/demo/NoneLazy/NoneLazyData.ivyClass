@@ -1,4 +1,0 @@
-NoneLazyData #class
-com.axonivy.market.extendedtable.demo.NoneLazy #namespace
-bean com.axonivy.market.extendedtable.demo.beans.NoneLazyBean #field
-bean PERSISTENT #fieldModifier

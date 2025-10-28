@@ -16,9 +16,6 @@ public class LazyCustomerDataModel extends LazyDataModel<Customer> {
 
 	private CustomerDAO customerDAO = new CustomerDAO();
 
-	public LazyCustomerDataModel() {
-	}
-
 	@Override
 	public Customer getRowData(String rowKey) {
 		return customerDAO.findById(rowKey);
@@ -32,7 +29,6 @@ public class LazyCustomerDataModel extends LazyDataModel<Customer> {
 	@Override
 	public int count(Map<String, FilterMeta> filterBy) {
 		return customerDAO.count(filterBy);
-		
 	}
 
 	@Override

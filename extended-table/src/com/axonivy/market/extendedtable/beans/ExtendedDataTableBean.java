@@ -18,7 +18,6 @@ import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datatable.DataTableState;
@@ -58,8 +57,8 @@ public class ExtendedDataTableBean {
 		String explicitSave = FacesContext.getCurrentInstance().getExternalContext()
 				.getRequestParameterMap().get("explicitSave");
 		
+		Ivy.log().info("saveTableState called but explicitSave parameter is not 'true', skipping save. Value: {0}", explicitSave);
 		if (!"true".equals(explicitSave)) {
-			Ivy.log().debug("saveTableState called but explicitSave parameter is not 'true', skipping save. Value: {0}", explicitSave);
 			return;
 		}
 

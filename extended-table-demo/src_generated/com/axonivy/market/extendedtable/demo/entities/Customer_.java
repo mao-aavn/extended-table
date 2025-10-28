@@ -12,17 +12,19 @@ public abstract class Customer_ extends com.axonivy.utils.persistence.beans.Audi
 
 	public static volatile SingularAttribute<Customer, LocalDate> date;
 	public static volatile SingularAttribute<Customer, Country> country;
-	public static volatile SingularAttribute<Customer, Integer> activity;
+	public static volatile SingularAttribute<Customer, Integer> customerRank;
 	public static volatile SingularAttribute<Customer, String> name;
 	public static volatile SingularAttribute<Customer, String> company;
 	public static volatile SingularAttribute<Customer, CustomerStatus> status;
 	public static volatile SingularAttribute<Customer, CustomerGroup> group;
+	public static volatile SingularAttribute<Customer, Boolean> isNew;
 
 	public static final String DATE = "date";
 	public static final String COUNTRY = "country";
-	public static final String ACTIVITY = "activity";
+	public static final String CUSTOMER_RANK = "customerRank";
 	public static final String NAME = "name";
 	public static final String COMPANY = "company";
 	public static final String STATUS = "status";
 	public static final String GROUP = "group";
+	public static final String IS_NEW = "isNew";
 }

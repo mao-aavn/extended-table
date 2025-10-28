@@ -3,6 +3,7 @@
 	<name>extended-table-demo</name>
 	<comment></comment>
 	<projects>
+		<project>extended-table</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

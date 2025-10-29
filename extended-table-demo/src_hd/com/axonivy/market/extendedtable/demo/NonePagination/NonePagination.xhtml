@@ -38,7 +38,7 @@
 							<p:datePicker selectionMode="range"
 								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
 						</f:facet>
-						<h:outputText value="#{item.formattedDate}" />
+						<h:outputText value="#{data.bean.formatDate(item.date)}" />
 					</p:column>
 
 					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->

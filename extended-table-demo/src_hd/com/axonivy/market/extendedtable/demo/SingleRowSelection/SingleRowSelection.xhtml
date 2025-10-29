@@ -33,34 +33,66 @@
 							update="form:msgs" />
 					</f:facet>
 
-					<!-- Id column -->
-					<p:column headerText="Id" filterBy="#{item.id}" sortBy="#{item.id}"
-						filterMatchMode="contains">
-						<f:facet name="filter">
-							<p:inputText onchange="PF('singleRowSelectionTable').filter()"
-								id="idFilter" styleClass="custom-filter" />
-						</f:facet>
-
-						<h:outputText value="#{item.id}" />
-					</p:column>
-
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
 						sortBy="#{item.name}" filterMatchMode="contains">
 						<f:facet name="filter">
 							<p:inputText id="nameFilter" styleClass="custom-filter"
-								onchange="PF('singleRowSelectionTable').filter()" />
+								onchange="filterTable()" />
 						</f:facet>
 
 						<h:outputText value="#{item.name}" />
 					</p:column>
 
+					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
+					<p:column headerText="Date Range" filterBy="#{item.date}"
+						field="date" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterDate}">
+						<f:facet name="filter">
+							<p:datePicker selectionMode="range"
+								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{data.bean.formatDate(item.date)}" />
+					</p:column>
+
+					<!-- Rank column with single input range syntax (e.g., 4..6, ..10, 5..) -->
+					<p:column headerText="Number Rank" field="rank"
+						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterRank}">
+						<f:facet name="filter">
+							<p:inputText id="rankFilter" placeholder="e.g. 4..6 or 5"
+								style="width:120px" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.rank}" />
+					</p:column>
+
+					<!-- Has Representative column -->
+					<p:column headerText="Has Representative"
+						sortBy="#{item.hasRepresentative}"
+						filterBy="#{item.hasRepresentative}">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItem itemLabel="True" itemValue="true" />
+								<f:selectItem itemLabel="False" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{item.hasRepresentative ? 'True' : 'False'}" />
+					</p:column>
+
+
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="startsWith">
+						sortBy="#{item.country.name}" filterMatchMode="exact">
 						<f:facet name="filter">
-							<p:inputText id="countryFilter" styleClass="custom-filter"
-								onchange="PF('singleRowSelectionTable').filter()" />
+							<p:selectOneMenu onchange="filterTable()" filter="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{data.bean.countries}" var="country"
+									itemLabel="#{country.name}" itemValue="#{country.name}" />
+							</p:selectOneMenu>
 						</f:facet>
 						<span class="flag flag-#{item.country.code}"
 							style="width: 30px; height: 20px" />
@@ -68,18 +100,16 @@
 							value="#{item.country.name}" />
 					</p:column>
 
-					<!-- Status column with custom filter -->
+					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="exact">
+						sortBy="#{item.status}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
-							<p:selectOneMenu
-								onchange="PF('singleRowSelectionTable').filter()"
+							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
+								onchange="filterTable()" multiple="true"
 								style="width:100%; box-sizing: border-box;">
-								<f:selectItem itemLabel="Select One" itemValue="#{null}"
-									noSelectionOption="true" />
-								<f:selectItems
-									value="#{data.bean.customerStatus}" />
-							</p:selectOneMenu>
+								<f:selectItems value="#{data.bean.customerStatus}" />
+							</p:selectCheckboxMenu>
 						</f:facet>
 						<span
 							class="customer-badge status-#{item.status.name().toLowerCase()}">

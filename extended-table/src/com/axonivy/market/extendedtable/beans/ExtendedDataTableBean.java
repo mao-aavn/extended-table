@@ -113,7 +113,8 @@ public class ExtendedDataTableBean {
 			currentState.setColumnMeta(persistedState.getColumnMeta());
 			currentState.setExpandedRowKeys(persistedState.getExpandedRowKeys());
 			currentState.setRows(persistedState.getRows());
-			currentState.setSelectedRowKeys(persistedState.getSelectedRowKeys());
+			// Don't set selectedRowKeys here - filterAndSort() will clear them
+			// We'll restore selection after filtering in restoreSelection()
 			currentState.setWidth(persistedState.getWidth());
 			currentTable.setFirst(persistedState.getFirst());
 
@@ -228,7 +229,7 @@ public class ExtendedDataTableBean {
 		// For checkbox selection, we need to explicitly update the selected row keys
 		// so PrimeFaces knows which checkboxes to check across pages
 		// Note: We need to get the state and update it there, as getSelectedRowKeys() may return immutable Set
-		DataTableState state = table.getMultiViewState(false);
+		DataTableState state = table.getMultiViewState(true); // force create to ensure we have a state
 		if (state != null) {
 			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
 			Ivy.log().info("State.getSelectedRowKeys() returned: {0}", stateSelectedRowKeys);
@@ -255,7 +256,7 @@ public class ExtendedDataTableBean {
 		StringBuilder script = new StringBuilder();
 		script.append("setTimeout(function() {");
 		script.append("  var widget = PF('").append(getWidgetVar()).append("');");
-		script.append("  if (widget && widget.selection) {");
+		script.append("  if (widget) {");
 		
 		// Build array of selected row keys for client-side
 		script.append("    widget.selection = [");

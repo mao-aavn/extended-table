@@ -300,17 +300,58 @@ public class ExtendedDataTableBean {
 	public void resetTable() {
 		String viewId = getViewRoot().getViewId();
 		String tableClientId = getTableClientId();
-		PrimeFaces.current().multiViewState().clearAll(viewId, true, null);
-		stateName = null;
 		DataTable currentTable = (DataTable) findComponentFromClientId(tableClientId);
 
 		if (currentTable == null) {
 			Ivy.log().warn("Table not found with the given id: {0}", tableClientId);
 			return;
 		}
+		
+		// Clear selection BEFORE clearing state to ensure clean reset
+		clearSelection(currentTable);
+		
+		// Now clear the PrimeFaces multiview state
+		PrimeFaces.current().multiViewState().clearAll(viewId, true, null);
+		stateName = null;
 
 		currentTable.clearInitialState();
 		currentTable.resetColumns();
+	}
+	
+	/**
+	 * Clears the selection from both the DataTable and the backing bean's selection list
+	 * 
+	 * @param table The DataTable component
+	 */
+	private void clearSelection(DataTable table) {
+		Ivy.log().info("clearSelection called");
+		
+		// Clear the backing bean's selection list FIRST (from composite component attribute)
+		// This is the most important step as it's bound to the UI
+		Object selectionAttr = Attrs.currentContext().get("selection");
+		if (selectionAttr instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<Object> selectionList = (List<Object>) selectionAttr;
+			selectionList.clear();
+			Ivy.log().info("Cleared selection list from backing bean, size: {0}", selectionList.size());
+		}
+		
+		// Clear the DataTable's selection property
+		table.setSelection(null);
+		Ivy.log().info("Set DataTable selection to null");
+		
+		// Clear the state's selectedRowKeys if state exists
+		DataTableState state = table.getMultiViewState(false);
+		if (state != null) {
+			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
+			if (stateSelectedRowKeys != null) {
+				stateSelectedRowKeys.clear();
+				Ivy.log().info("Cleared state selectedRowKeys");
+			}
+		}
+		
+		// Update the table to reflect changes
+		PrimeFaces.current().ajax().update(table.getClientId());
 	}
 
 	public void deleteTableState() {

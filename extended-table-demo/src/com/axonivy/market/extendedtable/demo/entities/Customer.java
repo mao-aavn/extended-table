@@ -1,6 +1,7 @@
 package com.axonivy.market.extendedtable.demo.entities;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
@@ -8,8 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import com.axonivy.utils.persistence.beans.AuditableIdEntity;
 
@@ -24,6 +25,8 @@ public class Customer extends AuditableIdEntity {
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "country_id")
 	private Country country;
+
+	private LocalDateTime dateTime;
 
 	private LocalDate date;
 
@@ -48,6 +51,7 @@ public class Customer extends AuditableIdEntity {
 		private String company;
 		private Country country;
 		private LocalDate date;
+		private LocalDateTime dateTime;
 		private CustomerStatus status;
 		private int customerRank;
 		private CustomerGroup group;
@@ -70,6 +74,11 @@ public class Customer extends AuditableIdEntity {
 
 		public Builder date(LocalDate date) {
 			this.date = date;
+			return this;
+		}
+		
+		public Builder dateTime(LocalDateTime dateTime) {
+			this.dateTime = dateTime;
 			return this;
 		}
 
@@ -105,6 +114,7 @@ public class Customer extends AuditableIdEntity {
 			c.setCompany(company);
 			c.setCountry(country);
 			c.setDate(date);
+			c.setDateTime(dateTime);
 			c.setStatus(status);
 			c.setCustomerRank(customerRank);
 			c.setGroup(group);
@@ -140,15 +150,16 @@ public class Customer extends AuditableIdEntity {
 		this.country = country;
 	}
 
-	public LocalDate getDate() {
-		return date;
+	public LocalDateTime getDateTime() {
+		return dateTime;
 	}
 
-	public String getFormattedDate() {
-		if (date == null) {
-			return "";
-		}
-		return date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
+	}
+
+	public LocalDate getDate() {
+		return date;
 	}
 
 	public void setDate(LocalDate date) {

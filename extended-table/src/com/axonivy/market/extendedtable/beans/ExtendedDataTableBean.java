@@ -7,10 +7,16 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromC
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +24,7 @@ import java.util.Set;
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.convert.DateTimeConverter;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
@@ -99,9 +106,6 @@ public class ExtendedDataTableBean {
 		DataTableState persistedState = fetchDataTableState();
 
 		if (persistedState != null) {
-			// Convert date strings back to LocalDate objects for proper filtering
-			convertDateStringsToLocalDates(persistedState);
-			
 			DataTableState currentState = currentTable.getMultiViewState(true); // force create
 			currentState.setFilterBy(persistedState.getFilterBy());
 			currentState.setSortBy(persistedState.getSortBy());
@@ -344,16 +348,19 @@ public class ExtendedDataTableBean {
 	private void persistDataTableState(DataTableState state) {
 		String stateKey = getStateKey();
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule())
-			.addMixIn(FilterMeta.class, FilterDataTableMixin.class)
-			.addMixIn(SortMeta.class, SortDataTableMixin.class);
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		// Write dates as ISO-8601 strings (e.g., "2025-10-01") instead of arrays
-		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
+		ObjectMapper mapper = createObjectMapper();
+		
+		// Extract and store date format patterns from columns before serialization
+		DataTable table = (DataTable) findComponentFromClientId(getTableClientId());
+		Map<String, String> columnDateFormats = extractDateFormatsFromColumns(table);
+		
 		try {
-			String stateJson = mapper.writeValueAsString(state);
+			// Create a wrapper object to store both state and format info
+			Map<String, Object> stateWrapper = new HashMap<>();
+			stateWrapper.put("state", state);
+			stateWrapper.put("dateFormats", columnDateFormats);
+			
+			String stateJson = mapper.writeValueAsString(stateWrapper);
 			getController().save(stateKey, stateJson);
 		} catch (JsonProcessingException e) {
 			Ivy.log().error("Couldn't serialize TableState to JSON", e);
@@ -367,19 +374,28 @@ public class ExtendedDataTableBean {
 		Ivy.log().info(stateKey);
 		Ivy.log().info(stateJson);
 
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule())
-			.addMixIn(FilterMeta.class, FilterDataTableMixin.class)
-			.addMixIn(SortMeta.class, SortDataTableMixin.class);
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		// Read dates from ISO-8601 strings
-		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		ObjectMapper mapper = createObjectMapper();
 		
 		DataTableState tableState = null;
 
 		try {
-			tableState = mapper.readValue(stateJson, new TypeReference<DataTableState>() {
-			});
+			// Read the wrapper containing both state and date formats
+			Map<String, Object> stateWrapper = mapper.readValue(stateJson, new TypeReference<Map<String, Object>>() {});
+			
+			// Extract the state
+			Object stateObj = stateWrapper.get("state");
+			if (stateObj != null) {
+				// Convert the state object back to DataTableState
+				String stateJsonStr = mapper.writeValueAsString(stateObj);
+				tableState = mapper.readValue(stateJsonStr, new TypeReference<DataTableState>() {});
+				
+				// Extract and apply date formats to convert string dates back to proper types
+				@SuppressWarnings("unchecked")
+				Map<String, String> dateFormats = (Map<String, String>) stateWrapper.get("dateFormats");
+				if (dateFormats != null && !dateFormats.isEmpty()) {
+					convertDateStringsUsingFormats(tableState, dateFormats);
+				}
+			}
 		} catch (IOException e) {
 			Ivy.log().error("Couldn't deserialize TableState from JSON", e);
 		}
@@ -388,55 +404,242 @@ public class ExtendedDataTableBean {
 	}
 
 	/**
-	 * Converts date string values in FilterMeta back to LocalDate objects.
-	 * After deserialization, date values are strings (e.g., "2025-10-19"),
-	 * but PrimeFaces filtering expects LocalDate objects for proper comparison.
+	 * Creates a configured ObjectMapper for serializing/deserializing DataTableState.
+	 * 
+	 * Default configuration:
+	 * - Includes JavaTimeModule for java.time.* types (LocalDate, LocalDateTime, etc.)
+	 * - Serializes dates as ISO-8601 strings instead of timestamps
+	 * - Ignores unknown properties during deserialization
+	 * 
+	 * Users can customize date format by providing a dateFormat attribute to the
+	 * ExtendedTable component (e.g., dateFormat="MM/dd/yyyy").
+	 * 
+	 * @return Configured ObjectMapper instance
+	 */
+	private ObjectMapper createObjectMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		
+		// Register JavaTimeModule for standard java.time types
+		mapper.registerModule(new JavaTimeModule());
+		
+		// Apply mixins to exclude problematic fields from serialization
+		mapper.addMixIn(FilterMeta.class, FilterDataTableMixin.class);
+		mapper.addMixIn(SortMeta.class, SortDataTableMixin.class);
+		
+		// Configure behavior
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		
+		// Apply custom date format if provided (global fallback)
+		String dateFormatPattern = (String) Attrs.currentContext().get("dateFormat");
+		if (dateFormatPattern != null && !dateFormatPattern.trim().isEmpty()) {
+			java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat(dateFormatPattern);
+			mapper.setDateFormat(dateFormat);
+		}
+		
+		return mapper;
+	}
+
+	/**
+	 * Extracts date format patterns from DateTimeConverter components in table columns.
+	 * This allows the component to automatically use the same format defined in the UI.
+	 * 
+	 * @param table The DataTable component
+	 * @return Map of column field names to date format patterns
+	 */
+	private Map<String, String> extractDateFormatsFromColumns(DataTable table) {
+		Map<String, String> dateFormats = new HashMap<>();
+		
+		if (table == null) {
+			return dateFormats;
+		}
+		
+		// Iterate through columns to find DateTimeConverter components or DatePicker patterns
+		for (UIComponent child : table.getChildren()) {
+			if (child instanceof org.primefaces.component.column.Column) {
+				org.primefaces.component.column.Column column = (org.primefaces.component.column.Column) child;
+				String field = column.getField();
+				
+				if (field != null && !field.isEmpty()) {
+					// First, check filter facet for DatePicker pattern
+					String pattern = findDatePickerPattern(column);
+					
+					// If not found in filter facet, search for DateTimeConverter in column children
+					if (pattern == null) {
+						pattern = findDateTimeConverterPattern(column);
+					}
+					
+					if (pattern != null) {
+						dateFormats.put(field, pattern);
+						Ivy.log().info("Found date format for column {0}: {1}", field, pattern);
+					}
+				}
+			}
+		}
+		
+		return dateFormats;
+	}
+
+	/**
+	 * Searches for a DatePicker component in the filter facet and extracts its pattern.
+	 * 
+	 * @param column The column to search
+	 * @return The date pattern if found, null otherwise
+	 */
+	private String findDatePickerPattern(org.primefaces.component.column.Column column) {
+		UIComponent filterFacet = column.getFacet("filter");
+		if (filterFacet != null) {
+			return findDatePickerPatternRecursive(filterFacet);
+		}
+		return null;
+	}
+	
+	/**
+	 * Recursively searches for a DatePicker component and extracts its pattern.
+	 * 
+	 * @param component The component to search
+	 * @return The date pattern if found, null otherwise
+	 */
+	private String findDatePickerPatternRecursive(UIComponent component) {
+		// Check if this is a DatePicker component
+		if (component instanceof org.primefaces.component.datepicker.DatePicker) {
+			org.primefaces.component.datepicker.DatePicker datePicker = 
+				(org.primefaces.component.datepicker.DatePicker) component;
+			String pattern = datePicker.getPattern();
+			if (pattern != null && !pattern.isEmpty()) {
+				return pattern;
+			}
+		}
+		
+		// Recursively search children
+		for (UIComponent child : component.getChildren()) {
+			String pattern = findDatePickerPatternRecursive(child);
+			if (pattern != null) {
+				return pattern;
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Recursively searches for a DateTimeConverter in the component tree and extracts its pattern.
+	 * 
+	 * @param component The component to search
+	 * @return The date pattern if found, null otherwise
+	 */
+	private String findDateTimeConverterPattern(UIComponent component) {
+		// Check direct converter
+		if (component instanceof javax.faces.component.ValueHolder) {
+			javax.faces.convert.Converter converter = ((javax.faces.component.ValueHolder) component).getConverter();
+			if (converter instanceof DateTimeConverter) {
+				DateTimeConverter dtConverter = (DateTimeConverter) converter;
+				String pattern = dtConverter.getPattern();
+				if (pattern != null && !pattern.isEmpty()) {
+					return pattern;
+				}
+			}
+		}
+		
+		// Recursively search children
+		for (UIComponent child : component.getChildren()) {
+			String pattern = findDateTimeConverterPattern(child);
+			if (pattern != null) {
+				return pattern;
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Converts date string values in FilterMeta back to appropriate date objects
+	 * using the format patterns extracted from column converters.
 	 * 
 	 * @param state The DataTableState containing filter metadata
+	 * @param dateFormats Map of column field names to date format patterns
 	 */
-	private void convertDateStringsToLocalDates(DataTableState state) {
-		if (state == null || state.getFilterBy() == null) {
+	private void convertDateStringsUsingFormats(DataTableState state, Map<String, String> dateFormats) {
+		if (state == null || state.getFilterBy() == null || dateFormats == null || dateFormats.isEmpty()) {
 			return;
 		}
 		
 		Map<String, FilterMeta> filterBy = state.getFilterBy();
-		for (FilterMeta filterMeta : filterBy.values()) {
+		for (Map.Entry<String, FilterMeta> entry : filterBy.entrySet()) {
+			String field = entry.getKey();
+			FilterMeta filterMeta = entry.getValue();
 			Object filterValue = filterMeta.getFilterValue();
+			
+			// Check if this field has a date format
+			String pattern = dateFormats.get(field);
+			if (pattern == null) {
+				continue;
+			}
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 			
 			if (filterValue instanceof List) {
 				List<?> filterList = (List<?>) filterValue;
 				List<Object> convertedList = new ArrayList<>();
-				boolean hasChanges = false;
 				
 				for (Object item : filterList) {
 					if (item instanceof String) {
-						try {
-							// Try to parse as LocalDate (ISO-8601 format: "2025-10-19")
-							LocalDate date = LocalDate.parse((String) item);
-							convertedList.add(date);
-							hasChanges = true;
-						} catch (DateTimeParseException e) {
-							// Not a date string, keep as is
-							convertedList.add(item);
-						}
+						Object converted = parseDate((String) item, pattern, dateFormat);
+						convertedList.add(converted != null ? converted : item);
 					} else {
 						convertedList.add(item);
 					}
 				}
 				
-				// Update the filter value if we converted any dates
-				if (hasChanges) {
-					filterMeta.setFilterValue(convertedList);
-				}
+				filterMeta.setFilterValue(convertedList);
 			} else if (filterValue instanceof String) {
-				try {
-					// Try to parse single value as LocalDate
-					LocalDate date = LocalDate.parse((String) filterValue);
-					filterMeta.setFilterValue(date);
-				} catch (DateTimeParseException e) {
-					// Not a date string, leave as is
+				Object converted = parseDate((String) filterValue, pattern, dateFormat);
+				if (converted != null) {
+					filterMeta.setFilterValue(converted);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Parses a date string using the given pattern, attempting multiple date types.
+	 * 
+	 * @param dateStr The date string to parse
+	 * @param pattern The date format pattern
+	 * @param dateFormat SimpleDateFormat configured with the pattern
+	 * @return Parsed date object (Date, LocalDate, or LocalDateTime) or null if parsing fails
+	 */
+	private Object parseDate(String dateStr, String pattern, SimpleDateFormat dateFormat) {
+		try {
+			// Check if pattern includes time components
+			boolean hasTime = pattern.contains("H") || pattern.contains("h") || 
+							  pattern.contains("m") || pattern.contains("s");
+			
+			// Try parsing as ISO format first (from JSON serialization)
+			try {
+				if (hasTime) {
+					// Try ISO LocalDateTime format (e.g., "2025-10-13T10:49:00")
+					return java.time.LocalDateTime.parse(dateStr);
+				} else {
+					// Try ISO LocalDate format (e.g., "2025-10-06")
+					return java.time.LocalDate.parse(dateStr);
+				}
+			} catch (java.time.format.DateTimeParseException e) {
+				// Not ISO format, continue to try custom pattern
+			}
+			
+			// Try parsing with the custom pattern
+			Date date = dateFormat.parse(dateStr);
+			
+			// Convert to appropriate java.time type for better compatibility
+			if (hasTime) {
+				return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			} else {
+				return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			}
+		} catch (ParseException e) {
+			Ivy.log().warn("Failed to parse date string: {0} with pattern: {1}", dateStr, pattern);
+			return null;
 		}
 	}
 

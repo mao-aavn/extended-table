@@ -1,6 +1,10 @@
 package com.axonivy.market.extendedtable.demo.beans;
 
+import static java.time.format.DateTimeFormatter.ofPattern;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -20,6 +24,8 @@ import com.axonivy.market.extendedtable.demo.service.CustomerService;
 import ch.ivyteam.ivy.environment.Ivy;
 
 public abstract class GenericDemoBean {
+	private final DateTimeFormatter dateTimeFormatter = ofPattern("dd.MM.yyyy MM:ss");
+	private final DateTimeFormatter dateFormatter = ofPattern("dd.MM.yyyy");
 
 	protected CustomerService customerService = new CustomerService();
 
@@ -32,13 +38,14 @@ public abstract class GenericDemoBean {
 	protected List<Country> countries = null;
 
 	protected List<LocalDate> dateRangeFilter; // holds 0..2 dates from the date picker
+	protected List<LocalDate> dateTimeRangeFilter; // holds 0..2 dates from the datetime picker
 	protected Integer rankFrom;
 	protected Integer rankTo;
 
 	/**
-	 * Template method that defines the initialization flow.
-	 * Subclasses cannot override this method due to final modifier.
-	 * To customize initialization, override the loadItems() hook method instead.
+	 * Template method that defines the initialization flow. Subclasses cannot
+	 * override this method due to final modifier. To customize initialization,
+	 * override the loadItems() hook method instead.
 	 */
 	public final void init() {
 		loadItems();
@@ -46,18 +53,18 @@ public abstract class GenericDemoBean {
 	}
 
 	/**
-	 * Hook method for subclasses to load their specific data.
-	 * By default, loads all customers from the service.
-	 * Override this method to customize data loading behavior.
+	 * Hook method for subclasses to load their specific data. By default, loads all
+	 * customers from the service. Override this method to customize data loading
+	 * behavior.
 	 */
 	protected void loadItems() {
 		items = customerService.findAll();
 	}
 
 	/**
-	 * Handles row selection events from the data table.
-	 * Displays a FacesMessage with the names of selected customers.
-	 * Supports both single and multiple selection modes.
+	 * Handles row selection events from the data table. Displays a FacesMessage
+	 * with the names of selected customers. Supports both single and multiple
+	 * selection modes.
 	 * 
 	 * @param event The SelectEvent containing the selection information
 	 */
@@ -66,10 +73,10 @@ public abstract class GenericDemoBean {
 		if (!(source instanceof DataTable)) {
 			return;
 		}
-		
+
 		Object selection = ((DataTable) source).getSelection();
 		String selectedNames = getSelectedCustomerNames(selection);
-		
+
 		if (!selectedNames.isEmpty()) {
 			FacesMessage msg = new FacesMessage("Row Selection", "Selected: " + selectedNames);
 			FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -77,8 +84,8 @@ public abstract class GenericDemoBean {
 	}
 
 	/**
-	 * Extracts customer names from the selection object.
-	 * Handles both single Customer objects and Lists of Customers.
+	 * Extracts customer names from the selection object. Handles both single
+	 * Customer objects and Lists of Customers.
 	 * 
 	 * @param selection The selection object from the data table
 	 * @return A comma-separated string of customer names
@@ -87,26 +94,30 @@ public abstract class GenericDemoBean {
 		if (selection == null) {
 			return "";
 		}
-		
+
 		if (selection instanceof List) {
 			List<?> list = (List<?>) selection;
-			return list.stream()
-					.filter(obj -> obj instanceof Customer)
-					.map(obj -> ((Customer) obj).getName())
+			return list.stream().filter(obj -> obj instanceof Customer).map(obj -> ((Customer) obj).getName())
 					.collect(Collectors.joining(", "));
 		} else if (selection instanceof Customer) {
 			return ((Customer) selection).getName();
 		}
-		
+
 		return "";
 	}
 
 	// Custom date filter supporting selectionMode="range" from DatePicker
 	public boolean filterDate(Object value, Object filter, Locale locale) {
-		if (!(value instanceof LocalDate)) {
+		LocalDate date = null;
+
+		// Convert value to LocalDate
+		if (value instanceof LocalDate) {
+			date = (LocalDate) value;
+		} else if (value instanceof LocalDateTime) {
+			date = ((LocalDateTime) value).toLocalDate();
+		} else {
 			return false;
 		}
-		LocalDate date = (LocalDate) value;
 
 		if (filter == null) {
 			return true;
@@ -341,12 +352,38 @@ public abstract class GenericDemoBean {
 		return countryName.equals(filter.toString());
 	}
 
+	public String formatDateTime(LocalDateTime dt) {
+		if (dt == null) {
+			return "";
+		}
+
+		return dt.format(dateTimeFormatter);
+	}
+
+	public String formatDate(LocalDate dt) {
+		if (dt == null) {
+			return "";
+		}
+
+		return dt.format(dateFormatter);
+	}
+
+	// getters/setters
+
 	public List<LocalDate> getDateRangeFilter() {
 		return dateRangeFilter;
 	}
 
 	public void setDateRangeFilter(List<LocalDate> dateRangeFilter) {
 		this.dateRangeFilter = dateRangeFilter;
+	}
+
+	public List<LocalDate> getDateTimeRangeFilter() {
+		return dateTimeRangeFilter;
+	}
+
+	public void setDateTimeRangeFilter(List<LocalDate> dateTimeRangeFilter) {
+		this.dateTimeRangeFilter = dateTimeRangeFilter;
 	}
 
 	public List<CustomerStatus> getSelectedStatuses() {

@@ -2,6 +2,7 @@ package com.axonivy.market.extendedtable.demo.service;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +65,9 @@ public class CustomerService {
 
 		List<Customer> customers = new ArrayList<>();
 		for (int i = 0; i < number; i++) {
-			customers.add(Customer.builder().name(getName()).company(getCompany()).country(getCountry()).date(getDate())
+			customers.add(Customer.builder().name(getName()).company(getCompany()).country(getCountry())
+					.date(getDate())
+					.dateTime(getDateTime())
 					.status(CustomerStatus.random()).rank(getRank()).hasRepresentative(random.nextBoolean()).build());
 		}
 		assignGroupsToCustomers(customers);
@@ -130,9 +133,20 @@ public class CustomerService {
 	}
 
 	private LocalDate getDate() {
+	    LocalDate now = LocalDate.now();
+	    long randomDay = ThreadLocalRandom.current()
+	            .nextLong(now.minusDays(30).toEpochDay(), now.toEpochDay() + 1);
+
+	    return LocalDate.ofEpochDay(randomDay);
+	}
+	
+	private LocalDateTime getDateTime() {
 		LocalDate now = LocalDate.now();
-		long randomDay = ThreadLocalRandom.current().nextLong(now.minusDays(30).toEpochDay(), now.toEpochDay());
-		return LocalDate.ofEpochDay(randomDay);
+		long randomDay = ThreadLocalRandom.current()
+				.nextLong(now.minusDays(30).toEpochDay(), now.toEpochDay() + 1);
+		
+		LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
+		return randomDate.atStartOfDay(); // or add random time if you wish
 	}
 
 	private int getRank() {

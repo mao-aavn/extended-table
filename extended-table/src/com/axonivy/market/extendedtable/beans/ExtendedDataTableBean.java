@@ -89,7 +89,12 @@ public class ExtendedDataTableBean {
 		}
 	}
 
-	public void restoreTableState() {
+	public void restoreTableState() throws JsonProcessingException {
+		if (stateName == null || stateName.isEmpty()) {
+			addErrorMsg(GROWL_MSG_ID, "State name is required!", null);
+			return;
+		}
+		
 		DataTable currentTable = (DataTable) findComponentFromClientId(getTableClientId());
 
 		if (currentTable == null) {

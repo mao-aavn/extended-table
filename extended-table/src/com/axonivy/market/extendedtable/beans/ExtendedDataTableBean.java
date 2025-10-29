@@ -126,6 +126,7 @@ public class ExtendedDataTableBean {
 			// Apply filters and sorting first to get the correct filtered dataset
 			currentTable.filterAndSort();
 			currentTable.resetColumns();
+			// currentState.setSelectedRowKeys(currentState.getSelectedRowKeys());
 			
 			// Restore selection AFTER filterAndSort so we work with filtered items
 			restoreSelection(currentTable, persistedState.getSelectedRowKeys());
@@ -137,8 +138,8 @@ public class ExtendedDataTableBean {
 
 	/**
 	 * Restores the selection by converting row keys back to actual objects.
-	 * PrimeFaces stores row keys in the state, but the selection List needs
-	 * to be populated with the actual objects for checkboxes to be checked.
+	 * PrimeFaces stores row keys in the state, but the selection needs
+	 * to be populated with the actual objects for proper UI representation.
 	 * 
 	 * @param table The DataTable component
 	 * @param selectedRowKeys The set of row keys from the persisted state
@@ -150,34 +151,6 @@ public class ExtendedDataTableBean {
 			Ivy.log().info("No selected row keys to restore");
 			return;
 		}
-		
-		// Get the selection value expression from the composite component attributes
-		// The DataTable gets its selection from cc.attrs.selection in the composite component
-		Object selectionAttr = Attrs.currentContext().get("selection");
-		Ivy.log().info("Selection attribute from composite component: {0}", selectionAttr);
-		
-		if (selectionAttr == null) {
-			Ivy.log().warn("No selection attribute found on composite component");
-			return;
-		}
-		
-		// The selection attribute should already be the actual object/list from the bean
-		// since it's evaluated via #{cc.attrs.selection} in the composite component
-		Ivy.log().info("Selection object type: {0}", selectionAttr.getClass().getName());
-		// The selection attribute should already be the actual object/list from the bean
-		// since it's evaluated via #{cc.attrs.selection} in the composite component
-		Ivy.log().info("Selection object type: {0}", selectionAttr.getClass().getName());
-		
-		// Only handle List selections (for multiple selection mode)
-		if (!(selectionAttr instanceof List)) {
-			Ivy.log().warn("Selection is not a List, cannot restore. Type: {0}", selectionAttr.getClass().getName());
-			return;
-		}
-		
-		@SuppressWarnings("unchecked")
-		List<Object> selectionList = (List<Object>) selectionAttr;
-		Ivy.log().info("Current selection list size before clear: {0}", selectionList.size());
-		selectionList.clear();
 		
 		FacesContext context = FacesContext.getCurrentInstance();
 		
@@ -196,7 +169,6 @@ public class ExtendedDataTableBean {
 			return;
 		}
 		
-		@SuppressWarnings("unchecked")
 		List<?> items = (List<?>) value;
 		Ivy.log().info("Table has {0} items to check", items.size());
 		
@@ -211,84 +183,103 @@ public class ExtendedDataTableBean {
 		String var = table.getVar();
 		Ivy.log().info("Table var name: {0}", var);
 		
-		// Match items by their row keys and add to selection
-		int matchedCount = 0;
+		// Match items by their row keys and collect matched items
+		List<Object> matchedItems = new ArrayList<>();
 		for (Object item : items) {
 			context.getExternalContext().getRequestMap().put(var, item);
 			Object rowKey = rowKeyVE.getValue(context.getELContext());
 			
 			if (rowKey != null && selectedRowKeys.contains(rowKey.toString())) {
-				selectionList.add(item);
-				matchedCount++;
+				matchedItems.add(item);
 				Ivy.log().info("Matched item with rowKey: {0}", rowKey);
 			}
 		}
 		
-		Ivy.log().info("Restored {0} selected items out of {1} row keys", matchedCount, selectedRowKeys.size());
-		Ivy.log().info("Final selection list size: {0}", selectionList.size());
+		Ivy.log().info("Restored {0} selected items out of {1} row keys", matchedItems.size(), selectedRowKeys.size());
 		
-		// Set the selection on the DataTable itself
-		table.setSelection(selectionList);
-		Ivy.log().info("Set selection on DataTable");
-		
-		// For checkbox selection, we need to explicitly update the selected row keys
-		// so PrimeFaces knows which checkboxes to check across pages
-		// Note: We need to get the state and update it there, as getSelectedRowKeys() may return immutable Set
-		DataTableState state = table.getMultiViewState(true); // force create to ensure we have a state
-		if (state != null) {
-			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
-			Ivy.log().info("State.getSelectedRowKeys() returned: {0}", stateSelectedRowKeys);
+		// Get the selection ValueExpression and update the backing bean
+		ValueExpression selectionVE = table.getValueExpression("selection");
+		if (selectionVE != null) {
+			Object currentSelection = selectionVE.getValue(context.getELContext());
 			
-			if (stateSelectedRowKeys != null) {
-				Ivy.log().info("Current state selectedRowKeys before clear: {0}", stateSelectedRowKeys);
-				stateSelectedRowKeys.clear();
-				stateSelectedRowKeys.addAll(selectedRowKeys);
-				Ivy.log().info("Updated state selectedRowKeys, size: {0}, keys: {1}", 
-					stateSelectedRowKeys.size(), stateSelectedRowKeys);
+			if (currentSelection instanceof List) {
+				// Multiple selection mode - update the list
+				@SuppressWarnings("unchecked")
+				List<Object> selectionList = (List<Object>) currentSelection;
+				try {
+					selectionList.clear();
+					selectionList.addAll(matchedItems);
+					Ivy.log().info("Updated selection list in backing bean, size: {0}", selectionList.size());
+				} catch (UnsupportedOperationException e) {
+					// If the list is immutable, set a new list via ValueExpression
+					Ivy.log().warn("Selection list is immutable, setting new list");
+					selectionVE.setValue(context.getELContext(), new ArrayList<>(matchedItems));
+				}
+				
+				// Set the selection on the DataTable
+				table.setSelection(matchedItems);
 			} else {
-				Ivy.log().warn("State selectedRowKeys is null, creating new HashSet");
-				// If null, create a new HashSet and set it
-				Set<String> newKeys = new java.util.HashSet<>(selectedRowKeys);
-				state.setSelectedRowKeys(newKeys);
-				Ivy.log().info("Created new selectedRowKeys set with size: {0}", newKeys.size());
+				// Single selection mode - set the first matched item
+				Object selectedItem = matchedItems.isEmpty() ? null : matchedItems.get(0);
+				selectionVE.setValue(context.getELContext(), selectedItem);
+				table.setSelection(selectedItem);
+				Ivy.log().info("Set single selection in backing bean: {0}", selectedItem);
 			}
 		} else {
-			Ivy.log().warn("DataTableState is null, cannot sync checkbox state");
+			Ivy.log().warn("No selection ValueExpression found on table");
 		}
 		
-		// Force client-side checkbox update by triggering a row select event
-		// This is necessary because modifying selectedRowKeys on the server doesn't automatically update the UI
-		StringBuilder script = new StringBuilder();
-		script.append("setTimeout(function() {");
-		script.append("  var widget = PF('").append(getWidgetVar()).append("');");
-		script.append("  if (widget) {");
-		
-		// Build array of selected row keys for client-side
-		script.append("    widget.selection = [");
-		boolean first = true;
-		for (String key : selectedRowKeys) {
-			if (!first) script.append(",");
-			script.append("'").append(key).append("'");
-			first = false;
+		// Update the state's selectedRowKeys for proper checkbox/row highlighting
+		DataTableState state = table.getMultiViewState(true);
+		if (state != null) {
+			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
+			
+			if (stateSelectedRowKeys != null) {
+				try {
+					stateSelectedRowKeys.clear();
+					stateSelectedRowKeys.addAll(selectedRowKeys);
+					Ivy.log().info("Updated state selectedRowKeys, size: {0}", stateSelectedRowKeys.size());
+				} catch (UnsupportedOperationException e) {
+					// If immutable, create new set
+					Ivy.log().warn("State selectedRowKeys is immutable, creating new set");
+					state.setSelectedRowKeys(new java.util.HashSet<>(selectedRowKeys));
+				}
+			} else {
+				state.setSelectedRowKeys(new java.util.HashSet<>(selectedRowKeys));
+				Ivy.log().info("Created new selectedRowKeys set with size: {0}", selectedRowKeys.size());
+			}
 		}
-		script.append("];");
 		
-		// Update checkboxes for currently visible rows
-		script.append("    widget.tbody.children('tr').each(function() {");
-		script.append("      var $row = $(this);");
-		script.append("      var rowKey = $row.data('rk');");
-		script.append("      var $checkbox = $row.find('td.ui-selection-column .ui-chkbox-box');");
-		script.append("      if (rowKey && widget.selection.indexOf(rowKey) >= 0) {");
-		script.append("        $checkbox.addClass('ui-state-active').children('span').addClass('ui-icon-check');");
-		script.append("        $row.addClass('ui-state-highlight').attr('aria-selected', true);");
-		script.append("      }");
-		script.append("    });");
-		script.append("  }");
-		script.append("}, 100);");
+		// For checkbox selection, we need to sync the client-side widget
+		// Check if this is checkbox selection (no selectionMode attribute means checkbox column)
+		String selectionMode = table.getSelectionMode();
+		if (selectionMode == null || selectionMode.isEmpty()) {
+			// This is checkbox selection - sync client-side widget
+			String widgetVar = getWidgetVar();
+			StringBuilder script = new StringBuilder();
+			script.append("setTimeout(function() {");
+			script.append("  var widget = PF('").append(widgetVar).append("');");
+			script.append("  if (widget && widget.selection) {");
+			script.append("    widget.selection = [");
+			boolean first = true;
+			for (String key : selectedRowKeys) {
+				if (!first) script.append(",");
+				script.append("'").append(key).append("'");
+				first = false;
+			}
+			script.append("    ];");
+			script.append("    if (widget.checkAllToggler) {");
+			script.append("      var allChecked = widget.selection.length > 0 && widget.selection.length === widget.tbody.children('tr').length;");
+			script.append("      widget.checkAllToggler.prop('checked', allChecked);");
+			script.append("    }");
+			script.append("  }");
+			script.append("}, 50);");
+			PrimeFaces.current().executeScript(script.toString());
+			Ivy.log().info("Executed client-side widget sync for checkbox selection");
+		}
 		
-		String jsScript = script.toString();
-		Ivy.log().info("Executing client-side script to update checkboxes");
-		PrimeFaces.current().executeScript(jsScript);
+		// Update the table component to reflect changes
+		PrimeFaces.current().ajax().update(table.getClientId());
 		
 		// Clean up
 		context.getExternalContext().getRequestMap().remove(var);
@@ -321,24 +312,42 @@ public class ExtendedDataTableBean {
 
 		currentTable.clearInitialState();
 		currentTable.resetColumns();
+		
+		Ivy.log().warn("RESET COMPLETED");
 	}
 	
 	/**
-	 * Clears the selection from both the DataTable and the backing bean's selection list
+	 * Clears the selection from both the DataTable and the backing bean's selection
 	 * 
 	 * @param table The DataTable component
 	 */
 	private void clearSelection(DataTable table) {
 		Ivy.log().info("clearSelection called");
 		
-		// Clear the backing bean's selection list FIRST (from composite component attribute)
-		// This is the most important step as it's bound to the UI
-		Object selectionAttr = Attrs.currentContext().get("selection");
-		if (selectionAttr instanceof List) {
-			@SuppressWarnings("unchecked")
-			List<Object> selectionList = (List<Object>) selectionAttr;
-			selectionList.clear();
-			Ivy.log().info("Cleared selection list from backing bean, size: {0}", selectionList.size());
+		// Use ValueExpression to properly clear the backing bean's selection
+		// This works for both single selection and multiple selection modes
+		ValueExpression ve = table.getValueExpression("selection");
+		if (ve != null) {
+			FacesContext context = FacesContext.getCurrentInstance();
+			Object selectionValue = ve.getValue(context.getELContext());
+			
+			if (selectionValue instanceof List) {
+				// Multiple selection mode - try to clear the list
+				try {
+					@SuppressWarnings("unchecked")
+					List<Object> selectionList = (List<Object>) selectionValue;
+					selectionList.clear();
+					Ivy.log().info("Cleared selection list from backing bean, size: {0}", selectionList.size());
+				} catch (UnsupportedOperationException e) {
+					// If the list is immutable, set the value expression to null or empty list
+					Ivy.log().warn("Selection list is immutable, setting to null instead");
+					ve.setValue(context.getELContext(), null);
+				}
+			} else if (selectionValue != null) {
+				// Single selection mode - set to null
+				ve.setValue(context.getELContext(), null);
+				Ivy.log().info("Cleared single selection from backing bean");
+			}
 		}
 		
 		// Clear the DataTable's selection property
@@ -350,8 +359,12 @@ public class ExtendedDataTableBean {
 		if (state != null) {
 			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
 			if (stateSelectedRowKeys != null) {
-				stateSelectedRowKeys.clear();
-				Ivy.log().info("Cleared state selectedRowKeys");
+				try {
+					stateSelectedRowKeys.clear();
+					Ivy.log().info("Cleared state selectedRowKeys");
+				} catch (UnsupportedOperationException e) {
+					Ivy.log().warn("State selectedRowKeys is immutable, cannot clear");
+				}
 			}
 		}
 		

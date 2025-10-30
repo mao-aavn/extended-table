@@ -9,10 +9,7 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -250,32 +247,12 @@ public class ExtendedDataTableBean {
 			}
 		}
 		
-		// For checkbox selection, we need to sync the client-side widget
+		// For checkbox selection, sync the client-side widget using PrimeFaces API
 		// Check if this is checkbox selection (no selectionMode attribute means checkbox column)
 		String selectionMode = table.getSelectionMode();
 		if (selectionMode == null || selectionMode.isEmpty()) {
-			// This is checkbox selection - sync client-side widget
-			String widgetVar = getWidgetVar();
-			StringBuilder script = new StringBuilder();
-			script.append("setTimeout(function() {");
-			script.append("  var widget = PF('").append(widgetVar).append("');");
-			script.append("  if (widget && widget.selection) {");
-			script.append("    widget.selection = [");
-			boolean first = true;
-			for (String key : selectedRowKeys) {
-				if (!first) script.append(",");
-				script.append("'").append(key).append("'");
-				first = false;
-			}
-			script.append("    ];");
-			script.append("    if (widget.checkAllToggler) {");
-			script.append("      var allChecked = widget.selection.length > 0 && widget.selection.length === widget.tbody.children('tr').length;");
-			script.append("      widget.checkAllToggler.prop('checked', allChecked);");
-			script.append("    }");
-			script.append("  }");
-			script.append("}, 50);");
-			PrimeFaces.current().executeScript(script.toString());
-			Ivy.log().info("Executed client-side widget sync for checkbox selection");
+			// This is checkbox selection - use the component's JavaScript function
+			restoreSelectionOnClient(getWidgetVar(), selectedRowKeys);
 		}
 		
 		// Update the table component to reflect changes
@@ -283,6 +260,37 @@ public class ExtendedDataTableBean {
 		
 		// Clean up
 		context.getExternalContext().getRequestMap().remove(var);
+	}
+	
+	/**
+	 * Restores selection on the client-side by calling the JavaScript function.
+	 * This is used for checkbox selection mode where client-side widget sync is needed.
+	 * 
+	 * @param widgetVar The widget variable name
+	 * @param rowKeys The set of row keys to select
+	 */
+	private void restoreSelectionOnClient(String widgetVar, Set<String> rowKeys) {
+		if (rowKeys == null || rowKeys.isEmpty()) {
+			return;
+		}
+		
+		// Build the JavaScript array of row keys
+		StringBuilder keysArray = new StringBuilder("[");
+		boolean first = true;
+		for (String key : rowKeys) {
+			if (!first) {
+				keysArray.append(",");
+			}
+			keysArray.append("'").append(key.replace("'", "\\'")).append("'");
+			first = false;
+		}
+		keysArray.append("]");
+		
+		// Call the JavaScript function defined in the component
+		String script = String.format("restoreTableSelection('%s', %s);", widgetVar, keysArray.toString());
+		PrimeFaces.current().executeScript(script);
+		
+		Ivy.log().info("Executed client-side selection restore for widget: {0} with {1} keys", widgetVar, rowKeys.size());
 	}
 	
 	/**

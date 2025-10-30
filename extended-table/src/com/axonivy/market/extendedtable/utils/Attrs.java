@@ -4,18 +4,13 @@ import javax.faces.context.FacesContext;
 
 /**
  * <p>
- * Small utility to set/get {@code cc.attrs} in HtmlDialog logic or {@code @ManagedBean}.
+ * Small utility to get {@code cc.attrs} values in HtmlDialog logic or {@code @ManagedBean}. E.g if you have <b>cc.attrs.name</b> property:
  * </p>
- * 
- * <p>
- * Typical use of {@code Attrs} is in HtmlDialog's process (methods & events)
- * </p>
- * 
  * <pre>
  * <code>
  *  Attrs attrs = Attrs.currentContext();
  *  String name = attrs.get("name");
- *  SomeClass someClass = attrs.get("argumentSomeClass");
+ *  SomeClass someClass = attrs.get("name");
  * </code>
  * </pre>
  */

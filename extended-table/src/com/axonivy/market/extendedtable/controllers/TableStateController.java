@@ -6,7 +6,7 @@ import java.util.List;
  * Controller to handle the data table state operations and so on.
  *
  */
-public interface ExtendedDataTableController {
+public interface TableStateController {
 
 	/**
 	 * Save the state JSON string with key

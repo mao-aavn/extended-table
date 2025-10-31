@@ -10,11 +10,11 @@ import ch.ivyteam.ivy.security.IUser;
  * current Ivy user for handling the table state operations.
  *
  */
-public class IvySessionExtendedDataTableController implements ExtendedDataTableController {
+public class IvyUserStateController implements TableStateController {
 	
 	private final IUser currentUser;
 	
-	public IvySessionExtendedDataTableController() {
+	public IvyUserStateController() {
 		currentUser = Ivy.session().getSessionUser();
 	}
 

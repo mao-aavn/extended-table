@@ -5,6 +5,10 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.clearSelection;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDatePickerPattern;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDateTimeConverterPattern;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.restoreSelection;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -15,23 +19,24 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import javax.faces.convert.DateTimeConverter;
 
 import org.primefaces.PrimeFaces;
+import org.primefaces.component.column.Column;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datatable.DataTableState;
 import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 
-import com.axonivy.market.extendedtable.controllers.ExtendedDataTableController;
-import com.axonivy.market.extendedtable.controllers.IvySessionExtendedDataTableController;
+import com.axonivy.market.extendedtable.controllers.TableStateController;
+import com.axonivy.market.extendedtable.controllers.IvyUserStateController;
 import com.axonivy.market.extendedtable.utils.Attrs;
+import com.axonivy.market.extendedtable.utils.DataTableUtils;
+import com.axonivy.market.extendedtable.utils.JSFUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -49,7 +54,7 @@ import ch.ivyteam.ivy.environment.Ivy;
 public class ExtendedDataTableBean {
 
 	private static final String TABLE_ID = "tableId";
-	private static final String DATA_TABLE_STATE_REPOSITORY = "dataTableStateRepository";
+	private static final String CC_ATTRS_TABLE_STATE_CONTROLLER = "tableStateController";
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final String STATE_KEY_PREFIX = "DATATABLE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
@@ -127,180 +132,11 @@ public class ExtendedDataTableBean {
 			// currentState.setSelectedRowKeys(currentState.getSelectedRowKeys());
 
 			// Restore selection AFTER filterAndSort so we work with filtered items
-			restoreSelection(currentTable, persistedState.getSelectedRowKeys());
+			restoreSelection(currentTable, persistedState.getSelectedRowKeys(), Attrs.get("widgetVar"));
 		} else {
 			Ivy.log().warn("No saved table state to restore for the table %s and state %s", getTableClientId(),
 					stateName);
 		}
-	}
-
-	/**
-	 * Restores the selection by converting row keys back to actual objects.
-	 * PrimeFaces stores row keys in the state, but the selection needs to be
-	 * populated with the actual objects for proper UI representation.
-	 * 
-	 * @param table           The DataTable component
-	 * @param selectedRowKeys The set of row keys from the persisted state
-	 */
-	private void restoreSelection(DataTable table, Set<String> selectedRowKeys) {
-		Ivy.log().info("restoreSelection called with selectedRowKeys: {0}", selectedRowKeys);
-
-		if (selectedRowKeys == null || selectedRowKeys.isEmpty()) {
-			Ivy.log().info("No selected row keys to restore");
-			return;
-		}
-
-		FacesContext context = FacesContext.getCurrentInstance();
-
-		// Get the value (data source) from the table - use filtered value if available
-		Object value = table.getFilteredValue();
-		if (value == null || !(value instanceof List)) {
-			// Fallback to full value if no filtered value
-			value = table.getValue();
-		}
-
-		Ivy.log().info("Using filtered value: {0}", table.getFilteredValue() != null);
-
-		if (!(value instanceof List)) {
-			Ivy.log().warn("Table value is not a List. Type: {0}", value != null ? value.getClass().getName() : "null");
-			return;
-		}
-
-		List<?> items = (List<?>) value;
-		Ivy.log().info("Table has {0} items to check", items.size());
-
-		// Get the rowKey value expression to extract keys from items
-		ValueExpression rowKeyVE = table.getValueExpression("rowKey");
-		if (rowKeyVE == null) {
-			Ivy.log().warn("No rowKey value expression found on table");
-			return;
-		}
-		Ivy.log().info("RowKey value expression: {0}", rowKeyVE.getExpressionString());
-
-		String var = table.getVar();
-		Ivy.log().info("Table var name: {0}", var);
-
-		// Match items by their row keys and collect matched items
-		List<Object> matchedItems = new ArrayList<>();
-		for (Object item : items) {
-			context.getExternalContext().getRequestMap().put(var, item);
-			Object rowKey = rowKeyVE.getValue(context.getELContext());
-
-			if (rowKey != null && selectedRowKeys.contains(rowKey.toString())) {
-				matchedItems.add(item);
-				Ivy.log().info("Matched item with rowKey: {0}", rowKey);
-			}
-		}
-
-		Ivy.log().info("Restored {0} selected items out of {1} row keys", matchedItems.size(), selectedRowKeys.size());
-
-		// Get the selection ValueExpression and update the backing bean
-		ValueExpression selectionVE = table.getValueExpression("selection");
-		if (selectionVE != null) {
-			Object currentSelection = selectionVE.getValue(context.getELContext());
-
-			if (currentSelection instanceof List) {
-				// Multiple selection mode - update the list
-				@SuppressWarnings("unchecked")
-				List<Object> selectionList = (List<Object>) currentSelection;
-				try {
-					selectionList.clear();
-					selectionList.addAll(matchedItems);
-					Ivy.log().info("Updated selection list in backing bean, size: {0}", selectionList.size());
-				} catch (UnsupportedOperationException e) {
-					// If the list is immutable, set a new list via ValueExpression
-					Ivy.log().warn("Selection list is immutable, setting new list");
-					selectionVE.setValue(context.getELContext(), new ArrayList<>(matchedItems));
-				}
-
-				// Set the selection on the DataTable
-				table.setSelection(matchedItems);
-			} else {
-				// Single selection mode - set the first matched item
-				Object selectedItem = matchedItems.isEmpty() ? null : matchedItems.get(0);
-				selectionVE.setValue(context.getELContext(), selectedItem);
-				table.setSelection(selectedItem);
-				Ivy.log().info("Set single selection in backing bean: {0}", selectedItem);
-			}
-		} else {
-			Ivy.log().warn("No selection ValueExpression found on table");
-		}
-
-		// Update the state's selectedRowKeys for proper checkbox/row highlighting
-		DataTableState state = table.getMultiViewState(true);
-		if (state != null) {
-			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
-
-			if (stateSelectedRowKeys != null) {
-				try {
-					stateSelectedRowKeys.clear();
-					stateSelectedRowKeys.addAll(selectedRowKeys);
-					Ivy.log().info("Updated state selectedRowKeys, size: {0}", stateSelectedRowKeys.size());
-				} catch (UnsupportedOperationException e) {
-					// If immutable, create new set
-					Ivy.log().warn("State selectedRowKeys is immutable, creating new set");
-					state.setSelectedRowKeys(new java.util.HashSet<>(selectedRowKeys));
-				}
-			} else {
-				state.setSelectedRowKeys(new java.util.HashSet<>(selectedRowKeys));
-				Ivy.log().info("Created new selectedRowKeys set with size: {0}", selectedRowKeys.size());
-			}
-		}
-
-		// For checkbox selection, sync the client-side widget using PrimeFaces API
-		// Check if this is checkbox selection (no selectionMode attribute means
-		// checkbox column)
-		String selectionMode = table.getSelectionMode();
-		if (selectionMode == null || selectionMode.isEmpty()) {
-			// This is checkbox selection - use the component's JavaScript function
-			restoreSelectionOnClient(getWidgetVar(), selectedRowKeys);
-		}
-
-		// Update the table component to reflect changes
-		PrimeFaces.current().ajax().update(table.getClientId());
-
-		// Clean up
-		context.getExternalContext().getRequestMap().remove(var);
-	}
-
-	/**
-	 * Restores selection on the client-side by calling the JavaScript function.
-	 * This is used for checkbox selection mode where client-side widget sync is
-	 * needed.
-	 * 
-	 * @param widgetVar The widget variable name
-	 * @param rowKeys   The set of row keys to select
-	 */
-	private void restoreSelectionOnClient(String widgetVar, Set<String> rowKeys) {
-		if (rowKeys == null || rowKeys.isEmpty()) {
-			return;
-		}
-
-		// Build the JavaScript array of row keys
-		StringBuilder keysArray = new StringBuilder("[");
-		boolean first = true;
-		for (String key : rowKeys) {
-			if (!first) {
-				keysArray.append(",");
-			}
-			keysArray.append("'").append(key.replace("'", "\\'")).append("'");
-			first = false;
-		}
-		keysArray.append("]");
-
-		// Call the JavaScript function defined in the component
-		String script = String.format("restoreTableSelection('%s', %s);", widgetVar, keysArray.toString());
-		PrimeFaces.current().executeScript(script);
-
-		Ivy.log().info("Executed client-side selection restore for widget: {0} with {1} keys", widgetVar,
-				rowKeys.size());
-	}
-
-	/**
-	 * Gets the widgetVar for the current table from component attributes
-	 */
-	private String getWidgetVar() {
-		return Attrs.get("widgetVar");
 	}
 
 	public void resetTable() {
@@ -326,62 +162,6 @@ public class ExtendedDataTableBean {
 		Ivy.log().warn("RESET COMPLETED");
 	}
 
-	/**
-	 * Clears the selection from both the DataTable and the backing bean's selection
-	 * 
-	 * @param table The DataTable component
-	 */
-	private void clearSelection(DataTable table) {
-		Ivy.log().info("clearSelection called");
-
-		// Use ValueExpression to properly clear the backing bean's selection
-		// This works for both single selection and multiple selection modes
-		ValueExpression ve = table.getValueExpression("selection");
-		if (ve != null) {
-			FacesContext context = FacesContext.getCurrentInstance();
-			Object selectionValue = ve.getValue(context.getELContext());
-
-			if (selectionValue instanceof List) {
-				// Multiple selection mode - try to clear the list
-				try {
-					@SuppressWarnings("unchecked")
-					List<Object> selectionList = (List<Object>) selectionValue;
-					selectionList.clear();
-					Ivy.log().info("Cleared selection list from backing bean, size: {0}", selectionList.size());
-				} catch (UnsupportedOperationException e) {
-					// If the list is immutable, set the value expression to null or empty list
-					Ivy.log().warn("Selection list is immutable, setting to null instead");
-					ve.setValue(context.getELContext(), null);
-				}
-			} else if (selectionValue != null) {
-				// Single selection mode - set to null
-				ve.setValue(context.getELContext(), null);
-				Ivy.log().info("Cleared single selection from backing bean");
-			}
-		}
-
-		// Clear the DataTable's selection property
-		table.setSelection(null);
-		Ivy.log().info("Set DataTable selection to null");
-
-		// Clear the state's selectedRowKeys if state exists
-		DataTableState state = table.getMultiViewState(false);
-		if (state != null) {
-			Set<String> stateSelectedRowKeys = state.getSelectedRowKeys();
-			if (stateSelectedRowKeys != null) {
-				try {
-					stateSelectedRowKeys.clear();
-					Ivy.log().info("Cleared state selectedRowKeys");
-				} catch (UnsupportedOperationException e) {
-					Ivy.log().warn("State selectedRowKeys is immutable, cannot clear");
-				}
-			}
-		}
-
-		// Update the table to reflect changes
-		PrimeFaces.current().ajax().update(table.getClientId());
-	}
-
 	public void deleteTableState() {
 		String stateKey = getStateKey();
 		if (!getController().delete(stateKey)) {
@@ -400,10 +180,8 @@ public class ExtendedDataTableBean {
 	public List<String> completeStateName(String query) {
 		if (stateNames == null || stateNames.isEmpty()) {
 			stateNames = fetchAllDataTableStateNames();
-			Ivy.log().info("stateNames : " + stateNames);
 		}
 		if (stateNames == null || stateNames.isEmpty()) {
-			Ivy.log().info("stateNames are tempty: ");
 			return Collections.emptyList();
 		}
 
@@ -421,7 +199,7 @@ public class ExtendedDataTableBean {
 		ObjectMapper mapper = createObjectMapper();
 
 		// Extract and store date format patterns from columns before serialization
-		DataTable table = (DataTable) findComponentFromClientId(getTableClientId());
+		DataTable table = (DataTable) JSFUtils.findComponentFromClientId(getTableClientId());
 		Map<String, String> columnDateFormats = extractDateFormatsFromColumns(table);
 
 		try {
@@ -440,9 +218,6 @@ public class ExtendedDataTableBean {
 	private DataTableState fetchDataTableState() {
 		String stateKey = getStateKey();
 		String stateJson = getController().load(stateKey);
-
-		Ivy.log().info(stateKey);
-		Ivy.log().info(stateJson);
 
 		ObjectMapper mapper = createObjectMapper();
 
@@ -525,8 +300,8 @@ public class ExtendedDataTableBean {
 		// Iterate through columns to find DateTimeConverter components or DatePicker
 		// patterns
 		for (UIComponent child : table.getChildren()) {
-			if (child instanceof org.primefaces.component.column.Column) {
-				org.primefaces.component.column.Column column = (org.primefaces.component.column.Column) child;
+			if (child instanceof Column) {
+				Column column = (Column) child;
 				String field = column.getField();
 
 				if (field != null && !field.isEmpty()) {
@@ -540,86 +315,12 @@ public class ExtendedDataTableBean {
 
 					if (pattern != null) {
 						dateFormats.put(field, pattern);
-						Ivy.log().info("Found date format for column {0}: {1}", field, pattern);
 					}
 				}
 			}
 		}
 
 		return dateFormats;
-	}
-
-	/**
-	 * Searches for a DatePicker component in the filter facet and extracts its
-	 * pattern.
-	 * 
-	 * @param column The column to search
-	 * @return The date pattern if found, null otherwise
-	 */
-	private String findDatePickerPattern(org.primefaces.component.column.Column column) {
-		UIComponent filterFacet = column.getFacet("filter");
-		if (filterFacet != null) {
-			return findDatePickerPatternRecursive(filterFacet);
-		}
-		return null;
-	}
-
-	/**
-	 * Recursively searches for a DatePicker component and extracts its pattern.
-	 * 
-	 * @param component The component to search
-	 * @return The date pattern if found, null otherwise
-	 */
-	private String findDatePickerPatternRecursive(UIComponent component) {
-		// Check if this is a DatePicker component
-		if (component instanceof org.primefaces.component.datepicker.DatePicker) {
-			org.primefaces.component.datepicker.DatePicker datePicker = (org.primefaces.component.datepicker.DatePicker) component;
-			String pattern = datePicker.getPattern();
-			if (pattern != null && !pattern.isEmpty()) {
-				return pattern;
-			}
-		}
-
-		// Recursively search children
-		for (UIComponent child : component.getChildren()) {
-			String pattern = findDatePickerPatternRecursive(child);
-			if (pattern != null) {
-				return pattern;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Recursively searches for a DateTimeConverter in the component tree and
-	 * extracts its pattern.
-	 * 
-	 * @param component The component to search
-	 * @return The date pattern if found, null otherwise
-	 */
-	private String findDateTimeConverterPattern(UIComponent component) {
-		// Check direct converter
-		if (component instanceof javax.faces.component.ValueHolder) {
-			javax.faces.convert.Converter converter = ((javax.faces.component.ValueHolder) component).getConverter();
-			if (converter instanceof DateTimeConverter) {
-				DateTimeConverter dtConverter = (DateTimeConverter) converter;
-				String pattern = dtConverter.getPattern();
-				if (pattern != null && !pattern.isEmpty()) {
-					return pattern;
-				}
-			}
-		}
-
-		// Recursively search children
-		for (UIComponent child : component.getChildren()) {
-			String pattern = findDateTimeConverterPattern(child);
-			if (pattern != null) {
-				return pattern;
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -713,14 +414,14 @@ public class ExtendedDataTableBean {
 	 * state data to the Ivy User's property map.
 	 * 
 	 */
-	private ExtendedDataTableController getController() {
-		ExtendedDataTableController repo = (ExtendedDataTableController) Attrs.get(DATA_TABLE_STATE_REPOSITORY);
-		if (repo != null && repo instanceof ExtendedDataTableController) {
-			return (ExtendedDataTableController) repo;
+	private TableStateController getController() {
+		TableStateController repo = (TableStateController) Attrs.get(CC_ATTRS_TABLE_STATE_CONTROLLER);
+		if (repo != null && repo instanceof TableStateController) {
+			return (TableStateController) repo;
 		}
 
 		// Fallback to default in case no overriding controller is set
-		return new IvySessionExtendedDataTableController();
+		return new IvyUserStateController();
 	}
 
 	private String getTableClientId() {

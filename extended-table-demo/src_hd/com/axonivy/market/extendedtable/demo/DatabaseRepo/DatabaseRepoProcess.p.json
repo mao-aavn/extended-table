@@ -47,10 +47,10 @@
       "config" : {
         "output" : {
           "code" : [
-            "import com.axonivy.market.extendedtable.demo.repo.DatabaseExtendedDataTableController;",
+            "import com.axonivy.market.extendedtable.demo.repo.DatabaseStateController;",
             "",
             "in.bean.init();",
-            "in.controller = new DatabaseExtendedDataTableController();"
+            "in.controller = new DatabaseStateController();"
           ]
         }
       },

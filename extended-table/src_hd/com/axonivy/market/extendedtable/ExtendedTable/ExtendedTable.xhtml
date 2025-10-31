@@ -10,9 +10,9 @@
 <cc:interface componentType="IvyComponent">
 
 	<!-- Data table controller -->
-	<cc:attribute name="extendedDataTableController" required="false"
-		type="com.axonivy.market.extendedtable.controllers.ExtendedDataTableController"
-		shortDescription="Controller to persist/fetch the table state ect, default will be IvySessionExtendedDataTableController" />
+	<cc:attribute name="tableStateController" required="false"
+		type="com.axonivy.market.extendedtable.controllers.TableStateController"
+		shortDescription="Controller to persist/fetch the table state ect, default will be IvyUserStateController" />
 
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
@@ -37,7 +37,6 @@
 	<!-- Datatable mapping -->
 	<cc:attribute name="tableId"></cc:attribute>
 	<cc:attribute name="widgetVar" required="true"></cc:attribute>
-	<cc:attribute name="value" required="true" />
 	<cc:attribute name="paginator" default="false"
 		shortDescription="Enables pagination. Default is false." />
 	<cc:attribute name="rows" default="0"
@@ -50,7 +49,7 @@
 	<cc:attribute name="binding" />
 	<cc:attribute name="cellEditMode" default="eager" />
 	<cc:attribute name="cellSeparator" />
-	<!-- <cc:attribute name="clientCache" default="false" /> -->
+	<cc:attribute name="clientCache" default="false" />
 	<cc:attribute name="currentPageReportTemplate"
 		default="{startRecord}-{endRecord} of {totalRecords} records" />
 	<cc:attribute name="dataLocale" />
@@ -59,7 +58,7 @@
 	<cc:attribute name="disabledSelection" default="false" />
 	<cc:attribute name="disabledTextSelection" default="true" />
 	<cc:attribute name="draggableColumns" default="false" />
-	<!-- <cc:attribute name="draggableRows" default="false" /> -->
+	<cc:attribute name="draggableRows" default="false" />
 	<!-- <cc:attribute name="draggableRowsFunction" /> -->
 	<cc:attribute name="editInitEvent" />
 	<cc:attribute name="editMode" default="row" />
@@ -205,7 +204,8 @@
 				paginator="#{cc.attrs.paginator}" rows="#{cc.attrs.rows}"
 				sortMode="#{cc.attrs.sortMode}"
 				emptyMessage="#{cc.attrs.emptyMessage}"
-				allowUnsorting="#{allowUnsorting}" ariaRowLabel="#{ariaRowLabel}"
+				allowUnsorting="#{cc.attrs.allowUnsorting}" 
+				ariaRowLabel="#{cc.attrs.ariaRowLabel}"
 				binding="#{cc.attrs.binding}"
 				cellEditMode="#{cc.attrs.cellEditMode}"
 				cellSeparator="#{cc.attrs.cellSeparator}"
@@ -291,7 +291,8 @@
 				rows="#{cc.attrs.rows}" rowKey="#{cc.attrs.rowKey}"
 				sortMode="#{cc.attrs.sortMode}"
 				emptyMessage="#{cc.attrs.emptyMessage}"
-				allowUnsorting="#{allowUnsorting}" ariaRowLabel="#{ariaRowLabel}"
+				allowUnsorting="#{cc.attrs.allowUnsorting}" 
+				ariaRowLabel="#{cc.attrs.ariaRowLabel}"
 				binding="#{cc.attrs.binding}"
 				cellEditMode="#{cc.attrs.cellEditMode}"
 				cellSeparator="#{cc.attrs.cellSeparator}"

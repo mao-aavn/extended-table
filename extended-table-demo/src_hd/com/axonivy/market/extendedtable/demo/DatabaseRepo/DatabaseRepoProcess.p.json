@@ -43,7 +43,7 @@
     }, {
       "id" : "f6",
       "type" : "Script",
-      "name" : "Init Bean",
+      "name" : "Init Bean + Controller",
       "config" : {
         "output" : {
           "code" : [

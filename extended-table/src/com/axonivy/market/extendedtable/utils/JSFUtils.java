@@ -39,11 +39,9 @@ public final class JSFUtils {
 
 	/**
 	 * @param localId: short id, not clientId (full path)
-	 * @return
 	 */
 	public static UIComponent findComponent(String localId) {
-		FacesContext context = FacesContext.getCurrentInstance();
-		UIComponent root = context.getViewRoot();
+		UIComponent root = currentContext().getViewRoot();
 
 		return ComponentTraversalUtils.firstWithId(localId, root);
 	}

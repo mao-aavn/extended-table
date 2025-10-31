@@ -20,15 +20,23 @@
 	<cc:attribute name="saveStateLabel" default="Save Table State"></cc:attribute>
 	<cc:attribute name="restoreStateLabel" default="Restore Table State"></cc:attribute>
 	<cc:attribute name="deleteStateLabel" default="Delete Table State"></cc:attribute>
+	
+	<!-- UI Messages -->
 	<cc:attribute name="stateNameRequiredMsg"
-		default="State name is required"></cc:attribute>
+		default="State name is required!"></cc:attribute>
+	<cc:attribute name="saveSuccessMsg"
+		default="Saved the table state successfully"></cc:attribute>
+	<cc:attribute name="deleteSuccessMsg"
+		default="Deleted the table state successfully"></cc:attribute>
+	<cc:attribute name="deleteErrorMsg"
+		default="No existing state found"></cc:attribute>
 
 	<cc:attribute name="showResetButton" default="false"></cc:attribute>
 	<cc:attribute name="showDeleteButton" default="false"></cc:attribute>
 
 	<!-- Datatable mapping -->
 	<cc:attribute name="tableId"></cc:attribute>
-	<cc:attribute name="widgetVar"></cc:attribute>
+	<cc:attribute name="widgetVar" required="true"></cc:attribute>
 	<cc:attribute name="value" required="true" />
 	<cc:attribute name="paginator" default="false"
 		shortDescription="Enables pagination. Default is false." />

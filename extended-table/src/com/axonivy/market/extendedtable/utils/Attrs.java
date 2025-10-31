@@ -4,15 +4,7 @@ import javax.faces.context.FacesContext;
 
 /**
  * <p>
- * Small utility to get {@code cc.attrs} values in HtmlDialog logic or {@code @ManagedBean}. E.g if you have <b>cc.attrs.name</b> property:
- * </p>
- * <pre>
- * <code>
- *  Attrs attrs = Attrs.currentContext();
- *  String name = attrs.get("name");
- *  SomeClass someClass = attrs.get("name");
- * </code>
- * </pre>
+ * Small utility to get {@code cc.attrs} values in HtmlDialog logic or {@code @ManagedBean}.
  */
 public class Attrs {
 
@@ -26,12 +18,24 @@ public class Attrs {
     return new Attrs(FacesContext.getCurrentInstance());
   }
 
-  public <T> T get(String attribute) {
+  /**
+   * <p>
+   * E.g if you have <b>cc.attrs.name</b> property:
+   * </p>
+   * <pre>
+   * <code>
+   *  Attrs attrs = Attrs.currentContext();
+   *  String name = attrs.get("name");
+   *  SomeClass someClass = attrs.get("name");
+   * </code>
+   * </pre>
+   */
+  public static <T> T get(String attribute) {
     String attributeExpression = String.format("#{cc.attrs.%s}", attribute);
     return getAttribute(attributeExpression);
   }
 
-  private <T> T getAttribute(String attributeExpression) {
+  private static <T> T getAttribute(String attributeExpression) {
     FacesContext fc = FacesContext.getCurrentInstance();
     @SuppressWarnings("unchecked")
     T attributeValue = (T) fc.getApplication().evaluateExpressionGet(fc, attributeExpression, Object.class);

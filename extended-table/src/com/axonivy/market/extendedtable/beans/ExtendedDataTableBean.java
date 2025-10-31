@@ -7,12 +7,11 @@ import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromC
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +37,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import ch.ivyteam.ivy.environment.Ivy;
@@ -496,14 +496,8 @@ public class ExtendedDataTableBean {
 		
 		// Configure behavior
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-		
-		// Apply custom date format if provided (global fallback)
-		String dateFormatPattern = (String) Attrs.currentContext().get("dateFormat");
-		if (dateFormatPattern != null && !dateFormatPattern.trim().isEmpty()) {
-			java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat(dateFormatPattern);
-			mapper.setDateFormat(dateFormat);
-		}
+		// mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		
 		return mapper;
 	}
@@ -627,89 +621,70 @@ public class ExtendedDataTableBean {
 	 * @param state The DataTableState containing filter metadata
 	 * @param dateFormats Map of column field names to date format patterns
 	 */
-	private void convertDateStringsUsingFormats(DataTableState state, Map<String, String> dateFormats) {
-		if (state == null || state.getFilterBy() == null || dateFormats == null || dateFormats.isEmpty()) {
-			return;
-		}
-		
-		Map<String, FilterMeta> filterBy = state.getFilterBy();
-		for (Map.Entry<String, FilterMeta> entry : filterBy.entrySet()) {
-			String field = entry.getKey();
-			FilterMeta filterMeta = entry.getValue();
-			Object filterValue = filterMeta.getFilterValue();
-			
-			// Check if this field has a date format
-			String pattern = dateFormats.get(field);
-			if (pattern == null) {
-				continue;
-			}
-			
-			SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-			
-			if (filterValue instanceof List) {
-				List<?> filterList = (List<?>) filterValue;
-				List<Object> convertedList = new ArrayList<>();
-				
-				for (Object item : filterList) {
-					if (item instanceof String) {
-						Object converted = parseDate((String) item, pattern, dateFormat);
-						convertedList.add(converted != null ? converted : item);
-					} else {
-						convertedList.add(item);
-					}
-				}
-				
-				filterMeta.setFilterValue(convertedList);
-			} else if (filterValue instanceof String) {
-				Object converted = parseDate((String) filterValue, pattern, dateFormat);
-				if (converted != null) {
-					filterMeta.setFilterValue(converted);
-				}
-			}
-		}
-	}
+private void convertDateStringsUsingFormats(DataTableState state, Map<String, String> dateFormats) {
+    if (state == null || state.getFilterBy() == null || dateFormats == null || dateFormats.isEmpty()) {
+        return;
+    }
 
-	/**
-	 * Parses a date string using the given pattern, attempting multiple date types.
-	 * 
-	 * @param dateStr The date string to parse
-	 * @param pattern The date format pattern
-	 * @param dateFormat SimpleDateFormat configured with the pattern
-	 * @return Parsed date object (Date, LocalDate, or LocalDateTime) or null if parsing fails
-	 */
-	private Object parseDate(String dateStr, String pattern, SimpleDateFormat dateFormat) {
-		try {
-			// Check if pattern includes time components
-			boolean hasTime = pattern.contains("H") || pattern.contains("h") || 
-							  pattern.contains("m") || pattern.contains("s");
-			
-			// Try parsing as ISO format first (from JSON serialization)
-			try {
-				if (hasTime) {
-					// Try ISO LocalDateTime format (e.g., "2025-10-13T10:49:00")
-					return java.time.LocalDateTime.parse(dateStr);
-				} else {
-					// Try ISO LocalDate format (e.g., "2025-10-06")
-					return java.time.LocalDate.parse(dateStr);
-				}
-			} catch (java.time.format.DateTimeParseException e) {
-				// Not ISO format, continue to try custom pattern
-			}
-			
-			// Try parsing with the custom pattern
-			Date date = dateFormat.parse(dateStr);
-			
-			// Convert to appropriate java.time type for better compatibility
-			if (hasTime) {
-				return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			} else {
-				return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-			}
-		} catch (ParseException e) {
-			Ivy.log().warn("Failed to parse date string: {0} with pattern: {1}", dateStr, pattern);
-			return null;
-		}
-	}
+    Map<String, FilterMeta> filterBy = state.getFilterBy();
+    for (Map.Entry<String, FilterMeta> entry : filterBy.entrySet()) {
+        FilterMeta filterMeta = entry.getValue();
+        Object filterValue = filterMeta.getFilterValue();
+
+        // Check if this field has a date format
+        String field = entry.getValue().getField();
+        String pattern = dateFormats.get(field);
+        if (pattern == null) {
+            continue;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+
+        if (filterValue instanceof List) {
+            List<?> filterList = (List<?>) filterValue;
+            List<LocalDate> convertedList = new ArrayList<>();
+
+            for (Object item : filterList) {
+                if (item instanceof String str) {
+                    LocalDate converted = parseLocalDate(str, formatter);
+                    if (converted != null) {
+                        convertedList.add(converted);
+                    }
+                } else if (item instanceof LocalDate date) {
+                    convertedList.add(date);
+                }
+            }
+
+            // Only set if we got something valid
+            if (!convertedList.isEmpty()) {
+                filterMeta.setFilterValue(convertedList);
+            }
+
+        } else if (filterValue instanceof String str) {
+            LocalDate converted = parseLocalDate(str, formatter);
+            if (converted != null) {
+                filterMeta.setFilterValue(List.of(converted));
+            }
+        }
+    }
+}
+
+private LocalDate parseLocalDate(String value, DateTimeFormatter formatter) {
+    if (value == null || value.isBlank()) {
+        return null;
+    }
+
+    try {
+        return LocalDate.parse(value, formatter);
+    } catch (DateTimeParseException e1) {
+        try {
+            // Fallback to ISO format (e.g. "2025-10-20")
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e2) {
+            return null;
+        }
+    }
+}
 
 	private List<String> fetchAllDataTableStateNames() {
 		String tableId = getTableClientId();

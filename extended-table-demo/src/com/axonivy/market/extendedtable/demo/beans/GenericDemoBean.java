@@ -122,6 +122,37 @@ public abstract class GenericDemoBean {
 		if (filter == null) {
 			return true;
 		}
+		
+		// Handle String filter (format: "dd.MM.yyyy,dd.MM.yyyy")
+		if (filter instanceof String) {
+			String filterStr = ((String) filter).trim();
+			if (filterStr.isEmpty()) {
+				return true;
+			}
+			
+			try {
+				String[] parts = filterStr.split(",");
+				LocalDate from = null;
+				LocalDate to = null;
+				
+				if (parts.length > 0 && !parts[0].trim().isEmpty()) {
+					from = LocalDate.parse(parts[0].trim(), dateFormatter);
+				}
+				if (parts.length > 1 && !parts[1].trim().isEmpty()) {
+					to = LocalDate.parse(parts[1].trim(), dateFormatter);
+				}
+				
+				if (from != null && date.isBefore(from)) {
+					return false;
+				}
+				if (to != null && date.isAfter(to)) {
+					return false;
+				}
+				return true;
+			} catch (Exception e) {
+				return true; // If parsing fails, show all
+			}
+		}
 
 		// PrimeFaces datePicker with selectionMode=range usually posts a List of 2
 		// dates

@@ -49,7 +49,7 @@
 						field="date" filterMatchMode="custom"
 						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
-							<p:datePicker selectionMode="range"
+							<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
 								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{data.bean.formatDate(item.date)}" />

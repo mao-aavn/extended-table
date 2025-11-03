@@ -6,10 +6,7 @@ import java.util.Set;
 
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
-import javax.faces.component.ValueHolder;
 import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.DateTimeConverter;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.column.Column;
@@ -273,33 +270,4 @@ public final class DataTableUtils {
 		return null;
 	}
 
-	/**
-	 * Recursively searches for a DateTimeConverter in the component tree and extracts its pattern.
-	 *
-	 * @param component The component to search
-	 * @return The date pattern if found, null otherwise
-	 */
-	public static String findDateTimeConverterPattern(UIComponent component) {
-		// Check direct converter
-		if (component instanceof ValueHolder) {
-			Converter converter = ((ValueHolder) component).getConverter();
-			if (converter instanceof DateTimeConverter) {
-				DateTimeConverter dtConverter = (DateTimeConverter) converter;
-				String pattern = dtConverter.getPattern();
-				if (pattern != null && !pattern.isEmpty()) {
-					return pattern;
-				}
-			}
-		}
-
-		// Recursively search children
-		for (UIComponent child : component.getChildren()) {
-			String pattern = findDateTimeConverterPattern(child);
-			if (pattern != null) {
-				return pattern;
-			}
-		}
-
-		return null;
-	}
 }

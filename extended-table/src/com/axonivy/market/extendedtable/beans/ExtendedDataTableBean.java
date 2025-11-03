@@ -1,14 +1,14 @@
 package com.axonivy.market.extendedtable.beans;
 
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.clearSelection;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDatePickerPattern;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.restoreSelection;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.getRequestParam;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
-import static com.axonivy.market.extendedtable.utils.DataTableUtils.clearSelection;
-import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDatePickerPattern;
-import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDateTimeConverterPattern;
-import static com.axonivy.market.extendedtable.utils.DataTableUtils.restoreSelection;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.column.Column;
@@ -32,10 +31,9 @@ import org.primefaces.model.FilterMeta;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.filter.FilterConstraint;
 
-import com.axonivy.market.extendedtable.controllers.TableStateController;
 import com.axonivy.market.extendedtable.controllers.IvyUserStateController;
+import com.axonivy.market.extendedtable.controllers.TableStateController;
 import com.axonivy.market.extendedtable.utils.Attrs;
-import com.axonivy.market.extendedtable.utils.DataTableUtils;
 import com.axonivy.market.extendedtable.utils.JSFUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,28 +51,36 @@ import ch.ivyteam.ivy.environment.Ivy;
  */
 public class ExtendedDataTableBean {
 
-	private static final String TABLE_ID = "tableId";
+	private static final String CC_ATTRS_TABLE_ID = "tableId";
 	private static final String CC_ATTRS_TABLE_STATE_CONTROLLER = "tableStateController";
+	private static final String CC_ATTRS_STATE_NAME_REQUIRED_MSG = "stateNameRequiredMsg";
+	private static final String CC_ATTRS_SAVE_SUCCESS_MSG = "saveSuccessMsg";
+	private static final String CC_ATTRS_WIDGET_VAR = "widgetVar";
+	private static final String CC_ATTRS_DELETE_ERROR_MSG = "deleteErrorMsg";
+	private static final String CC_ATTRS_DELETE_SUCCESS_MSG = "deleteSuccessMsg";
+
+	private static final String STATE = "state";
+	private static final String DATE_FORMATS = "dateFormats";
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final String STATE_KEY_PREFIX = "DATATABLE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
 	private List<String> stateNames = new ArrayList<>();
 
+	// Allow tests or integrators to inject a controller to avoid static lookups in Attrs
+	private TableStateController controllerOverride;
+
+	private static final ObjectMapper TABLE_STATE_MAPPER = createObjectMapperInstance();
+
 	public void saveTableState() {
-		// Only save if explicitly triggered by the Save button via the explicitSave
-		// parameter
-		// This prevents accidental saves when filtering or other actions trigger form
-		// submission
-		String explicitSave = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
-				.get("explicitSave");
+		String explicitSave = getRequestParam("explicitSave");
 
 		if (!"true".equals(explicitSave)) {
 			return;
 		}
 
 		if (stateName == null || stateName.isEmpty()) {
-			addErrorMsg(GROWL_MSG_ID, Attrs.get("stateNameRequiredMsg"), null);
+			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
 		} else {
 			String tableClientId = getTableClientId();
 			DataTable table = (DataTable) findComponentFromClientId(tableClientId);
@@ -84,7 +90,7 @@ public class ExtendedDataTableBean {
 				if (state != null) {
 					persistDataTableState(state);
 					stateNames = fetchAllDataTableStateNames();
-					addInfoMsg(GROWL_MSG_ID, Attrs.get("saveSuccessMsg"), null);
+					addInfoMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_SAVE_SUCCESS_MSG), null);
 				} else {
 					Ivy.log().warn("State is null for the table: {0}", getTableClientId());
 				}
@@ -94,7 +100,7 @@ public class ExtendedDataTableBean {
 
 	public void restoreTableState() throws JsonProcessingException {
 		if (stateName == null || stateName.isEmpty()) {
-			addErrorMsg(GROWL_MSG_ID, Attrs.get("stateNameRequiredMsg"), null);
+			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
 			return;
 		}
 
@@ -121,18 +127,15 @@ public class ExtendedDataTableBean {
 			currentState.setColumnMeta(persistedState.getColumnMeta());
 			currentState.setExpandedRowKeys(persistedState.getExpandedRowKeys());
 			currentState.setRows(persistedState.getRows());
-			// Don't set selectedRowKeys here - filterAndSort() will clear them
-			// We'll restore selection after filtering in restoreSelection()
 			currentState.setWidth(persistedState.getWidth());
 			currentTable.setFirst(persistedState.getFirst());
 
 			// Apply filters and sorting first to get the correct filtered dataset
 			currentTable.filterAndSort();
 			currentTable.resetColumns();
-			// currentState.setSelectedRowKeys(currentState.getSelectedRowKeys());
 
 			// Restore selection AFTER filterAndSort so we work with filtered items
-			restoreSelection(currentTable, persistedState.getSelectedRowKeys(), Attrs.get("widgetVar"));
+			restoreSelection(currentTable, persistedState.getSelectedRowKeys(), Attrs.get(CC_ATTRS_WIDGET_VAR));
 		} else {
 			Ivy.log().warn("No saved table state to restore for the table %s and state %s", getTableClientId(),
 					stateName);
@@ -158,14 +161,12 @@ public class ExtendedDataTableBean {
 
 		currentTable.clearInitialState();
 		currentTable.resetColumns();
-
-		Ivy.log().warn("RESET COMPLETED");
 	}
 
 	public void deleteTableState() {
 		String stateKey = getStateKey();
 		if (!getController().delete(stateKey)) {
-			addErrorMsg(GROWL_MSG_ID, Attrs.get("deleteErrorMsg"), null);
+			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_DELETE_ERROR_MSG), null);
 		} else {
 			stateNames = fetchAllDataTableStateNames();
 			if (stateNames.size() > 0) {
@@ -173,7 +174,7 @@ public class ExtendedDataTableBean {
 			} else {
 				stateName = null;
 			}
-			addInfoMsg(GROWL_MSG_ID, Attrs.get("deleteSuccessMsg"), null);
+			addInfoMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_DELETE_SUCCESS_MSG), null);
 		}
 	}
 
@@ -196,7 +197,7 @@ public class ExtendedDataTableBean {
 	private void persistDataTableState(DataTableState state) {
 		String stateKey = getStateKey();
 
-		ObjectMapper mapper = createObjectMapper();
+		ObjectMapper mapper = TABLE_STATE_MAPPER;
 
 		// Extract and store date format patterns from columns before serialization
 		DataTable table = (DataTable) JSFUtils.findComponentFromClientId(getTableClientId());
@@ -205,8 +206,8 @@ public class ExtendedDataTableBean {
 		try {
 			// Create a wrapper object to store both state and format info
 			Map<String, Object> stateWrapper = new HashMap<>();
-			stateWrapper.put("state", state);
-			stateWrapper.put("dateFormats", columnDateFormats);
+			stateWrapper.put(STATE, state);
+			stateWrapper.put(DATE_FORMATS, columnDateFormats);
 
 			String stateJson = mapper.writeValueAsString(stateWrapper);
 			getController().save(stateKey, stateJson);
@@ -219,17 +220,20 @@ public class ExtendedDataTableBean {
 		String stateKey = getStateKey();
 		String stateJson = getController().load(stateKey);
 
-		ObjectMapper mapper = createObjectMapper();
+		ObjectMapper mapper = TABLE_STATE_MAPPER;
 
 		DataTableState tableState = null;
 
 		try {
-			// Read the wrapper containing both state and date formats
+			// Validate and read the wrapper containing both state and date formats
+			if (stateJson == null || stateJson.isBlank()) {
+				return null;
+			}
 			Map<String, Object> stateWrapper = mapper.readValue(stateJson, new TypeReference<Map<String, Object>>() {
 			});
 
 			// Extract the state
-			Object stateObj = stateWrapper.get("state");
+			Object stateObj = stateWrapper.get(STATE);
 			if (stateObj != null) {
 				// Convert the state object back to DataTableState
 				String stateJsonStr = mapper.writeValueAsString(stateObj);
@@ -238,7 +242,7 @@ public class ExtendedDataTableBean {
 
 				// Extract and apply date formats to convert string dates back to proper types
 				@SuppressWarnings("unchecked")
-				Map<String, String> dateFormats = (Map<String, String>) stateWrapper.get("dateFormats");
+				Map<String, String> dateFormats = (Map<String, String>) stateWrapper.get(DATE_FORMATS);
 				if (dateFormats != null && !dateFormats.isEmpty()) {
 					convertDateStringsUsingFormats(tableState, dateFormats);
 				}
@@ -263,7 +267,7 @@ public class ExtendedDataTableBean {
 	 * 
 	 * @return Configured ObjectMapper instance
 	 */
-	private ObjectMapper createObjectMapper() {
+	private static ObjectMapper createObjectMapperInstance() {
 		ObjectMapper mapper = new ObjectMapper();
 
 		// Register JavaTimeModule for standard java.time types
@@ -275,8 +279,6 @@ public class ExtendedDataTableBean {
 
 		// Configure behavior
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		// mapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
-		// false);
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 		return mapper;
@@ -299,19 +301,18 @@ public class ExtendedDataTableBean {
 
 		// Iterate through columns to find DateTimeConverter components or DatePicker
 		// patterns
-		for (UIComponent child : table.getChildren()) {
+		List<UIComponent> children = table.getChildren();
+		if (children == null) {
+			return dateFormats;
+		}
+
+		for (UIComponent child : children) {
 			if (child instanceof Column) {
 				Column column = (Column) child;
 				String field = column.getField();
 
 				if (field != null && !field.isEmpty()) {
-					// First, check filter facet for DatePicker pattern
 					String pattern = findDatePickerPattern(column);
-
-					// If not found in filter facet, search for DateTimeConverter in column children
-					if (pattern == null) {
-						pattern = findDateTimeConverterPattern(column);
-					}
 
 					if (pattern != null) {
 						dateFormats.put(field, pattern);
@@ -404,7 +405,17 @@ public class ExtendedDataTableBean {
 	}
 
 	private String getStateKey() {
-		return String.format(STATE_KEY_PATTERN, getTableClientId(), stateName);
+		String tableId = getTableClientId();
+		String safeTableId = sanitizeClientId(tableId);
+		return String.format(STATE_KEY_PATTERN, safeTableId, stateName);
+	}
+
+	private String sanitizeClientId(String id) {
+		if (id == null) {
+			return "";
+		}
+		// Replace characters that may be problematic in keys
+		return id.replace(':', '_').replace(' ', '_');
 	}
 
 	/**
@@ -415,20 +426,34 @@ public class ExtendedDataTableBean {
 	 * 
 	 */
 	private TableStateController getController() {
-		TableStateController repo = (TableStateController) Attrs.get(CC_ATTRS_TABLE_STATE_CONTROLLER);
-		if (repo != null && repo instanceof TableStateController) {
-			return (TableStateController) repo;
+		// If a test or integrator injected a controller, use it
+		if (controllerOverride != null) {
+			return controllerOverride;
+		}
+
+		Object repoObj = Attrs.get(CC_ATTRS_TABLE_STATE_CONTROLLER);
+		if (repoObj instanceof TableStateController) {
+			return (TableStateController) repoObj;
 		}
 
 		// Fallback to default in case no overriding controller is set
 		return new IvyUserStateController();
 	}
 
+	/**
+	 * Setter allowing injection of a TableStateController for testing or
+	 * integration. This reduces the need for static mocking of Attrs in tests.
+	 */
+	public void setControllerOverride(TableStateController controller) {
+		this.controllerOverride = controller;
+	}
+
 	private String getTableClientId() {
-		UIComponent tableComponent = findComponent((String) Attrs.get(TABLE_ID));
+		UIComponent tableComponent = findComponent((String) Attrs.get(CC_ATTRS_TABLE_ID));
 
 		if (tableComponent == null) {
-			throw new IllegalStateException("Component with id '" + Attrs.get(TABLE_ID) + "' not found in view.");
+			throw new IllegalStateException(
+					"Component with id '" + Attrs.get(CC_ATTRS_TABLE_ID) + "' not found in view.");
 		}
 
 		return tableComponent.getClientId();

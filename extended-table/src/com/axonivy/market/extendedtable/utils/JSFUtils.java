@@ -1,23 +1,15 @@
 package com.axonivy.market.extendedtable.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-import javax.el.ValueExpression;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
-import javax.faces.component.ValueHolder;
 import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.DateTimeConverter;
+import javax.faces.context.ExternalContext;
 
-import org.primefaces.PrimeFaces;
 import org.primefaces.util.ComponentTraversalUtils;
-
-import ch.ivyteam.ivy.environment.Ivy;
 
 public final class JSFUtils {
 
@@ -46,6 +38,23 @@ public final class JSFUtils {
 
 	public static UIComponent findComponentFromClientId(String clientId) {
 		return getViewRoot().findComponent(clientId);
+	}
+
+	/**
+	 * Convenience helper to read a request parameter from the current FacesContext.
+	 * Returns null if context or external context or parameter map is not available.
+	 */
+	public static String getRequestParam(String name) {
+		FacesContext ctx = currentContext();
+		if (ctx == null) {
+			return null;
+		}
+		ExternalContext ext = ctx.getExternalContext();
+		if (ext == null) {
+			return null;
+		}
+		Map<String, String> params = ext.getRequestParameterMap();
+		return params == null ? null : params.get(name);
 	}
 
 	/**

@@ -17,6 +17,3 @@ classes/
 src_dataClasses/
 src_wsproc/
 logs/
-/.src_generated/
-/src_generated/
-/.apt_generated/

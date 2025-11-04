@@ -7,9 +7,10 @@
 	<packaging>iar</packaging>
 	<dependencies>
 		<dependency>
-			<groupId>com.axonivy.market</groupId>
+			<groupId>com.axonivy.market.extendedtable</groupId>
 			<artifactId>extended-table</artifactId>
 			<version>${project.version}</version>
+			<type>iar</type>
 		</dependency>
 		<dependency>
 			<groupId>com.axonivy.portal</groupId>
@@ -22,15 +23,12 @@
 			<artifactId>persistence-utils</artifactId>
 			<version>10.0.9</version>
 		</dependency>
-		<!-- JPA static metamodel generator -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-jpamodelgen</artifactId>
 			<version>5.6.5.Final</version>
 			<scope>provided</scope>
 		</dependency>
-
-		<!-- JPA API for annotation processing resolution -->
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>javax.persistence-api</artifactId>
@@ -52,9 +50,7 @@
 	</repositories>
 	<build>
 		<plugins>
-			<!-- Enable annotation processing to generate JPA metamodel (_ classes) into src_generated -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<executions>
@@ -78,8 +74,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- Ensure IDEs and Maven treat src_generated and .apt_generated as source folders -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -94,7 +88,6 @@
 						<configuration>
 							<sources>
 								<source>src_generated</source>
-								<source>.apt_generated</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -105,6 +98,11 @@
 				<artifactId>project-build-plugin</artifactId>
 				<version>10.0.14</version>
 				<extensions>true</extensions>
+				<configuration>
+					<compilerOptions>
+						<compilerOption>-proc:none</compilerOption>
+					</compilerOptions>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

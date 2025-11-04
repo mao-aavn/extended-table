@@ -4,7 +4,7 @@
 
 Extended Table is a JSF component for Axon.ivy that extends the `p:dataTable` component from PrimeFaces. Its main goal is to provide users with the ability to save the state of a table (such as filters, sorting, pagination, and column order) and restore it at any time and from anywhere within the application. This feature enhances user experience by allowing personalized table views to be persisted and reused.
 
-In the background, the table state is persisted as a JSON string in the user's session property map.
+In the background, the table state is persisted as a JSON string value, together with the key formed by some factors (formId, tableId, state name), and the persistence are decided by the given controller, the default controller will persist in the user's property map.
 
 ## Features
 

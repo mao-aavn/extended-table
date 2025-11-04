@@ -64,157 +64,232 @@ public class CustomerDAO extends AuditableIdDAO<Customer_, Customer> implements 
 	private List<Predicate> buildFilterPredicates(Map<String, FilterMeta> filterBy,
 			From<?, ?> root, CriteriaBuilder cb, Map<String, Join<?, ?>> joinCache) {
 		List<Predicate> predicates = new ArrayList<>();
-		if (filterBy != null) {
-			for (FilterMeta filter : filterBy.values()) {
-				Object filterValue = filter.getFilterValue();
-				if (filterValue == null || filterValue.toString().trim().isEmpty()) {
-					continue;
-				}
-				String field = filter.getField();
-				Path<?> path = resolvePath(field, root, joinCache);
-				Class<?> type = path.getJavaType();
+		if (filterBy == null) {
+			return predicates;
+		}
 
-				if (type == Boolean.class || type == boolean.class) {
-					try {
-						Boolean boolValue = (filterValue instanceof Boolean) ? (Boolean) filterValue
-								: Boolean.valueOf(filterValue.toString());
-						predicates.add(cb.equal(path, boolValue));
-					} catch (Exception e) {
-						// ignore invalid boolean filter
-					}
-				} else if (Enum.class.isAssignableFrom(type)) {
-					try {
-						ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: Enum filter - field: " + field + ", type: " + type + ", filterValue: " + filterValue + ", filterValue class: " + filterValue.getClass());
-						
-						if (filterValue instanceof java.util.Collection) {
-							// Handle multi-select enum filter
-							java.util.Collection<?> enumValues = (java.util.Collection<?>) filterValue;
-							ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: filterValue is a Collection with " + enumValues.size() + " items");
-							if (!enumValues.isEmpty()) {
-								List<Predicate> enumPredicates = new ArrayList<>();
-								for (Object enumItem : enumValues) {
-									if (enumItem instanceof Enum) {
-										enumPredicates.add(cb.equal(path, enumItem));
-									} else if (enumItem != null) {
-										String enumStr = enumItem.toString().trim();
-										if (!enumStr.isEmpty()) {
-											@SuppressWarnings("unchecked")
-											Enum<?> enumValue = Enum.valueOf((Class<Enum>) type, enumStr);
-											enumPredicates.add(cb.equal(path, enumValue));
-										}
-									}
-								}
-								if (!enumPredicates.isEmpty()) {
-									predicates.add(cb.or(enumPredicates.toArray(new Predicate[0])));
-									ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: Added OR predicate with " + enumPredicates.size() + " enum values");
-								}
-							}
-						} else if (filterValue instanceof Enum) {
-							ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: filterValue is already an Enum, using directly");
-							predicates.add(cb.equal(path, filterValue));
-						} else {
-							String enumStr = filterValue.toString().trim();
-							ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: filterValue as string (trimmed): '" + enumStr + "', isEmpty: " + enumStr.isEmpty());
-							if (!enumStr.isEmpty()) {
-								@SuppressWarnings("unchecked")
-								Enum<?> enumValue = Enum.valueOf((Class<Enum>) type, enumStr);
-								ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: Parsed enum value: " + enumValue);
-								predicates.add(cb.equal(path, enumValue));
-							}
-						}
-					} catch (IllegalArgumentException e) {
-						// ignore invalid enum filter - value doesn't exist in enum
-						ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: IllegalArgumentException parsing enum: " + e.getMessage());
-					} catch (Exception e) {
-						// ignore other invalid enum filter
-						ch.ivyteam.ivy.environment.Ivy.log().info("DEBUG: Exception parsing enum: " + e.getClass() + " - " + e.getMessage());
-					}
-				} else if (Number.class.isAssignableFrom(type) || type == int.class || type == long.class 
-						|| type == double.class || type == float.class || type == short.class || type == byte.class) {
-					// Check if it's a range filter (format: "min..max")
-					String filterStr = filterValue.toString();
-					if (filterStr.contains("..")) {
-						// Parse range filter
-						String[] parts = filterStr.split("\\.\\.");
-						if (parts.length == 2) {
-							try {
-								Double from = Double.valueOf(parts[0].trim());
-								Double to = Double.valueOf(parts[1].trim());
-								predicates.add(cb.greaterThanOrEqualTo(path.as(Double.class), from));
-								predicates.add(cb.lessThanOrEqualTo(path.as(Double.class), to));
-							} catch (NumberFormatException e) {
-								// ignore invalid range
-							}
-						}
-					} else if (filterValue instanceof Map) {
-						// Handle range filter as Map (alternative format)
-						Map<?, ?> range = (Map<?, ?>) filterValue;
-						Object from = range.get("from");
-						Object to = range.get("to");
-						if (from != null) {
-							predicates.add(cb.greaterThanOrEqualTo(path.as(Comparable.class), (Comparable) from));
-						}
-						if (to != null) {
-							predicates.add(cb.lessThanOrEqualTo(path.as(Comparable.class), (Comparable) to));
-						}
-					} else {
-						try {
-							Number number = (filterValue instanceof Number) ? (Number) filterValue
-									: Double.valueOf(filterValue.toString());
-							predicates.add(cb.equal(path, number));
-						} catch (NumberFormatException e) {
-							// ignore invalid number filter
-						}
-					}
-				} else if (java.util.Date.class.isAssignableFrom(type)
-						|| java.time.temporal.Temporal.class.isAssignableFrom(type)) {
-					if (filterValue instanceof Map) {
-						Map<?, ?> range = (Map<?, ?>) filterValue;
-						Object from = range.get("from");
-						Object to = range.get("to");
-						if (from != null) {
-							predicates.add(cb.greaterThanOrEqualTo(path.as(Comparable.class), (Comparable) from));
-						}
-						if (to != null) {
-							predicates.add(cb.lessThanOrEqualTo(path.as(Comparable.class), (Comparable) to));
-						}
-					} else {
-						predicates.add(cb.equal(path, filterValue));
-					}
-				} else if (type == String.class) {
-					predicates.add(cb.like(cb.lower(path.as(String.class)),
-							"%" + filterValue.toString().toLowerCase() + "%"));
-				} else {
-					predicates.add(cb.equal(path, filterValue));
-				}
+		for (FilterMeta filter : filterBy.values()) {
+			Object filterValue = filter.getFilterValue();
+			if (isEmptyFilter(filterValue)) {
+				continue;
+			}
+
+			String field = filter.getField();
+			Path<?> path = resolvePath(field, root, joinCache);
+			Class<?> type = path.getJavaType();
+
+			Predicate predicate = buildPredicateForType(path, type, filterValue, cb);
+			if (predicate != null) {
+				predicates.add(predicate);
 			}
 		}
 		return predicates;
+	}
+
+	private boolean isEmptyFilter(Object filterValue) {
+		return filterValue == null || filterValue.toString().trim().isEmpty();
+	}
+
+	private Predicate buildPredicateForType(Path<?> path, Class<?> type, Object filterValue, CriteriaBuilder cb) {
+		if (type == Boolean.class || type == boolean.class) {
+			return buildBooleanPredicate(path, filterValue, cb);
+		} else if (Enum.class.isAssignableFrom(type)) {
+			return buildEnumPredicate(path, type, filterValue, cb);
+		} else if (isNumberType(type)) {
+			return buildNumberPredicate(path, filterValue, cb);
+		} else if (isDateType(type)) {
+			return buildDatePredicate(path, filterValue, cb);
+		} else if (type == String.class) {
+			return buildStringPredicate(path, filterValue, cb);
+		} else {
+			return cb.equal(path, filterValue);
+		}
+	}
+
+	private boolean isNumberType(Class<?> type) {
+		return Number.class.isAssignableFrom(type) || type == int.class || type == long.class
+				|| type == double.class || type == float.class || type == short.class || type == byte.class;
+	}
+
+	private boolean isDateType(Class<?> type) {
+		return java.util.Date.class.isAssignableFrom(type)
+				|| java.time.temporal.Temporal.class.isAssignableFrom(type);
+	}
+
+	private Predicate buildBooleanPredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {
+		try {
+			Boolean boolValue = (filterValue instanceof Boolean) ? (Boolean) filterValue
+					: Boolean.valueOf(filterValue.toString());
+			return cb.equal(path, boolValue);
+		} catch (Exception e) {
+			return null; // ignore invalid boolean filter
+		}
+	}
+
+	private Predicate buildEnumPredicate(Path<?> path, Class<?> type, Object filterValue, CriteriaBuilder cb) {
+		try {
+			if (filterValue instanceof java.util.Collection) {
+				return buildEnumCollectionPredicate(path, type, (java.util.Collection<?>) filterValue, cb);
+			} else if (filterValue instanceof Enum) {
+				return cb.equal(path, filterValue);
+			} else {
+				return buildEnumFromString(path, type, filterValue.toString().trim(), cb);
+			}
+		} catch (Exception e) {
+			return null; // ignore invalid enum filter
+		}
+	}
+
+	private Predicate buildEnumCollectionPredicate(Path<?> path, Class<?> type, java.util.Collection<?> enumValues,
+			CriteriaBuilder cb) {
+		if (enumValues.isEmpty()) {
+			return null;
+		}
+
+		List<Predicate> enumPredicates = new ArrayList<>();
+		for (Object enumItem : enumValues) {
+			if (enumItem instanceof Enum) {
+				enumPredicates.add(cb.equal(path, enumItem));
+			} else if (enumItem != null) {
+				String enumStr = enumItem.toString().trim();
+				if (!enumStr.isEmpty()) {
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					Enum<?> enumValue = Enum.valueOf((Class<Enum>) type, enumStr);
+					enumPredicates.add(cb.equal(path, enumValue));
+				}
+			}
+		}
+		return enumPredicates.isEmpty() ? null : cb.or(enumPredicates.toArray(new Predicate[0]));
+	}
+
+	private Predicate buildEnumFromString(Path<?> path, Class<?> type, String enumStr, CriteriaBuilder cb) {
+		if (enumStr.isEmpty()) {
+			return null;
+		}
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Enum<?> enumValue = Enum.valueOf((Class<Enum>) type, enumStr);
+		return cb.equal(path, enumValue);
+	}
+
+	private Predicate buildNumberPredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {
+		String filterStr = filterValue.toString();
+		if (filterStr.contains("..")) {
+			return buildNumberRangeFromString(path, filterStr, cb);
+		} else if (filterValue instanceof Map) {
+			return buildRangeFromMap(path, (Map<?, ?>) filterValue, cb);
+		} else {
+			return buildExactNumberPredicate(path, filterValue, cb);
+		}
+	}
+
+	private Predicate buildNumberRangeFromString(Path<?> path, String filterStr, CriteriaBuilder cb) {
+		String[] parts = filterStr.split("\\.\\.");
+		if (parts.length != 2) {
+			return null;
+		}
+		try {
+			Double from = Double.valueOf(parts[0].trim());
+			Double to = Double.valueOf(parts[1].trim());
+			return cb.and(
+					cb.greaterThanOrEqualTo(path.as(Double.class), from),
+					cb.lessThanOrEqualTo(path.as(Double.class), to));
+		} catch (NumberFormatException e) {
+			return null; // ignore invalid range
+		}
+	}
+
+	private Predicate buildExactNumberPredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {
+		try {
+			Number number = (filterValue instanceof Number) ? (Number) filterValue
+					: Double.valueOf(filterValue.toString());
+			return cb.equal(path, number);
+		} catch (NumberFormatException e) {
+			return null; // ignore invalid number filter
+		}
+	}
+
+	private Predicate buildDatePredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {
+		if (filterValue instanceof Map) {
+			return buildRangeFromMap(path, (Map<?, ?>) filterValue, cb);
+		} else if (filterValue instanceof java.util.List) {
+			return buildDateRangeFromList(path, (java.util.List<?>) filterValue, cb);
+		} else {
+			return cb.equal(path, filterValue);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Predicate buildRangeFromMap(Path<?> path, Map<?, ?> range, CriteriaBuilder cb) {
+		Object from = range.get("from");
+		Object to = range.get("to");
+		
+		List<Predicate> predicates = new ArrayList<>();
+		if (from != null) {
+			@SuppressWarnings("rawtypes")
+			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
+			predicates.add(cb.greaterThanOrEqualTo(pathExpr, (Comparable) from));
+		}
+		if (to != null) {
+			@SuppressWarnings("unchecked")
+			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
+			predicates.add(cb.lessThanOrEqualTo(pathExpr, (Comparable) to));
+		}
+		return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+	}
+
+	private Predicate buildDateRangeFromList(Path<?> path, java.util.List<?> range, CriteriaBuilder cb) {
+		Object from = range.size() > 0 ? range.get(0) : null;
+		Object to = range.size() > 1 ? range.get(1) : null;
+
+		List<Predicate> predicates = new ArrayList<>();
+		if (from != null) {
+			@SuppressWarnings("unchecked")
+			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
+			predicates.add(cb.greaterThanOrEqualTo(pathExpr, (Comparable) from));
+		}
+		if (to != null) {
+			@SuppressWarnings("unchecked")
+			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
+			predicates.add(cb.lessThanOrEqualTo(pathExpr, (Comparable) to));
+		}
+		return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+	}
+
+	private Predicate buildStringPredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {
+		return cb.like(cb.lower(path.as(String.class)),
+				"%" + filterValue.toString().toLowerCase() + "%");
+	}
+
+	private List<Order> buildSortOrders(Map<String, SortMeta> sortBy, From<?, ?> root, CriteriaBuilder cb,
+			Map<String, Join<?, ?>> joinCache) {
+		List<Order> orders = new ArrayList<>();
+		if (sortBy == null || sortBy.isEmpty()) {
+			return orders;
+		}
+
+		for (SortMeta sortMeta : sortBy.values()) {
+			String field = sortMeta.getField();
+			Path<?> sortPath = resolvePath(field, root, joinCache);
+			if (sortMeta.getOrder().isAscending()) {
+				orders.add(cb.asc(sortPath));
+			} else {
+				orders.add(cb.desc(sortPath));
+			}
+		}
+		return orders;
 	}
 
 	public List<Customer> find(int offset, int pageSize, Map<String, SortMeta> sortBy,
 			Map<String, FilterMeta> filterBy) {
 		try (CriteriaQueryContext<Customer> ctx = initializeQuery()) {
 			Map<String, Join<?, ?>> joinCache = new java.util.HashMap<>();
-			
+
 			List<Predicate> predicates = buildFilterPredicates(filterBy, ctx.r, ctx.c, joinCache);
 			if (!predicates.isEmpty()) {
 				ctx.q.where(ctx.c.and(predicates.toArray(new Predicate[0])));
 			}
 
-			// Sorting
-			List<Order> orders = new ArrayList<>();
-			if (sortBy != null && !sortBy.isEmpty()) {
-				for (SortMeta sortMeta : sortBy.values()) {
-					String field = sortMeta.getField();
-					Path<?> sortPath = resolvePath(field, ctx.r, joinCache);
-					if (sortMeta.getOrder().isAscending()) {
-						orders.add(ctx.c.asc(sortPath));
-					} else {
-						orders.add(ctx.c.desc(sortPath));
-					}
-				}
-			}
+			List<Order> orders = buildSortOrders(sortBy, ctx.r, ctx.c, joinCache);
 			if (!orders.isEmpty()) {
 				ctx.q.orderBy(orders);
 			}

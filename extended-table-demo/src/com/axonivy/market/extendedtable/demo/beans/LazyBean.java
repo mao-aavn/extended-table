@@ -11,7 +11,6 @@ public class LazyBean extends GenericDemoBean {
 
 	@Override
 	protected void loadItems() {
-		// LazyBean uses lazy loading, so we don't load items eagerly
 		lazyModel = new LazyCustomerDataModel();
 	}
 

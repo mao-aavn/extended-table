@@ -25,9 +25,7 @@ public class IvyUserStateController implements TableStateController {
 
 	@Override
 	public String load(String key) {
-		String stateJson = currentUser.getProperty(key);
-
-		return stateJson;
+		return currentUser.getProperty(key);
 	}
 
 	@Override

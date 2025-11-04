@@ -10,131 +10,124 @@
 <cc:interface componentType="IvyComponent">
 
 	<!-- Data table controller -->
-	<cc:attribute name="tableStateController" required="false"
+	<cc:attribute name="tableStateController"
 		type="com.axonivy.market.extendedtable.controllers.TableStateController"
-		shortDescription="Controller to persist/fetch the table state ect, default will be IvyUserStateController" />
+		shortDescription="Controller to persist/fetch the table state; default will be IvyUserStateController" />
 
 	<!-- UI Labels -->
-	<cc:attribute name="stateNameLabel" default="State Name"></cc:attribute>
-	<cc:attribute name="resetTableLabel" default="Reset Table"></cc:attribute>
-	<cc:attribute name="saveStateLabel" default="Save Table State"></cc:attribute>
-	<cc:attribute name="restoreStateLabel" default="Restore Table State"></cc:attribute>
-	<cc:attribute name="deleteStateLabel" default="Delete Table State"></cc:attribute>
-	
+	<cc:attribute name="stateNameLabel" type="java.lang.String" default="State Name" shortDescription="Label for the state name input." />
+	<cc:attribute name="resetTableLabel" type="java.lang.String" default="Reset Table" shortDescription="Label for the reset button." />
+	<cc:attribute name="saveStateLabel" type="java.lang.String" default="Save Table State" shortDescription="Label for the save state button." />
+	<cc:attribute name="restoreStateLabel" type="java.lang.String" default="Restore Table State" shortDescription="Label for the restore state button." />
+	<cc:attribute name="deleteStateLabel" type="java.lang.String" default="Delete Table State" shortDescription="Label for the delete state button." />
+    
 	<!-- UI Messages -->
-	<cc:attribute name="stateNameRequiredMsg"
-		default="State name is required!"></cc:attribute>
-	<cc:attribute name="saveSuccessMsg"
-		default="Saved the table state successfully"></cc:attribute>
-	<cc:attribute name="deleteSuccessMsg"
-		default="Deleted the table state successfully"></cc:attribute>
-	<cc:attribute name="deleteErrorMsg"
-		default="No existing state found"></cc:attribute>
+	<cc:attribute name="stateNameRequiredMsg" type="java.lang.String" default="State name is required!" shortDescription="Validation message when state name is empty." />
+	<cc:attribute name="saveSuccessMsg" type="java.lang.String" default="Saved the table state successfully" shortDescription="Message shown on successful save." />
+	<cc:attribute name="deleteSuccessMsg" type="java.lang.String" default="Deleted the table state successfully" shortDescription="Message shown on successful delete." />
+	<cc:attribute name="deleteErrorMsg" type="java.lang.String" default="No existing state found" shortDescription="Message shown when delete failed." />
 
-	<cc:attribute name="showResetButton" default="false"></cc:attribute>
-	<cc:attribute name="showDeleteButton" default="false"></cc:attribute>
+	<cc:attribute name="showResetButton" type="boolean" default="true" shortDescription="Whether to render the reset button." />
+	<cc:attribute name="showDeleteButton" type="boolean" default="false" shortDescription="Whether to render the delete button." />
 
-	<!-- Datatable mapping -->
-	<cc:attribute name="tableId"></cc:attribute>
-	<cc:attribute name="widgetVar" required="true"></cc:attribute>
-	<cc:attribute name="paginator" default="false"
-		shortDescription="Enables pagination. Default is false." />
-	<cc:attribute name="rows" default="0"
-		shortDescription="Number of rows to display per page. Default value is 0 meaning to display all data available." />
-	<cc:attribute name="sortMode" default="single" />
-	<cc:attribute name="emptyMessage" default="No records found." />
+	<!-- Datatable mapping (matching PrimeFaces DataTable attribute types/defaults where applicable) -->
+	<cc:attribute name="tableId" type="java.lang.String" required="true" shortDescription="ID of the underlying p:dataTable." />
+	<cc:attribute name="widgetVar" type="java.lang.String" required="true" shortDescription="PrimeFaces widgetVar to access the DataTable on client side." />
+    <cc:attribute name="paginator" type="boolean" default="false" shortDescription="Enable pagination." />
+    <cc:attribute name="rows" type="java.lang.Integer" shortDescription="Number of rows per page." />
+    <cc:attribute name="sortMode" type="java.lang.String" default="multiple" shortDescription="Sorting mode: 'single' or 'multiple'." />
+	<cc:attribute name="emptyMessage" type="java.lang.String" default="No records found." shortDescription="Message to display when no data is available." />
 
-	<cc:attribute name="allowUnsorting" default="false" />
-	<cc:attribute name="ariaRowLabel" />
-	<cc:attribute name="binding" />
-	<cc:attribute name="cellEditMode" default="eager" />
-	<cc:attribute name="cellSeparator" />
-	<cc:attribute name="clientCache" default="false" />
-	<cc:attribute name="currentPageReportTemplate"
-		default="{startRecord}-{endRecord} of {totalRecords} records" />
-	<cc:attribute name="dataLocale" />
-	<cc:attribute name="dir" default="ltr" />
-	<cc:attribute name="disableContextMenuIfEmpty" default="false" />
-	<cc:attribute name="disabledSelection" default="false" />
-	<cc:attribute name="disabledTextSelection" default="true" />
-	<cc:attribute name="draggableColumns" default="false" />
-	<cc:attribute name="draggableRows" default="false" />
-	<!-- <cc:attribute name="draggableRowsFunction" /> -->
-	<cc:attribute name="editInitEvent" />
-	<cc:attribute name="editMode" default="row" />
-	<cc:attribute name="editable" default="false" />
-	<cc:attribute name="editingRow" default="false" />
-	<cc:attribute name="escapeText" default="true" />
-	<cc:attribute name="expandedRow" default="false" />
-	<cc:attribute name="filterBy" />
-	<cc:attribute name="filterDelay" default="300" />
-	<cc:attribute name="filterEvent" default="keyup" />
-	<cc:attribute name="filteredValue" required="false"
-		type="java.util.List" />
-	<cc:attribute name="first" default="0" />
-	<cc:attribute name="frozenColumns" default="0" />
-	<cc:attribute name="frozenRows" />
-	<cc:attribute name="globalFilter" />
-	<cc:attribute name="globalFilterOnly" default="false" />
-	<cc:attribute name="globalFilterFunction" />
-	<!-- <cc:attribute name="id" /> Replaced by tableId attr-->
-	<cc:attribute name="lazy" default="false" />
-	<cc:attribute name="liveResize" default="false" />
-	<cc:attribute name="liveScroll" default="false" />
-	<cc:attribute name="liveScrollBuffer" default="0" />
-	<cc:attribute name="nativeElements" default="false" />
-	<cc:attribute name="onExpandStart" />
-	<cc:attribute name="onRowClick" />
-	<cc:attribute name="pageLinks" default="10" />
-	<cc:attribute name="paginatorAlwaysVisible" default="true" />
-	<cc:attribute name="paginatorPosition" default="both" />
-	<cc:attribute name="paginatorTemplate"
-		default="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" />
-	<cc:attribute name="reflow" default="false" />
-	<cc:attribute name="rendered" default="true" />
-	<cc:attribute name="renderEmptyFacets" default="false" />
-	<cc:attribute name="resizableColumns" default="false" />
-	<cc:attribute name="resizeMode" default="fit" />
-	<cc:attribute name="rowDragSelector" default="td,span:not(.ui-c)" />
-	<cc:attribute name="rowEditMode" default="eager" />
-	<cc:attribute name="rowExpandMode" default="multiple" />
-	<cc:attribute name="rowHover" default="false" />
-	<cc:attribute name="rowIndexVar" />
-	<cc:attribute name="rowKey" required="false" default="#{item.id}" />
-	<cc:attribute name="rowSelectMode" default="new" />
-	<cc:attribute name="rowSelector" />
-	<cc:attribute name="rowStatePreserved" default="false" />
-	<cc:attribute name="rowStyleClass" />
-	<cc:attribute name="rowsPerPageLabel" />
-	<cc:attribute name="rowsPerPageTemplate" default="5,10,{ShowAll|'All'}" />
-	<cc:attribute name="saveOnCellBlur" default="true" />
-	<cc:attribute name="scrollHeight" />
-	<cc:attribute name="scrollRows" default="0" />
-	<cc:attribute name="scrollWidth" />
-	<cc:attribute name="scrollable" default="false" />
+    <cc:attribute name="allowUnsorting" type="boolean" default="false" shortDescription="Defines whether columns are allowed to be unsorted. Default is false." />
+    <cc:attribute name="ariaRowLabel" type="java.lang.String" shortDescription="Label to read by screen readers on checkbox selection." />
+    <cc:attribute name="binding" type="javax.faces.component.UIComponent" shortDescription="An el expression that maps to a server side UIComponent instance in a backing bean" />
+    <cc:attribute name="cellEditMode" type="java.lang.String" default="eager" shortDescription="Defines the cell edit behavior, valid values are 'eager' (default) and 'lazy'." />
+    <cc:attribute name="cellSeparator" type="java.lang.String" shortDescription="Separator text to use in output mode of editable cells with multiple components." />
+    <cc:attribute name="clientCache" type="boolean" default="false" shortDescription="Caches the next page asynchronously, default is false." />
+    <cc:attribute name="currentPageReportTemplate" type="java.lang.String" default="{startRecord}-{endRecord} of {totalRecords} records" shortDescription="Template of the currentPageReport UI." />
+    <cc:attribute name="dataLocale" type="java.util.Locale" shortDescription="Locale to be used in features such as filtering and sorting, defaults to view locale." />
+    <cc:attribute name="dir" type="java.lang.String" default="ltr" shortDescription="Defines text direction, valid values are ltr and rtl." />
+    <cc:attribute name="disableContextMenuIfEmpty" type="boolean" default="false" shortDescription="Decides whether to disable context menu or not if a table has no records." />
+    <cc:attribute name="disabledSelection" type="boolean" default="false" shortDescription="Disables row selection when true. Overrides p:column's disabledSelection attr. Example: var='xxx' disabledSelection='#{xxx.year > 1960}'" />
+    <cc:attribute name="disabledTextSelection" type="boolean" default="true" shortDescription="Disables text selection on row click." />
+    <cc:attribute name="draggableColumns" type="boolean" default="false" shortDescription="Columns can be reordered with dragdrop when enabled." />
+    <cc:attribute name="draggableRows" type="boolean" default="false" shortDescription="When enabled, rows can be reordered using dragdrop." />
+    <cc:attribute name="draggableRowsFunction" type="java.lang.String" shortDescription="Method expression to execute after dragging row." />
+    <cc:attribute name="editInitEvent" type="java.lang.String" shortDescription="Defines a client side event to open cell on editable table." />
+    <cc:attribute name="editMode" type="java.lang.String" default="row" shortDescription="Defines edit mode, valid values are row and cell." />
+    <cc:attribute name="editable" type="boolean" default="false" shortDescription="Controls incell editing." />
+    <cc:attribute name="editingRow" type="boolean" default="false" shortDescription="Defines if cell editors of row should be displayed as editable or not." />
+    <cc:attribute name="escapeText" type="boolean" default="true" shortDescription="Defines if headerText and footerText values on columns are escaped or not. Default is true." />
+    <cc:attribute name="expandedRow" type="boolean" default="false" shortDescription="Defines if row should be rendered as expanded by default." />
+    <cc:attribute name="filterBy" type="java.lang.String" shortDescription="Property to be used for default filtering. Expects a single or a collection of FilterMeta." />
+    <cc:attribute name="filterDelay" type="java.lang.Integer" default="300" shortDescription="Delay in milliseconds before sending an ajax filter query." />
+    <cc:attribute name="filterEvent" type="java.lang.String" default="keyup" shortDescription="Event triggering filter for input filters." />
+    <cc:attribute name="filteredValue" type="java.util.List" shortDescription="List to keep filtered data." />
+    <cc:attribute name="first" type="java.lang.Integer" default="0" shortDescription="Index of the first row to be displayed" />
+    <cc:attribute name="frozenColumns" type="java.lang.Integer" default="0" shortDescription="Number of columns to freeze from start index 0." />
+    <cc:attribute name="frozenRows" type="java.lang.Object" shortDescription="Collection to display as fixed in scrollable mode." />
+    <cc:attribute name="globalFilter" type="java.lang.String" shortDescription="Value of the global filter to use when filtering by default." />
+    <cc:attribute name="globalFilterOnly" type="boolean" default="false" shortDescription="When true this will hide all column filters and allow all columns to be filtered by global filter only." />
+    <cc:attribute name="globalFilterFunction" type="java.lang.String" shortDescription="Custom implementation to globally filter a value against a constraint." />
+    <!-- <cc:attribute name="id" /> Replaced by tableId attr -->
+    <cc:attribute name="initMode" type="java.lang.String" default="load" shortDescription="Defines when the datatable is initiated at client side, valid values are 'load' (default) and 'immediate'." />
+    <cc:attribute name="lazy" type="boolean" default="false" shortDescription="Controls lazy loading. In most cases this is detected automatically based on value-binding to LazyDataModel. So no need to set this explicit." />
+    <cc:attribute name="liveResize" type="boolean" default="false" shortDescription="Columns are resized live in this mode without using a resize helper." />
+    <cc:attribute name="liveScroll" type="boolean" default="false" shortDescription="Enables live scrolling." />
+    <cc:attribute name="liveScrollBuffer" type="java.lang.Integer" default="0" shortDescription="Percentage height of the buffer between the bottom of the page and the scroll position to initiate the load for the new chunk. Value is defined in integer and default is 0." />
+    <cc:attribute name="nativeElements" type="boolean" default="false" shortDescription="Uses native radio-checkbox elements for row selection." />
+    <cc:attribute name="onExpandStart" type="java.lang.String" shortDescription="Client side callback to execute before expansion." />
+    <cc:attribute name="onRowClick" type="java.lang.String" shortDescription="Client side callback to execute after clicking row." />
+    <cc:attribute name="pageLinks" type="java.lang.Integer" default="10" shortDescription="Maximum number of page links to display." />
+    <cc:attribute name="paginatorAlwaysVisible" type="boolean" default="true" shortDescription="Defines if paginator should be hidden if total data count is less than number of rows per page." />
+    <cc:attribute name="paginatorPosition" type="java.lang.String" default="both" shortDescription="Paginator can be positioned at the 'top,' 'bottom,' or 'both.' Default setting is 'both.'" />
+    <cc:attribute name="paginatorTemplate" type="java.lang.String" default="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" shortDescription="Template of the paginator." />
+    <cc:attribute name="reflow" type="boolean" default="false" shortDescription="Reflow mode is a responsive mode to display columns as stacked depending on screen size." />
+    <cc:attribute name="rendered" type="boolean" default="true" shortDescription="Boolean value to specify the rendering of the component, when set to false component will not be rendered." />
+    <cc:attribute name="renderEmptyFacets" type="boolean" default="false" shortDescription="Render facets even if their children are not rendered. Default is false. See https://github.com/primefaces/primefaces/issues/4840" />
+    <cc:attribute name="resizableColumns" type="boolean" default="false" shortDescription="Enables column resizing." />
+    <cc:attribute name="resizeMode" type="java.lang.String" default="fit" shortDescription="Defines the resize behavior, valid values are 'fit' (default) and expand." />
+    <cc:attribute name="rowDragSelector" type="java.lang.String" default="td,span:not(.ui-c)" shortDescription="Defines the element used to reorder rows using dragdrop. Default selector is 'td,span:not(.ui-c)'" />
+    <cc:attribute name="rowEditMode" type="java.lang.String" default="eager" shortDescription="Defines the row edit behavior, valid values are 'eager' (default) and 'lazy'." />
+    <cc:attribute name="rowExpandMode" type="java.lang.String" default="new" shortDescription="Defines row expand mode, valid values are 'single' and 'multiple' (default)." />
+    <cc:attribute name="rowHover" type="boolean" default="false" shortDescription="Adds hover effect to rows, default is false. Hover is always on when selection is enabled." />
+    <cc:attribute name="rowIndexVar" type="java.lang.String" shortDescription="Name of iterator to refer each row index." />
+    <cc:attribute name="rowKey" type="java.lang.String" shortDescription="Unique identifier of a row. Must be defined when using selection together with non-lazy datasource (eg value-attribute bound to a instance of java.util.List)." />
+    <cc:attribute name="rowSelectMode" type="java.lang.String" default="new" shortDescription="Defines row selection mode for multiple selection. Valid values are 'new', 'add' and 'checkbox'." />
+    <cc:attribute name="rowSelector" type="java.lang.String" shortDescription="Client side check if rowclick triggered row click event not a clickable element in row content." />
+    <cc:attribute name="rowStatePreserved" type="boolean" default="false" shortDescription="Keeps state of its children on a per-row basis. Default is false." />
+    <cc:attribute name="rowStyleClass" type="java.lang.String" shortDescription="Style class for each row." />
+    <cc:attribute name="rowsPerPageLabel" type="java.lang.String" shortDescription="Label for the rowsPerPage dropdown." />
+    <cc:attribute name="rowsPerPageTemplate" type="java.lang.String" default="5,10,{ShowAll|'All'}" shortDescription="Template of the rowsPerPage dropdown." />
+    <cc:attribute name="saveOnCellBlur" type="boolean" default="true" shortDescription="Saves the changes in cell editing on blur, when set to false changes are discarded." />
+    <cc:attribute name="scrollHeight" type="java.lang.String" shortDescription="Scroll viewport height." />
+    <cc:attribute name="scrollRows" type="java.lang.Integer" default="0" shortDescription="Number of rows to load on live scroll." />
+	<cc:attribute name="scrollWidth" type="java.lang.String" shortDescription="Scroll viewport width." />
+    <cc:attribute name="scrollable" type="boolean" default="false" shortDescription="Makes data scrollable with fixed header." />
+    
+    <!-- PrimeFaces 11 does not have showSelectAll - this was added in PF13+. Keeping for forward compatibility but default false. -->
+    <cc:attribute name="showSelectAll" type="boolean" default="false" shortDescription="Show the select-all checkbox in header when selectionMode is multiple (PF13+)." />	<cc:attribute name="selectionMode" type="java.lang.String" default="" shortDescription="Enables row selection, valid values are 'single' and 'multiple'." />
+	<cc:attribute name="selection" type="java.lang.Object" shortDescription="Reference to the selection data." />
 
-	<cc:attribute name="selectionMode" type="java.lang.String" default="" />
-	<cc:attribute name="selection" type="java.lang.Object" required="false" />
-
-	<cc:attribute name="selectionPageOnly" default="true" />
-	<cc:attribute name="showGridlines" default="false" />
-	<cc:attribute name="size" default="regular" />
-	<cc:attribute name="sortBy" />
-	<cc:attribute name="skipChildren" default="false" />
-	<cc:attribute name="stickyHeader" default="false" />
-	<cc:attribute name="stickyTopAt" />
-	<cc:attribute name="stripedRows" default="false" />
-	<cc:attribute name="style" />
-	<cc:attribute name="styleClass" />
-	<cc:attribute name="summary" />
-	<cc:attribute name="tabindex" />
-	<cc:attribute name="tableStyle" />
-	<cc:attribute name="tableStyleClass" />
-	<cc:attribute name="value" required="true" />
-	<!-- <cc:attribute name="var" default="item" type=""/> -->
-	<cc:attribute name="virtualScroll" default="false" />
-	<cc:attribute name="touchable" default="false" />
-	<cc:attribute name="partialUpdate" default="true" />
+	<cc:attribute name="selectionPageOnly" type="boolean" default="true" shortDescription="When using a paginator and selection mode is checkbox, the select all checkbox in the header will select all rows on the current page if true, or all rows on all pages if false. Default is true." />
+	<cc:attribute name="showGridlines" type="boolean" default="false" shortDescription="When enabled, cell borders are displayed." />
+	<cc:attribute name="size" type="java.lang.String" default="regular" shortDescription="Size of the table content, valid values are 'small' and 'large'. Leave empty for regular size." />
+	<cc:attribute name="sortBy" type="java.lang.String" shortDescription="Property to be used for default sorting. Expects a single or a collection of SortMeta." />
+	<cc:attribute name="skipChildren" type="boolean" default="false" shortDescription="Ignores processing of children during lifecycle, improves performance if table only has output components." />
+	<cc:attribute name="stickyHeader" type="boolean" default="false" shortDescription="Sticky header stays in window viewport during scrolling." />
+	<cc:attribute name="stickyTopAt" type="java.lang.String" shortDescription="Selector to position on the page according to other fixing elements on the top of the table. Default is null." />
+	<cc:attribute name="stripedRows" type="boolean" default="false" shortDescription="Whether to display striped rows to visually separate content." />
+	<cc:attribute name="style" type="java.lang.String" shortDescription="Inline style of the component." />
+	<cc:attribute name="styleClass" type="java.lang.String" shortDescription="Style class of the component." />
+	<cc:attribute name="summary" type="java.lang.String" shortDescription="Summary attribute for WCAG." />
+	<cc:attribute name="tabindex" type="java.lang.String" shortDescription="Position of the element in the tabbing order." />
+	<cc:attribute name="tableStyle" type="java.lang.String" shortDescription="Inline style of the table element." />
+	<cc:attribute name="tableStyleClass" type="java.lang.String" shortDescription="Style class of the table element." />
+    <cc:attribute name="value" type="java.lang.Object" required="true" shortDescription="Data to display." />
+    <!-- <cc:attribute name="var" default="item" type=""/> -->
+    <cc:attribute name="virtualScroll" type="boolean" default="false" shortDescription="Loads data on demand as the scrollbar gets close to the bottom. Default is false." />
+    <cc:attribute name="touchable" type="boolean" default="false" shortDescription="Enable touch support if browser detection supports it. Default is false because it is globally enabled by default." />
+	<cc:attribute name="partialUpdate" type="boolean" default="true" shortDescription="When disabled, it updates the whole table instead of updating a specific field such as body element in the client requests of the dataTable." />
 </cc:interface>
 
 <cc:implementation>

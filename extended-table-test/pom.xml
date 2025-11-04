@@ -14,7 +14,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.axonivy.market</groupId>
+			<groupId>com.axonivy.market.extendedtable</groupId>
 			<artifactId>extended-table</artifactId>
 			<version>${project.version}</version>
 			<type>iar</type>

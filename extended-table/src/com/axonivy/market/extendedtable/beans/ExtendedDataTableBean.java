@@ -62,19 +62,18 @@ public class ExtendedDataTableBean {
 	private static final String STATE = "state";
 	private static final String DATE_FORMATS = "dateFormats";
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
-	private static final String STATE_KEY_PREFIX = "DATATABLE_";
+	private static final String STATE_KEY_PREFIX = "TABLE_STATE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
-	private List<String> stateNames = new ArrayList<>();
-
-	// Allow tests or integrators to inject a controller to avoid static lookups in Attrs
-	private TableStateController controllerOverride;
 
 	private static final ObjectMapper TABLE_STATE_MAPPER = createObjectMapperInstance();
+
+	private List<String> stateNames = new ArrayList<>();
 
 	public void saveTableState() {
 		String explicitSave = getRequestParam("explicitSave");
 
+		// Ignore in case unexpected first button submission
 		if (!"true".equals(explicitSave)) {
 			return;
 		}
@@ -258,12 +257,14 @@ public class ExtendedDataTableBean {
 	 * Creates a configured ObjectMapper for serializing/deserializing
 	 * DataTableState.
 	 * 
-	 * Default configuration: - Includes JavaTimeModule for java.time.* types
-	 * (LocalDate, LocalDateTime, etc.) - Serializes dates as ISO-8601 strings
-	 * instead of timestamps - Ignores unknown properties during deserialization
+	 * <pre>
+	 * Default configuration: 
+	 * - Includes JavaTimeModule for java.time.* types (LocalDate, LocalDateTime, etc.) 
+	 * - Serializes dates as ISO-8601 strings instead of timestamps - Ignores unknown properties during deserialization
 	 * 
 	 * Users can customize date format by providing a dateFormat attribute to the
 	 * ExtendedTable component (e.g., dateFormat="MM/dd/yyyy").
+	 * </pre>
 	 * 
 	 * @return Configured ObjectMapper instance
 	 */
@@ -350,6 +351,7 @@ public class ExtendedDataTableBean {
 
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
+			// Date range
 			if (filterValue instanceof List) {
 				List<?> filterList = (List<?>) filterValue;
 				List<LocalDate> convertedList = new ArrayList<>();
@@ -370,6 +372,7 @@ public class ExtendedDataTableBean {
 					filterMeta.setFilterValue(convertedList);
 				}
 
+				// Single date
 			} else if (filterValue instanceof String str) {
 				LocalDate converted = parseLocalDate(str, formatter);
 				if (converted != null) {
@@ -397,25 +400,26 @@ public class ExtendedDataTableBean {
 	}
 
 	private List<String> fetchAllDataTableStateNames() {
-		String tableId = getTableClientId();
-		String prefix = STATE_KEY_PREFIX + tableId + "_";
+		String safeTableId = getSanitizedClientId();
+		String prefix = STATE_KEY_PREFIX + safeTableId + "_";
 
 		return getController().listKeys(prefix).stream().filter(name -> name.startsWith(prefix))
 				.map(name -> name.substring(prefix.length())).filter(value -> !value.isEmpty()).toList();
 	}
 
 	private String getStateKey() {
-		String tableId = getTableClientId();
-		String safeTableId = sanitizeClientId(tableId);
+		String safeTableId = getSanitizedClientId();
+
 		return String.format(STATE_KEY_PATTERN, safeTableId, stateName);
 	}
 
-	private String sanitizeClientId(String id) {
-		if (id == null) {
+	private String getSanitizedClientId() {
+		String tableId = getTableClientId();
+		if (tableId == null) {
 			return "";
 		}
 		// Replace characters that may be problematic in keys
-		return id.replace(':', '_').replace(' ', '_');
+		return tableId.replace(':', '_').replace(' ', '_');
 	}
 
 	/**
@@ -426,26 +430,13 @@ public class ExtendedDataTableBean {
 	 * 
 	 */
 	private TableStateController getController() {
-		// If a test or integrator injected a controller, use it
-		if (controllerOverride != null) {
-			return controllerOverride;
-		}
-
-		Object repoObj = Attrs.get(CC_ATTRS_TABLE_STATE_CONTROLLER);
-		if (repoObj instanceof TableStateController) {
-			return (TableStateController) repoObj;
+		Object stateController = Attrs.get(CC_ATTRS_TABLE_STATE_CONTROLLER);
+		if (stateController instanceof TableStateController) {
+			return (TableStateController) stateController;
 		}
 
 		// Fallback to default in case no overriding controller is set
 		return new IvyUserStateController();
-	}
-
-	/**
-	 * Setter allowing injection of a TableStateController for testing or
-	 * integration. This reduces the need for static mocking of Attrs in tests.
-	 */
-	public void setControllerOverride(TableStateController controller) {
-		this.controllerOverride = controller;
 	}
 
 	private String getTableClientId() {

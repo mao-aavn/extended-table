@@ -169,8 +169,8 @@ class ExtendedDataTableBeanTest {
                 .thenReturn("State saved successfully");
             
             // Setup mock controller to return state names
-            when(mockController.listKeys("DATATABLE_form:testTable_")).thenReturn(
-                Arrays.asList("DATATABLE_form:testTable_testState", "DATATABLE_form:testTable_anotherState"));
+            when(mockController.listKeys("TABLE_STATE_form_testTable_")).thenReturn(
+                Arrays.asList("TABLE_STATE_form_testTable_testState", "TABLE_STATE_form_testTable_anotherState"));
             
             // Ensure ComponentTraversalUtils used by JSFUtils.findComponent returns our mock
             try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
@@ -181,8 +181,8 @@ class ExtendedDataTableBeanTest {
                 bean.saveTableState();
 
                 // Then
-                verify(mockController, times(1)).save(eq("DATATABLE_form:testTable_testState"), anyString());
-                verify(mockController, times(1)).listKeys("DATATABLE_form:testTable_");
+                verify(mockController, times(1)).save(eq("TABLE_STATE_form_testTable_testState"), anyString());
+                verify(mockController, times(1)).listKeys("TABLE_STATE_form_testTable_");
             }
         }
     }
@@ -257,7 +257,7 @@ class ExtendedDataTableBeanTest {
             when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.widgetVar}"), eq(Object.class)))
                 .thenReturn("testTableWidget");
             
-            when(mockController.load("DATATABLE_form:testTable_testState")).thenReturn(jsonState);
+            when(mockController.load("TABLE_STATE_form_testTable_testState")).thenReturn(jsonState);
             
             // Ensure ComponentTraversalUtils used by JSFUtils.findComponent returns our mock
             try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
@@ -272,7 +272,7 @@ class ExtendedDataTableBeanTest {
                 verify(mockDataTable).filterAndSort();
                 verify(mockDataTable).resetColumns();
                 verify(mockDataTable).setFirst(0);
-                verify(mockController).load("DATATABLE_form:testTable_testState");
+                verify(mockController).load("TABLE_STATE_form_testTable_testState");
             }
         }
     }
@@ -326,9 +326,9 @@ class ExtendedDataTableBeanTest {
             when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.deleteSuccessMsg}"), eq(Object.class)))
                 .thenReturn("State deleted successfully");
             
-            when(mockController.delete("DATATABLE_form:testTable_testState")).thenReturn(true);
-            when(mockController.listKeys("DATATABLE_form:testTable_")).thenReturn(
-                Arrays.asList("DATATABLE_form:testTable_anotherState"));
+            when(mockController.delete("TABLE_STATE_form_testTable_testState")).thenReturn(true);
+            when(mockController.listKeys("TABLE_STATE_form_testTable_")).thenReturn(
+                Arrays.asList("TABLE_STATE_form_testTable_anotherState"));
             try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
                 traverseMock.when(() -> ComponentTraversalUtils.firstWithId("testTable", mockViewRoot))
                     .thenReturn(mockDataTable);
@@ -337,8 +337,8 @@ class ExtendedDataTableBeanTest {
                 bean.deleteTableState();
 
                 // Then
-                verify(mockController).delete("DATATABLE_form:testTable_testState");
-                verify(mockController).listKeys("DATATABLE_form:testTable_");
+                verify(mockController).delete("TABLE_STATE_form_testTable_testState");
+                verify(mockController).listKeys("TABLE_STATE_form_testTable_");
                 assertEquals("anotherState", bean.getStateName());
             }
         }
@@ -362,7 +362,7 @@ class ExtendedDataTableBeanTest {
             when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.deleteErrorMsg}"), eq(Object.class)))
                 .thenReturn("Failed to delete state");
             
-            when(mockController.delete("DATATABLE_form:testTable_testState")).thenReturn(false);
+            when(mockController.delete("TABLE_STATE_form_testTable_testState")).thenReturn(false);
             try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
                 traverseMock.when(() -> ComponentTraversalUtils.firstWithId("testTable", mockViewRoot))
                     .thenReturn(mockDataTable);
@@ -371,7 +371,7 @@ class ExtendedDataTableBeanTest {
                 bean.deleteTableState();
 
                 // Then
-                verify(mockController).delete("DATATABLE_form:testTable_testState");
+                verify(mockController).delete("TABLE_STATE_form_testTable_testState");
             }
         }
     }
@@ -431,8 +431,8 @@ class ExtendedDataTableBeanTest {
             when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableStateController}"), eq(Object.class)))
                 .thenReturn(mockController);
             
-            when(mockController.listKeys("DATATABLE_form:testTable_")).thenReturn(
-                Arrays.asList("DATATABLE_form:testTable_state1", "DATATABLE_form:testTable_state2"));
+            when(mockController.listKeys("TABLE_STATE_form_testTable_")).thenReturn(
+                Arrays.asList("TABLE_STATE_form_testTable_state1", "TABLE_STATE_form_testTable_state2"));
             
             // Ensure ComponentTraversalUtils used by JSFUtils.findComponent returns our mock
             try (var traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
@@ -443,7 +443,7 @@ class ExtendedDataTableBeanTest {
                 List<String> result = bean.completeStateName("state");
 
                 // Then
-                verify(mockController).listKeys("DATATABLE_form:testTable_");
+                verify(mockController).listKeys("TABLE_STATE_form_testTable_");
                 assertThat(result).containsExactly("state1", "state2");
             }
         }

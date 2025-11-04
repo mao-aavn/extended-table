@@ -24,7 +24,7 @@
 							<div>
 								<p:commandButton id="toggler" type="button" value="Columns"
 									icon="pi pi-align-justify" />
-								<p:columnToggler id="bbb"
+								<p:columnToggler id="toggler"
 									datasource="columnTogglerForm:extendedTable:columnTogglerTable"
 									trigger="toggler" />
 							</div>
@@ -45,15 +45,13 @@
 					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
 					<p:column headerText="Date Range" filterBy="#{item.date}"
 						field="date" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterDate}">
-						<f:facet name="filter">
-							<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
-								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
-						</f:facet>
-						<h:outputText value="#{data.bean.formatDate(item.date)}" />
-					</p:column>
-
-					<!-- Rank column with single input range syntax -->
+					filterFunction="#{data.bean.filterDate}">
+					<f:facet name="filter">
+						<p:datePicker pattern="dd.MM.yyyy"
+							value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
+					</f:facet>
+					<h:outputText value="#{data.bean.formatDate(item.date)}" />
+				</p:column>					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
 						filterFunction="#{data.bean.filterRank}">

@@ -37,7 +37,7 @@ public abstract class GenericDemoBean {
 	protected final CustomerStatus[] customerStatus = CustomerStatus.values();
 	protected List<Country> countries = null;
 
-	protected List<LocalDate> dateRangeFilter; // holds 0..2 dates from the date picker
+	protected Object dateRangeFilter; // holds LocalDate (single), List<LocalDate> (range/multiple)
 	protected List<LocalDate> dateTimeRangeFilter; // holds 0..2 dates from the datetime picker
 	protected Integer rankFrom;
 	protected Integer rankTo;
@@ -107,6 +107,8 @@ public abstract class GenericDemoBean {
 	}
 
 	// Custom date filter supporting selectionMode="range" from DatePicker
+	// Also supports single date selection and multiple date selection
+	// The filter parameter can be: LocalDate (single), List<LocalDate> (range/multiple), String, or java.util.Date
 	public boolean filterDate(Object value, Object filter, Locale locale) {
 		LocalDate date = null;
 
@@ -150,27 +152,36 @@ public abstract class GenericDemoBean {
 				}
 				return true;
 			} catch (Exception e) {
-				return true; // If parsing fails, show all
-			}
+			return true; // If parsing fails, show all
 		}
+	}
 
-		// PrimeFaces datePicker with selectionMode=range usually posts a List of 2
-		// dates
-		if (filter instanceof java.util.List) {
-			@SuppressWarnings("unchecked")
-			java.util.List<Object> range = (java.util.List<Object>) filter;
+	// Handle List: can be range (2 dates) or multiple selection (n dates)
+	if (filter instanceof java.util.List) {
+		@SuppressWarnings("unchecked")
+		java.util.List<Object> filterList = (java.util.List<Object>) filter;
+		
+		if (filterList.isEmpty()) {
+			return true;
+		}
+		
+		// If exactly 2 dates, treat as range (from..to)
+		if (filterList.size() == 2) {
 			LocalDate from = null;
 			LocalDate to = null;
-			if (range.size() > 0 && range.get(0) instanceof java.util.Date) {
-				from = ((java.util.Date) range.get(0)).toInstant().atZone(java.time.ZoneId.systemDefault())
-						.toLocalDate();
-			} else if (range.size() > 0 && range.get(0) instanceof LocalDate) {
-				from = (LocalDate) range.get(0);
+			
+			if (filterList.get(0) instanceof java.util.Date) {
+				from = ((java.util.Date) filterList.get(0)).toInstant()
+					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+			} else if (filterList.get(0) instanceof LocalDate) {
+				from = (LocalDate) filterList.get(0);
 			}
-			if (range.size() > 1 && range.get(1) instanceof java.util.Date) {
-				to = ((java.util.Date) range.get(1)).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-			} else if (range.size() > 1 && range.get(1) instanceof LocalDate) {
-				to = (LocalDate) range.get(1);
+			
+			if (filterList.get(1) instanceof java.util.Date) {
+				to = ((java.util.Date) filterList.get(1)).toInstant()
+					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+			} else if (filterList.get(1) instanceof LocalDate) {
+				to = (LocalDate) filterList.get(1);
 			}
 
 			if (from != null && date.isBefore(from)) {
@@ -181,8 +192,24 @@ public abstract class GenericDemoBean {
 			}
 			return true;
 		}
-
-		// Single value compare: equals
+		
+		// Multiple selection: check if date matches any in the list
+		for (Object filterItem : filterList) {
+			LocalDate filterDate = null;
+			
+			if (filterItem instanceof java.util.Date) {
+				filterDate = ((java.util.Date) filterItem).toInstant()
+					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+			} else if (filterItem instanceof LocalDate) {
+				filterDate = (LocalDate) filterItem;
+			}
+			
+			if (filterDate != null && date.equals(filterDate)) {
+				return true;
+			}
+		}
+		return false;
+	}		// Single value compare: equals
 		if (filter instanceof java.util.Date) {
 			LocalDate f = ((java.util.Date) filter).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 			return date.equals(f);
@@ -401,11 +428,11 @@ public abstract class GenericDemoBean {
 
 	// getters/setters
 
-	public List<LocalDate> getDateRangeFilter() {
+	public Object getDateRangeFilter() {
 		return dateRangeFilter;
 	}
 
-	public void setDateRangeFilter(List<LocalDate> dateRangeFilter) {
+	public void setDateRangeFilter(Object dateRangeFilter) {
 		this.dateRangeFilter = dateRangeFilter;
 	}
 

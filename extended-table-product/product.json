@@ -6,15 +6,21 @@
       "data": {
         "projects": [
           {
-            "groupId": "MY-GROUP-ID",
-            "artifactId": "MY-PRODUCT-NAME-demo",
+            "groupId": "com.axonivy.market.extendedtable",
+            "artifactId": "extended-table-demo",
+            "version": "${version}",
+            "type": "iar"
+          },
+          {
+            "groupId": "com.axonivy.market.extendedtable",
+            "artifactId": "extended-table-test",
             "version": "${version}",
             "type": "iar"
           }
         ],
         "repositories": [
           {
-            "id": "maven.axonivy.com",
+            "id": "axonivy.public",
             "url": "https://maven.axonivy.com",
             "snapshots": {
               "enabled": "true"
@@ -28,31 +34,10 @@
       "data": {
         "dependencies": [
           {
-            "groupId": "MY-GROUP-ID",
-            "artifactId": "MY-PRODUCT-NAME",
+            "groupId": "com.axonivy.market.extendedtable",
+            "artifactId": "extended-table",
             "version": "${version}",
             "type": "iar"
-          }
-        ],
-        "repositories": [
-          {
-            "id": "maven.axonivy.com",
-            "url": "https://maven.axonivy.com",
-            "snapshots": {
-              "enabled": "true"
-            }
-          }
-        ]
-      }
-    }, 
-    {
-      "id": "maven-dropins",
-      "data": {
-        "dependencies": [
-          {
-            "groupId": "MY-GROUP-ID",
-            "artifactId": "MY-PRODUCT-NAME",
-            "version": "${version}"
           }
         ],
         "repositories": [

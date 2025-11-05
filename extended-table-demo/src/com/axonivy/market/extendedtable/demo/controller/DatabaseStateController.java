@@ -1,4 +1,4 @@
-package com.axonivy.market.extendedtable.demo.repo;
+package com.axonivy.market.extendedtable.demo.controller;
 
 import java.util.List;
 

@@ -37,8 +37,9 @@ public abstract class GenericDemoBean {
 	protected final CustomerStatus[] customerStatus = CustomerStatus.values();
 	protected List<Country> countries = null;
 
-	protected Object dateRangeFilter; // holds LocalDate (single), List<LocalDate> (range/multiple)
-	protected List<LocalDate> dateTimeRangeFilter; // holds 0..2 dates from the datetime picker
+	protected LocalDate dateFilter; 
+	protected List<LocalDate> datesFilter; // for date range and multiple modes only
+	protected List<LocalDate> dateTimesFilter; // for date range and multiple modes only
 	protected Integer rankFrom;
 	protected Integer rankTo;
 
@@ -311,17 +312,18 @@ public abstract class GenericDemoBean {
 
 	// Custom filter function for rank with syntax: "x..y", "..y", "x..", or single
 	// value "x"
-	public boolean filterRank(Object value, Object filter, Locale locale) {
+	public boolean filterNumber(Object value, Object filter, Locale locale) {
 		if (value == null) {
 			return false;
 		}
 
-		Integer rank = null;
+		Number numValue = null;
 		if (value instanceof Number) {
-			rank = ((Number) value).intValue();
+			numValue = (Number) value;
 		} else if (value instanceof String) {
 			try {
-				rank = Integer.parseInt((String) value);
+				// Try to parse as double to handle both int and double
+				numValue = Double.parseDouble((String) value);
 			} catch (NumberFormatException e) {
 				return false;
 			}
@@ -345,19 +347,21 @@ public abstract class GenericDemoBean {
 				String left = parts.length > 0 ? parts[0] : "";
 				String right = parts.length > 1 ? parts[1] : "";
 
-				Integer from = left.isEmpty() ? null : Integer.valueOf(left);
-				Integer to = right.isEmpty() ? null : Integer.valueOf(right);
+				Double from = left.isEmpty() ? null : Double.valueOf(left);
+				Double to = right.isEmpty() ? null : Double.valueOf(right);
 
-				if (from != null && rank < from) {
+				double numVal = numValue.doubleValue();
+				
+				if (from != null && numVal < from) {
 					return false;
 				}
-				if (to != null && rank > to) {
+				if (to != null && numVal > to) {
 					return false;
 				}
 				return true;
 			} else {
-				// exact
-				return rank.equals(Integer.valueOf(text));
+				// exact match - compare as double to handle both int and double
+				return Math.abs(numValue.doubleValue() - Double.parseDouble(text)) < 0.0001;
 			}
 		} catch (NumberFormatException ex) {
 			return false;
@@ -427,25 +431,25 @@ public abstract class GenericDemoBean {
 	}
 
 	// getters/setters
-
-	public Object getDateRangeFilter() {
-		return dateRangeFilter;
-	}
-
-	public void setDateRangeFilter(Object dateRangeFilter) {
-		this.dateRangeFilter = dateRangeFilter;
-	}
-
-	public List<LocalDate> getDateTimeRangeFilter() {
-		return dateTimeRangeFilter;
-	}
-
-	public void setDateTimeRangeFilter(List<LocalDate> dateTimeRangeFilter) {
-		this.dateTimeRangeFilter = dateTimeRangeFilter;
-	}
-
+	
 	public List<CustomerStatus> getSelectedStatuses() {
 		return selectedStatuses;
+	}
+
+	public List<LocalDate> getDatesFilter() {
+		return datesFilter;
+	}
+
+	public void setDatesFilter(List<LocalDate> datesFilter) {
+		this.datesFilter = datesFilter;
+	}
+
+	public List<LocalDate> getDateTimesFilter() {
+		return dateTimesFilter;
+	}
+
+	public void setDateTimesFilter(List<LocalDate> dateTimesFilter) {
+		this.dateTimesFilter = dateTimesFilter;
 	}
 
 	public void setSelectedStatuses(List<CustomerStatus> selectedStatuses) {
@@ -502,6 +506,14 @@ public abstract class GenericDemoBean {
 
 	public CustomerStatus[] getCustomerStatus() {
 		return customerStatus;
+	}
+
+	public LocalDate getDateFilter() {
+		return dateFilter;
+	}
+
+	public void setDateFilter(LocalDate dateFilter) {
+		this.dateFilter = dateFilter;
 	}
 
 }

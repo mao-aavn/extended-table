@@ -65,10 +65,17 @@ public class CustomerService {
 
 		List<Customer> customers = new ArrayList<>();
 		for (int i = 0; i < number; i++) {
-			customers.add(Customer.builder().name(getName()).company(getCompany()).country(getCountry())
+			customers.add(Customer.builder()
+					.name(getName())
+					.company(getCompany())
+					.country(getCountry())
 					.date(getDate())
+					.date1(getDate())
 					.dateTime(getDateTime())
-					.status(CustomerStatus.random()).rank(getRank()).hasRepresentative(random.nextBoolean()).build());
+					.status(CustomerStatus.random())
+					.income(random.nextDouble() * 1000000)
+					.rank(getRank())
+					.hasRepresentative(random.nextBoolean()).build());
 		}
 		assignGroupsToCustomers(customers);
 

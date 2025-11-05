@@ -24,7 +24,7 @@
 							<div>
 								<p:commandButton id="toggler" type="button" value="Columns"
 									icon="pi pi-align-justify" />
-								<p:columnToggler id="toggler"
+								<p:columnToggler id="columnToggler"
 									datasource="columnTogglerForm:extendedTable:columnTogglerTable"
 									trigger="toggler" />
 							</div>
@@ -42,24 +42,40 @@
 						<h:outputText value="#{item.name}" />
 					</p:column>
 
-					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
-					<p:column headerText="Date Range" filterBy="#{item.date}"
+					<!-- Single Date -->
+					<p:column headerText="Single Date" filterBy="#{item.date}"
 						field="date" filterMatchMode="custom"
-					filterFunction="#{data.bean.filterDate}">
-					<f:facet name="filter">
-						<p:datePicker pattern="dd.MM.yyyy"
-							value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
-					</f:facet>
-					<h:outputText value="#{data.bean.formatDate(item.date)}" />
-				</p:column>					<!-- Rank column with single input range syntax -->
+						filterFunction="#{data.bean.filterDate}">
+						<f:facet name="filter">
+							<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
+								value="#{data.bean.dateFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{data.bean.formatDate(item.date)}" />
+					</p:column>
+					
+					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterRank}">
+						filterFunction="#{data.bean.filterNumber}">
 						<f:facet name="filter">
-							<p:inputText id="rankFilter" placeholder="e.g: 4..6, ..10, 5.., or 5"
+							<p:inputText id="rankFilter" placeholder="4..6, ..10, 5.., or 5"
 								style="width:120px" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
+					</p:column>
+					
+					<!-- Income column-->
+					<p:column headerText="Income" field="income" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterNumber}">
+						<f:facet name="filter">
+							<p:inputText id="incomeFilter"
+								placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px"
+								onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.income}">
+							<f:convertNumber locale="de_DE" minFractionDigits="2"
+								maxFractionDigits="2" />
+						</h:outputText>
 					</p:column>
 
 					<!-- Has Representative column -->

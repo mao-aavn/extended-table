@@ -376,7 +376,7 @@ public class ExtendedDataTableBean {
 			} else if (filterValue instanceof String str) {
 				LocalDate converted = parseLocalDate(str, formatter);
 				if (converted != null) {
-					filterMeta.setFilterValue(List.of(converted));
+					filterMeta.setFilterValue(converted);
 				}
 			}
 		}

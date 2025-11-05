@@ -45,7 +45,7 @@
 						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
-								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
+								value="#{data.bean.datesFilter}" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{data.bean.formatDate(item.date)}" />
 					</p:column>
@@ -53,12 +53,26 @@
 					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterRank}">
+						filterFunction="#{data.bean.filterNumber}">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="e.g: 4..6, ..10, 5.., or 5"
 								style="width:120px" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
+					</p:column>
+					
+					<!-- Income column-->
+					<p:column headerText="Income" field="income" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterNumber}">
+						<f:facet name="filter">
+							<p:inputText id="incomeFilter"
+								placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px"
+								onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.income}">
+							<f:convertNumber locale="de_DE" minFractionDigits="2"
+								maxFractionDigits="2" />
+						</h:outputText>
 					</p:column>
 
 					<!-- Has Representative column -->

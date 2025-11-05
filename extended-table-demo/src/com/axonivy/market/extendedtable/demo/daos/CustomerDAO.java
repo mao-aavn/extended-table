@@ -183,18 +183,54 @@ public class CustomerDAO extends AuditableIdDAO<Customer_, Customer> implements 
 	}
 
 	private Predicate buildNumberRangeFromString(Path<?> path, String filterStr, CriteriaBuilder cb) {
-		String[] parts = filterStr.split("\\.\\.");
+		// Use limit -1 to preserve trailing empty strings
+		String[] parts = filterStr.split("\\.\\.", -1);
 		if (parts.length != 2) {
 			return null;
 		}
+		
+		List<Predicate> predicates = new ArrayList<>();
+		Class<?> type = path.getJavaType();
+		
 		try {
-			Double from = Double.valueOf(parts[0].trim());
-			Double to = Double.valueOf(parts[1].trim());
-			return cb.and(
-					cb.greaterThanOrEqualTo(path.as(Double.class), from),
-					cb.lessThanOrEqualTo(path.as(Double.class), to));
+			// Handle "from.." (e.g., "5.." means >= 5)
+			if (!parts[0].trim().isEmpty()) {
+				Number from = parseNumber(parts[0].trim(), type);
+				@SuppressWarnings("unchecked")
+				Expression<Number> pathExpr = (Expression<Number>) path;
+				predicates.add(cb.ge(pathExpr, from));
+			}
+			
+			// Handle "..to" (e.g., "..10" means <= 10)
+			if (!parts[1].trim().isEmpty()) {
+				Number to = parseNumber(parts[1].trim(), type);
+				@SuppressWarnings("unchecked")
+				Expression<Number> pathExpr = (Expression<Number>) path;
+				predicates.add(cb.le(pathExpr, to));
+			}
+			
+			return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
 		} catch (NumberFormatException e) {
 			return null; // ignore invalid range
+		}
+	}
+	
+	private Number parseNumber(String value, Class<?> type) {
+		if (type == Integer.class || type == int.class) {
+			return Integer.valueOf(value);
+		} else if (type == Long.class || type == long.class) {
+			return Long.valueOf(value);
+		} else if (type == Double.class || type == double.class) {
+			return Double.valueOf(value);
+		} else if (type == Float.class || type == float.class) {
+			return Float.valueOf(value);
+		} else if (type == Short.class || type == short.class) {
+			return Short.valueOf(value);
+		} else if (type == Byte.class || type == byte.class) {
+			return Byte.valueOf(value);
+		} else {
+			// Default to Double for other Number types
+			return Double.valueOf(value);
 		}
 	}
 
@@ -230,29 +266,34 @@ public class CustomerDAO extends AuditableIdDAO<Customer_, Customer> implements 
 			predicates.add(cb.greaterThanOrEqualTo(pathExpr, (Comparable) from));
 		}
 		if (to != null) {
-			@SuppressWarnings("unchecked")
 			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
 			predicates.add(cb.lessThanOrEqualTo(pathExpr, (Comparable) to));
 		}
 		return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
 	}
 
-	private Predicate buildDateRangeFromList(Path<?> path, java.util.List<?> range, CriteriaBuilder cb) {
-		Object from = range.size() > 0 ? range.get(0) : null;
-		Object to = range.size() > 1 ? range.get(1) : null;
+	private Predicate buildDateRangeFromList(Path<?> path, java.util.List<?> dateList, CriteriaBuilder cb) {
+		if (dateList == null || dateList.isEmpty()) {
+			return null;
+		}
 
-		List<Predicate> predicates = new ArrayList<>();
-		if (from != null) {
-			@SuppressWarnings("unchecked")
-			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
-			predicates.add(cb.greaterThanOrEqualTo(pathExpr, (Comparable) from));
+		// Check if the path is LocalDateTime type
+		boolean isLocalDateTime = path.getJavaType().equals(java.time.LocalDateTime.class);
+
+		// Multiple selection: Build IN query for selectionMode="multiple"
+		CriteriaBuilder.In<Object> inClause = cb.in(path);
+		for (Object date : dateList) {
+			if (date != null) {
+				// Convert LocalDate to LocalDateTime if needed
+				if (isLocalDateTime && date instanceof java.time.LocalDate) {
+					// For IN clause, use start of day
+					inClause.value(((java.time.LocalDate) date).atStartOfDay());
+				} else {
+					inClause.value(date);
+				}
+			}
 		}
-		if (to != null) {
-			@SuppressWarnings("unchecked")
-			Expression<Comparable> pathExpr = (Expression<Comparable>) path;
-			predicates.add(cb.lessThanOrEqualTo(pathExpr, (Comparable) to));
-		}
-		return predicates.isEmpty() ? null : cb.and(predicates.toArray(new Predicate[0]));
+		return inClause;
 	}
 
 	private Predicate buildStringPredicate(Path<?> path, Object filterValue, CriteriaBuilder cb) {

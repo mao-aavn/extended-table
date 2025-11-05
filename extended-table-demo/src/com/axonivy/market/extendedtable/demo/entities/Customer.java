@@ -29,11 +29,15 @@ public class Customer extends AuditableIdEntity {
 	private LocalDateTime dateTime;
 
 	private LocalDate date;
+	
+	private LocalDate date1;
 
 	@Enumerated(EnumType.STRING)
 	private CustomerStatus status;
 
 	private int customerRank;
+	
+	private double income;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "group_id")
@@ -51,9 +55,11 @@ public class Customer extends AuditableIdEntity {
 		private String company;
 		private Country country;
 		private LocalDate date;
+		private LocalDate date1;
 		private LocalDateTime dateTime;
 		private CustomerStatus status;
 		private int customerRank;
+		private double income;
 		private CustomerGroup group;
 		private boolean hasRepresentative = false;
 
@@ -77,6 +83,11 @@ public class Customer extends AuditableIdEntity {
 			return this;
 		}
 		
+		public Builder date1(LocalDate date) {
+			this.date1 = date;
+			return this;
+		}
+		
 		public Builder dateTime(LocalDateTime dateTime) {
 			this.dateTime = dateTime;
 			return this;
@@ -87,9 +98,13 @@ public class Customer extends AuditableIdEntity {
 			return this;
 		}
 
-		// keep backward compatibility with previous API used in services/UI
 		public Builder rank(int rank) {
 			this.customerRank = rank;
+			return this;
+		}
+		
+		public Builder income(double income) {
+			this.income = income;
 			return this;
 		}
 
@@ -114,9 +129,11 @@ public class Customer extends AuditableIdEntity {
 			c.setCompany(company);
 			c.setCountry(country);
 			c.setDate(date);
+			c.setDate1(date1);
 			c.setDateTime(dateTime);
 			c.setStatus(status);
 			c.setCustomerRank(customerRank);
+			c.setIncome(income);
 			c.setGroup(group);
 			c.setHasRepresentative(hasRepresentative);
 			return c;
@@ -124,6 +141,22 @@ public class Customer extends AuditableIdEntity {
 	}
 
 	public Customer() {
+	}
+
+	public LocalDate getDate1() {
+		return date1;
+	}
+
+	public void setDate1(LocalDate date1) {
+		this.date1 = date1;
+	}
+
+	public double getIncome() {
+		return income;
+	}
+
+	public void setIncome(double income) {
+		this.income = income;
 	}
 
 	public String getName() {
@@ -216,13 +249,20 @@ public class Customer extends AuditableIdEntity {
 			return false;
 		}
 		Customer customer = (Customer) o;
-		return id == customer.id && customerRank == customer.customerRank && Objects.equals(name, customer.name)
-				&& Objects.equals(company, customer.company) && Objects.equals(country, customer.country)
-				&& Objects.equals(date, customer.date) && status == customer.status;
+		return id == customer.id;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, company, country, date, status, customerRank);
+		return Objects.hash(id);
 	}
+
+	@Override
+	public String toString() {
+		return "Customer [name=" + name + ", company=" + company + ", country=" + country + ", dateTime=" + dateTime
+				+ ", date=" + date + ", date1=" + date1 + ", status=" + status + ", customerRank=" + customerRank
+				+ ", income=" + income + ", group=" + group + ", hasRepresentative=" + hasRepresentative + "]";
+	}
+	
+	
 }

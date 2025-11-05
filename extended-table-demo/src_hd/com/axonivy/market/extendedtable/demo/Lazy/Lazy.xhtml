@@ -14,8 +14,7 @@
 					tableId="lazyTable" widgetVar="lazyTable" id="extendedTable"
 					showDeleteButton="true" paginator="true" rows="10"
 					allowUnsorting="true" filteredValue="#{data.bean.filteredItems}"
-					showResetButton="true"
-					lazy="true" value="#{data.bean.lazyModel}">
+					showResetButton="true" lazy="true" value="#{data.bean.lazyModel}">
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
@@ -28,26 +27,53 @@
 						<h:outputText value="#{item.name}" />
 					</p:column>
 
-					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
-					<p:column headerText="Date Range" filterBy="#{item.date}"
-						field="date" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterDate}">
+					<!-- Multi Date-->
+					<p:column headerText="Date (Multi Selection)" field="date">
 						<f:facet name="filter">
-							<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
-								value="#{data.bean.dateRangeFilter}" onchange="filterTable()" />
+							<p:datePicker selectionMode="multiple" pattern="dd.MM.yyyy"
+								value="#{data.bean.datesFilter}" onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{data.bean.formatDate(item.date)}" />
 					</p:column>
+					
+					<!-- Single Date-->
+					<p:column headerText="Date (Single Selection)" field="date1">
+						<f:facet name="filter">
+							<p:datePicker pattern="dd.MM.yyyy" value="#{data.bean.dateFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{data.bean.formatDate(item.date1)}" />
+					</p:column>
+
+					<!-- Date Time-->
+					<p:column headerText="Date Time (Multi Selection)" field="dateTime">
+						<f:facet name="filter">
+							<p:datePicker selectionMode="multiple" pattern="dd.MM.yyyy"
+								value="#{data.bean.datesFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{data.bean.formatDateTime(item.dateTime)}" />
+					</p:column>
 
 					<!-- Rank column with single input range syntax-->
-					<p:column headerText="Number Rank" field="rank"
-						filterBy="#{item.rank}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterRank}">
+					<p:column headerText="Number Rank" field="rank">
 						<f:facet name="filter">
-							<p:inputText id="rankFilter" placeholder="e.g: 4..6, ..10, 5.., or 5"
-								style="width:120px" onchange="filterTable()" />
+							<p:inputText id="rankFilter"
+								placeholder="e.g: 4..6, ..10, 5.., or 5" style="width:120px"
+								onchange="filterTable()" />
 						</f:facet>
 						<h:outputText value="#{item.rank}" />
+					</p:column>
+
+					<!-- Income column-->
+					<p:column headerText="Income" field="income">
+						<f:facet name="filter">
+							<p:inputText id="incomeFilter"
+								placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px"
+								onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.income}">
+							<f:convertNumber locale="de_DE" minFractionDigits="2"
+								maxFractionDigits="2" />
+						</h:outputText>
 					</p:column>
 
 					<!-- Has Representative column -->
@@ -68,7 +94,7 @@
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="exact">
+						sortBy="#{item.country.name}">
 						<f:facet name="filter">
 							<p:selectOneMenu onchange="filterTable()" filter="true"
 								style="width:100%; box-sizing: border-box;">
@@ -86,8 +112,7 @@
 
 					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterEnum}">
+						sortBy="#{item.status}">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
 								onchange="filterTable()" multiple="true"

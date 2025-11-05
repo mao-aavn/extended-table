@@ -13,9 +13,10 @@
 			<h:form id="columnTogglerForm">
 				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="columnTogglerTable" widgetVar="columnTogglerTable"
+					tableId="columnTogglerTable" widgetVar="columnTogglerTable" resizableColumns="true"
 					id="extendedTable" value="#{data.bean.items}"
-					paginator="true" rows="10"
+					paginator="true" rows="10" scrollable="true"
+					scrollWidth="100%"
 					filteredValue="#{data.bean.filteredItems}">
 
 					<f:facet name="header">
@@ -33,7 +34,7 @@
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
-						sortBy="#{item.name}" filterMatchMode="contains">
+						sortBy="#{item.name}" filterMatchMode="contains" style="width:200px">
 						<f:facet name="filter">
 							<p:inputText id="nameFilter" styleClass="custom-filter"
 								onchange="filterTable()" />
@@ -45,7 +46,7 @@
 					<!-- Single Date -->
 					<p:column headerText="Single Date" filterBy="#{item.date}"
 						field="date" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterDate}">
+						filterFunction="#{data.bean.filterDate}" style="width:180px">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
 								value="#{data.bean.dateFilter}" onchange="filterTable()" />
@@ -56,7 +57,7 @@
 					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
 						filterBy="#{item.rank}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterNumber}">
+						filterFunction="#{data.bean.filterNumber}" style="width:150px">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="4..6, ..10, 5.., or 5"
 								style="width:120px" onchange="filterTable()" />
@@ -66,7 +67,7 @@
 					
 					<!-- Income column-->
 					<p:column headerText="Income" field="income" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterNumber}">
+						filterFunction="#{data.bean.filterNumber}" style="width:180px">
 						<f:facet name="filter">
 							<p:inputText id="incomeFilter"
 								placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px"
@@ -81,7 +82,7 @@
 					<!-- Has Representative column -->
 					<p:column headerText="Has Representative"
 						sortBy="#{item.hasRepresentative}"
-						filterBy="#{item.hasRepresentative}">
+						filterBy="#{item.hasRepresentative}" style="width:200px">
 						<f:facet name="filter">
 							<p:selectOneMenu onchange="filterTable()">
 								<f:selectItem itemLabel="All" itemValue="#{null}"
@@ -95,7 +96,7 @@
 
 					<!-- Country column -->
 					<p:column headerText="Country" filterBy="#{item.country.name}"
-						sortBy="#{item.country.name}" filterMatchMode="exact">
+						sortBy="#{item.country.name}" filterMatchMode="exact" style="width:180px">
 						<f:facet name="filter">
 							<p:selectOneMenu onchange="filterTable()" filter="true"
 								style="width:100%; box-sizing: border-box;">
@@ -114,7 +115,7 @@
 					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
 						sortBy="#{item.status}" filterMatchMode="custom"
-						filterFunction="#{data.bean.filterEnum}">
+						filterFunction="#{data.bean.filterEnum}" style="width:180px">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
 								onchange="filterTable()" multiple="true"
@@ -125,6 +126,96 @@
 						<span
 							class="customer-badge status-#{item.status.name().toLowerCase()}">
 							#{item.status} </span>
+					</p:column>
+					
+					<!-- Email column -->
+					<p:column headerText="Email" filterBy="#{item.email}"
+						sortBy="#{item.email}" filterMatchMode="contains" style="width:250px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.email}" />
+					</p:column>
+					
+					<!-- Phone column -->
+					<p:column headerText="Phone" filterBy="#{item.phone}"
+						sortBy="#{item.phone}" filterMatchMode="contains" style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.phone}" />
+					</p:column>
+					
+					<!-- Address column -->
+					<p:column headerText="Address" filterBy="#{item.address}"
+						sortBy="#{item.address}" filterMatchMode="contains" style="width:220px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.address}" />
+					</p:column>
+					
+					<!-- City column -->
+					<p:column headerText="City" filterBy="#{item.city}"
+						sortBy="#{item.city}" filterMatchMode="contains" style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.city}" />
+					</p:column>
+					
+					<!-- Postal Code column -->
+					<p:column headerText="Postal Code" filterBy="#{item.postalCode}"
+						sortBy="#{item.postalCode}" filterMatchMode="contains" style="width:150px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.postalCode}" />
+					</p:column>
+					
+					<!-- Website column -->
+					<p:column headerText="Website" filterBy="#{item.website}"
+						sortBy="#{item.website}" filterMatchMode="contains" style="width:250px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.website}" />
+					</p:column>
+					
+					<!-- Description column -->
+					<p:column headerText="Description" filterBy="#{item.description}"
+						sortBy="#{item.description}" filterMatchMode="contains" style="width:300px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.description}" />
+					</p:column>
+					
+					<!-- Notes column -->
+					<p:column headerText="Notes" filterBy="#{item.notes}"
+						sortBy="#{item.notes}" filterMatchMode="contains" style="width:300px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.notes}" />
+					</p:column>
+					
+					<!-- Contact Person column -->
+					<p:column headerText="Contact Person" filterBy="#{item.contactPerson}"
+						sortBy="#{item.contactPerson}" filterMatchMode="contains" style="width:200px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.contactPerson}" />
+					</p:column>
+					
+					<!-- Department column -->
+					<p:column headerText="Department" filterBy="#{item.department}"
+						sortBy="#{item.department}" filterMatchMode="contains" style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.department}" />
 					</p:column>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 			</h:form>

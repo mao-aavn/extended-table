@@ -28,6 +28,10 @@ public class CustomerService {
 	private String[] firstNames;
 	private String[] lastNames;
 	private String[] companies;
+	private String[] cities;
+	private String[] streets;
+	private String[] departments;
+	private String[] domains;
 
 	private CustomerDAO customerDAO = new CustomerDAO();
 
@@ -55,6 +59,21 @@ public class CustomerService {
 				"Caudy", "Chui", "Kusko", "Figeroa", "Vocelka", "Stenseth", "Glick", "Sergi", "Shinko", "Stockham",
 				"Ostrosky", "Gillian", "Rulapaugh", "Schemmer", "Oldroyd", "Campain", "Perin", "Ferencz", "Saylors",
 				"Briddick", "Waycott", "Bowley", "Malet", "Malet", "Bolognia", "Nestle", "Doe" };
+		
+		cities = new String[] { "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", 
+				"San Antonio", "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville", "Fort Worth", 
+				"Columbus", "Charlotte", "Seattle", "Denver", "Boston", "Portland", "Miami" };
+		
+		streets = new String[] { "Main St", "Oak Ave", "Pine Rd", "Maple Dr", "Cedar Ln", "Elm St", 
+				"Washington Blvd", "Park Ave", "Broadway", "Lake St", "Hill Rd", "Forest Dr", "River Rd", 
+				"Sunset Blvd", "Ocean Ave", "Market St", "Church St", "School Rd", "Mill St", "Spring St" };
+		
+		departments = new String[] { "Sales", "Marketing", "Engineering", "Human Resources", "Finance", 
+				"Operations", "Customer Service", "IT", "Legal", "Product Management", "Research", 
+				"Quality Assurance", "Business Development", "Procurement", "Administration" };
+		
+		domains = new String[] { "example.com", "business.com", "company.net", "enterprise.org", 
+				"solutions.io", "tech.co", "global.com", "services.net", "consulting.com", "industries.com" };
 	}
 
 	public void initCustomersIfNotExisting(int number) {
@@ -75,6 +94,16 @@ public class CustomerService {
 					.status(CustomerStatus.random())
 					.income(random.nextDouble() * 1000000)
 					.rank(getRank())
+					.email(getEmail())
+					.phone(getPhone())
+					.address(getAddress())
+					.city(getCity())
+					.postalCode(getPostalCode())
+					.website(getWebsite())
+					.description(getDescription())
+					.notes(getNotes())
+					.contactPerson(getContactPerson())
+					.department(getDepartment())
 					.hasRepresentative(random.nextBoolean()).build());
 		}
 		assignGroupsToCustomers(customers);
@@ -158,6 +187,68 @@ public class CustomerService {
 
 	private int getRank() {
 		return random.nextInt(100);
+	}
+	
+	private String getEmail() {
+		return firstNames[random.nextInt(firstNames.length)].toLowerCase() + "." + 
+				lastNames[random.nextInt(lastNames.length)].toLowerCase() + "@" + 
+				domains[random.nextInt(domains.length)];
+	}
+	
+	private String getPhone() {
+		return String.format("+1-%03d-%03d-%04d", 
+				random.nextInt(1000), 
+				random.nextInt(1000), 
+				random.nextInt(10000));
+	}
+	
+	private String getAddress() {
+		return (random.nextInt(9999) + 1) + " " + streets[random.nextInt(streets.length)];
+	}
+	
+	private String getCity() {
+		return cities[random.nextInt(cities.length)];
+	}
+	
+	private String getPostalCode() {
+		return String.format("%05d", random.nextInt(100000));
+	}
+	
+	private String getWebsite() {
+		return "www." + companies[random.nextInt(companies.length)]
+				.replaceAll("[^a-zA-Z0-9]", "")
+				.toLowerCase() + ".com";
+	}
+	
+	private String getDescription() {
+		String[] descriptions = {
+			"Leading provider of innovative solutions",
+			"Industry expert with 20+ years experience",
+			"Trusted partner for global enterprises",
+			"Specialized in cutting-edge technology",
+			"Award-winning service provider"
+		};
+		return descriptions[random.nextInt(descriptions.length)];
+	}
+	
+	private String getNotes() {
+		String[] notes = {
+			"Important client - high priority",
+			"Follow up needed next quarter",
+			"Recently renewed contract",
+			"Interested in premium services",
+			"Request quarterly business review"
+		};
+		return notes[random.nextInt(notes.length)];
+	}
+	
+	private String getContactPerson() {
+		return firstNames[random.nextInt(firstNames.length)] + " " + 
+				lastNames[random.nextInt(lastNames.length)];
+	}
+	
+	private String getDepartment() {
+		return departments[random.nextInt(departments.length)];
 	}
 
 	public List<Customer> findAll() {

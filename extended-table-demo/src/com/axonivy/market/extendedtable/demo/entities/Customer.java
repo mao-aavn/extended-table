@@ -38,6 +38,17 @@ public class Customer extends AuditableIdEntity {
 	private int customerRank;
 	
 	private double income;
+	
+	private String email;
+	private String phone;
+	private String address;
+	private String city;
+	private String postalCode;
+	private String website;
+	private String description;
+	private String notes;
+	private String contactPerson;
+	private String department;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "group_id")
@@ -60,6 +71,16 @@ public class Customer extends AuditableIdEntity {
 		private CustomerStatus status;
 		private int customerRank;
 		private double income;
+		private String email;
+		private String phone;
+		private String address;
+		private String city;
+		private String postalCode;
+		private String website;
+		private String description;
+		private String notes;
+		private String contactPerson;
+		private String department;
 		private CustomerGroup group;
 		private boolean hasRepresentative = false;
 
@@ -107,6 +128,56 @@ public class Customer extends AuditableIdEntity {
 			this.income = income;
 			return this;
 		}
+		
+		public Builder email(String email) {
+			this.email = email;
+			return this;
+		}
+		
+		public Builder phone(String phone) {
+			this.phone = phone;
+			return this;
+		}
+		
+		public Builder address(String address) {
+			this.address = address;
+			return this;
+		}
+		
+		public Builder city(String city) {
+			this.city = city;
+			return this;
+		}
+		
+		public Builder postalCode(String postalCode) {
+			this.postalCode = postalCode;
+			return this;
+		}
+		
+		public Builder website(String website) {
+			this.website = website;
+			return this;
+		}
+		
+		public Builder description(String description) {
+			this.description = description;
+			return this;
+		}
+		
+		public Builder notes(String notes) {
+			this.notes = notes;
+			return this;
+		}
+		
+		public Builder contactPerson(String contactPerson) {
+			this.contactPerson = contactPerson;
+			return this;
+		}
+		
+		public Builder department(String department) {
+			this.department = department;
+			return this;
+		}
 
 		public Builder customerRank(int customerRank) {
 			this.customerRank = customerRank;
@@ -134,6 +205,16 @@ public class Customer extends AuditableIdEntity {
 			c.setStatus(status);
 			c.setCustomerRank(customerRank);
 			c.setIncome(income);
+			c.setEmail(email);
+			c.setPhone(phone);
+			c.setAddress(address);
+			c.setCity(city);
+			c.setPostalCode(postalCode);
+			c.setWebsite(website);
+			c.setDescription(description);
+			c.setNotes(notes);
+			c.setContactPerson(contactPerson);
+			c.setDepartment(department);
 			c.setGroup(group);
 			c.setHasRepresentative(hasRepresentative);
 			return c;
@@ -157,6 +238,86 @@ public class Customer extends AuditableIdEntity {
 
 	public void setIncome(double income) {
 		this.income = income;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getPostalCode() {
+		return postalCode;
+	}
+
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
+
+	public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
+	public String getContactPerson() {
+		return contactPerson;
+	}
+
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 
 	public String getName() {

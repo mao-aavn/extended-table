@@ -1,0 +1,113 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:body>
+	<ui:composition template="/layouts/frame-10-full-width.xhtml">
+		<ui:define name="title">Extended Table Showcase</ui:define>
+		<ui:define name="content">
+
+			<h2>Dynamic Columns</h2>
+			<h:form id="dynamicColumnsForm">
+				<p:messages />
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="dynamicColumnsTable" widgetVar="dynamicColumnsTable"
+					id="extendedTable" value="#{data.bean.items}" paginator="true"
+					rows="10" scrollable="true" scrollWidth="100%"
+					filteredValue="#{data.bean.filteredItems}">
+
+					<f:facet name="header">
+							Columns
+							<div>
+							<p:commandButton id="toggler" type="button" value="Columns"
+								icon="pi pi-align-justify" />
+								<p:columnToggler id="columnToggler"
+									widgetVar="columnTogglerWidget"
+									datasource="dynamicColumnsForm:extendedTable:dynamicColumnsTable"
+									trigger="toggler" />
+						</div>
+					</f:facet>
+
+					<!-- remote command to send visible columns CSV to backing bean -->
+					<p:remoteCommand name="updateVisibleColumns"
+						action="#{data.bean.updateVisibleColumns}" />
+
+					<!-- hidden inputs containing precomputed JSON/CSV from bean for client initialization -->
+					<h:inputHidden id="headerToPropJson" value='#{data.bean.headerToPropJson}' />
+					<h:inputHidden id="visibleHeadersCsv" value='#{data.bean.visibleHeadersCsv}' />
+
+					<!-- render dynamic columns from bean.dynamicColumns; bean controls visibility -->
+					<p:columns value="#{data.bean.dynamicColumns}" var="col" 
+						 rendered="#{data.bean.isColumnVisible(col.property)}">
+						<f:facet name="header">
+							<h:outputText value="#{col.header}" />
+						</f:facet>
+						<h:outputText value="#{item[col.property]}" />
+					</p:columns>
+
+				</ic:com.axonivy.market.extendedtable.ExtendedTable>
+
+					<script type="text/javascript">
+						/*<![CDATA[*/
+						function filterTable() {
+							PF('dynamicColumnsTable').filter();
+						}
+
+						// attach listener to the columnToggler widget and notify server with visible columns CSV
+						(function() {
+							setTimeout(function() {
+								var w = PF('columnTogglerWidget');
+								if (!w || !w.jq)
+									return;
+									// mapping header -> property provided by bean (JSON string put into hidden input)
+									var headerToProp = JSON.parse(document.getElementById('headerToPropJson').value || '{}');
+									var initialVisible = (document.getElementById('visibleHeadersCsv').value || '').split(',').map(function(s){ return s.trim(); }).filter(function(s){return s.length>0;});
+								// initialize checkboxes according to server-side visibleColumns
+								var inputs = w.jq.find('input[type=checkbox]');
+								inputs.each(function(i, el) {
+									var $el = $(el);
+									var label = $el.closest('li').text() || $el.parent().text();
+									label = $.trim(label);
+									if(initialVisible.indexOf(label) !== -1) {
+										$el.prop('checked', true);
+									} else {
+										$el.prop('checked', false);
+									}
+									$el.trigger('change');
+								});
+								w.jq.on('toggle', function(e, state) {
+									// gather visible columns from DOM: the column toggler checkbox inputs carry data-colKey attr in PrimeFaces
+									var inputs = w.jq.find('input[type=checkbox]');
+									var visible = [];
+									inputs.each(function(i, el) {
+										var $el = $(el);
+										// PrimeFaces columnToggler often uses value or data-colKey to indicate column id/property
+										var v = $el.val()
+												|| $el.attr('data-colkey')
+												|| $el.attr('data-colKey')
+												|| $el.attr('data-column');
+										if (v && $el.prop('checked'))
+											visible.push(v);
+									});
+									// send CSV to server
+									if (window.updateVisibleColumns) {
+										updateVisibleColumns([ {
+											name : 'visibleColumns',
+											value : visible.join(',')
+										} ]);
+									}
+								});
+							}, 200);
+						})();
+						/*]]>*/
+					</script>
+			</h:form>
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

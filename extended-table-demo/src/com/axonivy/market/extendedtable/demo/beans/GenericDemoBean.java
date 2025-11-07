@@ -45,9 +45,9 @@ public abstract class GenericDemoBean {
 
 	/**
 	 * Init method for beans.
-	 * 
 	 */
 	public final void init() {
+		customerService.initDummyCustomersIfNotExisting(500);
 		loadItems();
 		countries = customerService.getCountries();
 	}

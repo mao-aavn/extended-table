@@ -76,8 +76,7 @@ public class CustomerService {
 				"solutions.io", "tech.co", "global.com", "services.net", "consulting.com", "industries.com" };
 	}
 
-	public void initCustomersIfNotExisting(int number) {
-
+	public void initDummyCustomersIfNotExisting(int number) {
 		if (!customerDAO.findAll().isEmpty()) {
 			return;
 		}

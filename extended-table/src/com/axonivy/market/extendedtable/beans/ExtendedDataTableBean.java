@@ -158,6 +158,7 @@ public class ExtendedDataTableBean {
 		PrimeFaces.current().multiViewState().clearAll(viewId, true, null);
 		stateName = null;
 
+		currentTable.getExpandedRowKeys().clear();
 		currentTable.clearInitialState();
 		currentTable.resetColumns();
 	}

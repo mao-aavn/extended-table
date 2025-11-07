@@ -10,6 +10,7 @@
       "name" : "nonePagination.ivp",
       "config" : {
         "callSignature" : "nonePagination",
+        "startCategory" : "ExtendedTable",
         "outLink" : "nonePagination.ivp",
         "startName" : "None Pagination Table",
         "case" : { }
@@ -51,6 +52,7 @@
       "name" : "lazy.ivp",
       "config" : {
         "callSignature" : "lazy",
+        "startCategory" : "ExtendedTable",
         "outLink" : "lazy.ivp",
         "startName" : "Lazy Table",
         "case" : { }
@@ -91,6 +93,7 @@
       "name" : "ColumnToggler",
       "config" : {
         "callSignature" : "ColumnToggler",
+        "startCategory" : "ExtendedTable",
         "outLink" : "ColumnToggler.ivp",
         "startName" : "Column Toggler",
         "case" : { }
@@ -132,6 +135,7 @@
       "name" : "Single Row Selection",
       "config" : {
         "callSignature" : "SingleRowSelection",
+        "startCategory" : "ExtendedTable",
         "outLink" : "SingleRowSelection.ivp",
         "startName" : "Single Row Selection",
         "case" : { }
@@ -173,6 +177,7 @@
       "name" : "Multiple Row Selection",
       "config" : {
         "callSignature" : "MultipleRowSelection",
+        "startCategory" : "ExtendedTable",
         "outLink" : "MultipleRowSelection.ivp",
         "startName" : "Multiple Row Selection",
         "case" : { }
@@ -214,6 +219,7 @@
       "name" : "Checkbox Selection",
       "config" : {
         "callSignature" : "CheckboxSelection",
+        "startCategory" : "ExtendedTable",
         "outLink" : "CheckboxSelection.ivp",
         "startName" : "Checkbox Selection",
         "case" : { }
@@ -255,6 +261,7 @@
       "name" : "databaseTableState.ivp",
       "config" : {
         "callSignature" : "databaseTableState",
+        "startCategory" : "ExtendedTable",
         "outLink" : "databaseTableState.ivp",
         "startName" : "DatabaseTableState",
         "case" : { }
@@ -290,5 +297,89 @@
         "at" : { "x" : 224, "y" : 216 }
       },
       "connect" : { "id" : "f39", "to" : "f36" }
+    }, {
+      "id" : "f30",
+      "type" : "RequestStart",
+      "name" : "RowExpansion",
+      "config" : {
+        "callSignature" : "RowExpansion",
+        "startCategory" : "ExtendedTable",
+        "outLink" : "RowExpansion.ivp",
+        "startName" : "Row Expansion",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1072 }
+      },
+      "connect" : { "id" : "f34", "to" : "f31" }
+    }, {
+      "id" : "f31",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.RowExpansion",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1072 }
+      },
+      "connect" : { "id" : "f33", "to" : "f32" }
+    }, {
+      "id" : "f32",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1072 }
+      }
+    }, {
+      "id" : "f40",
+      "type" : "RequestStart",
+      "name" : "Editable",
+      "config" : {
+        "callSignature" : "editable",
+        "startCategory" : "ExtendedTable",
+        "outLink" : "editable.ivp",
+        "startName" : "Editable",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1192 }
+      },
+      "connect" : { "id" : "f44", "to" : "f41" }
+    }, {
+      "id" : "f41",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.EditableDatatable",
+        "startMethod" : "start()",
+        "call" : {
+          "code" : [
+            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
+            "",
+            "",
+            "CustomerService service = new CustomerService();",
+            "service.initCustomersIfNotExisting(500);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1192 }
+      },
+      "connect" : { "id" : "f43", "to" : "f42" }
+    }, {
+      "id" : "f42",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1192 }
+      }
     } ]
 }

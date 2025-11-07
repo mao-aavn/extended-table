@@ -37,16 +37,15 @@ public abstract class GenericDemoBean {
 	protected final CustomerStatus[] customerStatus = CustomerStatus.values();
 	protected List<Country> countries = null;
 
-	protected LocalDate dateFilter; 
+	protected LocalDate dateFilter;
 	protected List<LocalDate> datesFilter; // for date range and multiple modes only
 	protected List<LocalDate> dateTimesFilter; // for date range and multiple modes only
 	protected Integer rankFrom;
 	protected Integer rankTo;
 
 	/**
-	 * Template method that defines the initialization flow. Subclasses cannot
-	 * override this method due to final modifier. To customize initialization,
-	 * override the loadItems() hook method instead.
+	 * Init method for beans.
+	 * 
 	 */
 	public final void init() {
 		loadItems();
@@ -84,6 +83,7 @@ public abstract class GenericDemoBean {
 		}
 	}
 
+
 	/**
 	 * Extracts customer names from the selection object. Handles both single
 	 * Customer objects and Lists of Customers.
@@ -109,7 +109,8 @@ public abstract class GenericDemoBean {
 
 	// Custom date filter supporting selectionMode="range" from DatePicker
 	// Also supports single date selection and multiple date selection
-	// The filter parameter can be: LocalDate (single), List<LocalDate> (range/multiple), String, or java.util.Date
+	// The filter parameter can be: LocalDate (single), List<LocalDate>
+	// (range/multiple), String, or java.util.Date
 	public boolean filterDate(Object value, Object filter, Locale locale) {
 		LocalDate date = null;
 
@@ -125,26 +126,26 @@ public abstract class GenericDemoBean {
 		if (filter == null) {
 			return true;
 		}
-		
+
 		// Handle String filter (format: "dd.MM.yyyy,dd.MM.yyyy")
 		if (filter instanceof String) {
 			String filterStr = ((String) filter).trim();
 			if (filterStr.isEmpty()) {
 				return true;
 			}
-			
+
 			try {
 				String[] parts = filterStr.split(",");
 				LocalDate from = null;
 				LocalDate to = null;
-				
+
 				if (parts.length > 0 && !parts[0].trim().isEmpty()) {
 					from = LocalDate.parse(parts[0].trim(), dateFormatter);
 				}
 				if (parts.length > 1 && !parts[1].trim().isEmpty()) {
 					to = LocalDate.parse(parts[1].trim(), dateFormatter);
 				}
-				
+
 				if (from != null && date.isBefore(from)) {
 					return false;
 				}
@@ -153,64 +154,64 @@ public abstract class GenericDemoBean {
 				}
 				return true;
 			} catch (Exception e) {
-			return true; // If parsing fails, show all
+				return true; // If parsing fails, show all
+			}
 		}
-	}
 
-	// Handle List: can be range (2 dates) or multiple selection (n dates)
-	if (filter instanceof java.util.List) {
-		@SuppressWarnings("unchecked")
-		java.util.List<Object> filterList = (java.util.List<Object>) filter;
-		
-		if (filterList.isEmpty()) {
-			return true;
-		}
-		
-		// If exactly 2 dates, treat as range (from..to)
-		if (filterList.size() == 2) {
-			LocalDate from = null;
-			LocalDate to = null;
-			
-			if (filterList.get(0) instanceof java.util.Date) {
-				from = ((java.util.Date) filterList.get(0)).toInstant()
-					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-			} else if (filterList.get(0) instanceof LocalDate) {
-				from = (LocalDate) filterList.get(0);
-			}
-			
-			if (filterList.get(1) instanceof java.util.Date) {
-				to = ((java.util.Date) filterList.get(1)).toInstant()
-					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-			} else if (filterList.get(1) instanceof LocalDate) {
-				to = (LocalDate) filterList.get(1);
-			}
+		// Handle List: can be range (2 dates) or multiple selection (n dates)
+		if (filter instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<Object> filterList = (List<Object>) filter;
 
-			if (from != null && date.isBefore(from)) {
-				return false;
-			}
-			if (to != null && date.isAfter(to)) {
-				return false;
-			}
-			return true;
-		}
-		
-		// Multiple selection: check if date matches any in the list
-		for (Object filterItem : filterList) {
-			LocalDate filterDate = null;
-			
-			if (filterItem instanceof java.util.Date) {
-				filterDate = ((java.util.Date) filterItem).toInstant()
-					.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-			} else if (filterItem instanceof LocalDate) {
-				filterDate = (LocalDate) filterItem;
-			}
-			
-			if (filterDate != null && date.equals(filterDate)) {
+			if (filterList.isEmpty()) {
 				return true;
 			}
-		}
-		return false;
-	}		// Single value compare: equals
+
+			// If exactly 2 dates, treat as range (from..to)
+			if (filterList.size() == 2) {
+				LocalDate from = null;
+				LocalDate to = null;
+
+				if (filterList.get(0) instanceof java.util.Date) {
+					from = ((java.util.Date) filterList.get(0)).toInstant().atZone(java.time.ZoneId.systemDefault())
+							.toLocalDate();
+				} else if (filterList.get(0) instanceof LocalDate) {
+					from = (LocalDate) filterList.get(0);
+				}
+
+				if (filterList.get(1) instanceof java.util.Date) {
+					to = ((java.util.Date) filterList.get(1)).toInstant().atZone(java.time.ZoneId.systemDefault())
+							.toLocalDate();
+				} else if (filterList.get(1) instanceof LocalDate) {
+					to = (LocalDate) filterList.get(1);
+				}
+
+				if (from != null && date.isBefore(from)) {
+					return false;
+				}
+				if (to != null && date.isAfter(to)) {
+					return false;
+				}
+				return true;
+			}
+
+			// Multiple selection: check if date matches any in the list
+			for (Object filterItem : filterList) {
+				LocalDate filterDate = null;
+
+				if (filterItem instanceof java.util.Date) {
+					filterDate = ((java.util.Date) filterItem).toInstant().atZone(java.time.ZoneId.systemDefault())
+							.toLocalDate();
+				} else if (filterItem instanceof LocalDate) {
+					filterDate = (LocalDate) filterItem;
+				}
+
+				if (filterDate != null && date.equals(filterDate)) {
+					return true;
+				}
+			}
+			return false;
+		} // Single value compare: equals
 		if (filter instanceof java.util.Date) {
 			LocalDate f = ((java.util.Date) filter).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 			return date.equals(f);
@@ -351,7 +352,7 @@ public abstract class GenericDemoBean {
 				Double to = right.isEmpty() ? null : Double.valueOf(right);
 
 				double numVal = numValue.doubleValue();
-				
+
 				if (from != null && numVal < from) {
 					return false;
 				}
@@ -431,7 +432,7 @@ public abstract class GenericDemoBean {
 	}
 
 	// getters/setters
-	
+
 	public List<CustomerStatus> getSelectedStatuses() {
 		return selectedStatuses;
 	}

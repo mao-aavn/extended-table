@@ -5,10 +5,6 @@
   <version>0.0.1</version>
   <packaging>pom</packaging>
 
-  <properties>
-    <variables.yaml.file>../extended-table/config/variables.yaml</variables.yaml.file>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -45,9 +41,6 @@
                  <copy todir="${project.build.directory}">
                   <fileset dir="." includes="README*.md" />
                 </copy>
-                <loadfile property="variables.yaml" srcFile="${variables.yaml.file}" encoding="UTF-8" failonerror="false" />
-                <replace file="${project.build.directory}/README.md" token="@variables.yaml@" value="${variables.yaml}" />
-                <replace file="${project.build.directory}/README_DE.md" token="@variables.yaml@" value="${variables.yaml}"/>
               </target>
             </configuration>
             <goals>

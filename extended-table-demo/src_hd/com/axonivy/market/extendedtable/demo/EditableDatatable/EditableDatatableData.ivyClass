@@ -1,0 +1,4 @@
+EditableDatatableData #class
+com.axonivy.market.extendedtable.demo.EditableDatatable #namespace
+bean com.axonivy.market.extendedtable.demo.beans.EditableDatatableBean #field
+bean PERSISTENT #fieldModifier

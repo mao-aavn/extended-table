@@ -10,12 +10,6 @@
             "artifactId": "extended-table-demo",
             "version": "${version}",
             "type": "iar"
-          },
-          {
-            "groupId": "com.axonivy.market.extendedtable",
-            "artifactId": "extended-table-test",
-            "version": "${version}",
-            "type": "iar"
           }
         ],
         "repositories": [

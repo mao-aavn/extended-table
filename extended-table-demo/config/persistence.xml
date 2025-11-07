@@ -7,7 +7,7 @@
         <class>com.axonivy.market.extendedtable.demo.entities.CustomerGroup</class>
         <class>com.axonivy.market.extendedtable.demo.entities.DataTableState</class>
         <properties>
-            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
         </properties>
     </persistence-unit>
 </persistence>

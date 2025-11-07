@@ -1,0 +1,93 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui">
+<h:body>
+	<ui:composition template="/layouts/frame-10-full-width.xhtml">
+		<ui:define name="title">Extended Table Showcase</ui:define>
+		<ui:define name="content">
+
+			<h2>Editable Table</h2>
+			<h:form id="form" style="margin-top: 100px;">
+				<p:messages showDetail="true" />
+				<p:growl id="msgs" showDetail="true"></p:growl>
+				
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="editableTable" widgetVar="editableTable"
+					id="editableTableWrapper" value="#{data.bean.items}"
+					filteredValue="#{data.bean.filteredItems}" paginator="true"
+					rows="20" editable="true" editMode="cell" rowKey="#{item.id}">
+
+					<f:facet name="event">
+						<p:ajax event="cellEdit" listener="#{data.bean.onCellEdit}"
+							update="form:msgs" />
+					</f:facet>
+
+					<!-- Column 1: Name -->
+					<p:column headerText="Name">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{item.name}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{item.name}" style="width:100%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<!-- Column 2: Company -->
+					<p:column headerText="Company">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{item.company}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{item.company}" style="width:100%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<!-- Column 3: Email -->
+					<p:column headerText="Email">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{item.email}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{item.email}" style="width:100%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<!-- Column 4: Phone -->
+					<p:column headerText="Phone">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{item.phone}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{item.phone}" style="width:100%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+
+					<!-- Column 5: Address -->
+					<p:column headerText="Address">
+						<p:cellEditor>
+							<f:facet name="output">
+								<h:outputText value="#{item.address}" />
+							</f:facet>
+							<f:facet name="input">
+								<p:inputText value="#{item.address}" style="width:100%" />
+							</f:facet>
+						</p:cellEditor>
+					</p:column>
+				</ic:com.axonivy.market.extendedtable.ExtendedTable>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

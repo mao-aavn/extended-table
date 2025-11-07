@@ -1,12 +1,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:cc="http://xmlns.jcp.org/jsf/composite"
 	xmlns:ic="http://ivyteam.ch/jsf/component"
 	xmlns:p="http://primefaces.org/ui"
-	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:pe="http://primefaces.org/ui/extensions">
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
 <cc:interface componentType="IvyComponent">
 
 	<!-- Data table controller -->
@@ -48,7 +46,7 @@
     <cc:attribute name="draggableColumns" type="boolean" default="false" shortDescription="Columns can be reordered with dragdrop when enabled." />
     <cc:attribute name="draggableRows" type="boolean" default="false" shortDescription="When enabled, rows can be reordered using dragdrop." />
     <cc:attribute name="draggableRowsFunction" type="java.lang.String" shortDescription="Method expression to execute after dragging row." />
-    <cc:attribute name="editInitEvent" type="java.lang.String" shortDescription="Defines a client side event to open cell on editable table." />
+    <cc:attribute name="editInitEvent" type="java.lang.String" default="click" shortDescription="Defines a client side event to open cell on editable table." />
     <cc:attribute name="editMode" type="java.lang.String" default="row" shortDescription="Defines edit mode, valid values are row and cell." />
     <cc:attribute name="editable" type="boolean" default="false" shortDescription="Controls incell editing." />
     <cc:attribute name="editingRow" type="boolean" default="false" shortDescription="Defines if cell editors of row should be displayed as editable or not." />

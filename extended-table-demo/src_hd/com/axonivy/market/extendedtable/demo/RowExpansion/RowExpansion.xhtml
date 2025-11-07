@@ -10,25 +10,14 @@
 		<ui:define name="title">Extended Table Showcase</ui:define>
 		<ui:define name="content">
 
-			<h2>Checkbox Selection</h2>
-			<h:form id="form" style="margin-top: 100px;">
-				<p:messages showDetail="true" />
-				<p:growl id="msgs" showDetail="true"></p:growl>
-
+			<h:form id="nonePaginationForm" style="margin-top: 100px;">
+				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="checkboxSelectionTable" 
-					widgetVar="checkboxSelectionTable"
-					id="checkboxSelectionTableWrapper" value="#{data.bean.items}"
-					showDeleteButton="true" allowUnsorting="true"
-					filteredValue="#{data.bean.filteredItems}" showResetButton="true"
-					paginator="true" rows="10"
-					resizableColumns="true"
-					selection="#{data.bean.selectedCustomers}"
-					rowKey="#{item.id}">
-
-					<p:column id="checkbox" selectionMode="multiple"
-						style="width:16px;text-align:center" />
-
+					tableId="rowExpansionTable" widgetVar="rowExpansionTable"
+					id="rowExpansionTableWrapper" value="#{data.bean.items}"
+					showDeleteButton="true" showResetButton="true" paginator="true"
+					sortMode="multiple" filteredValue="#{data.bean.filteredItems}"
+					allowUnsorting="true">
 
 					<!-- Name column -->
 					<p:column headerText="Name" filterBy="#{item.name}"
@@ -126,14 +115,34 @@
 							class="customer-badge status-#{item.status.name().toLowerCase()}">
 							#{item.status} </span>
 					</p:column>
+
+					<!-- Row expansion: show detailed information when a row is expanded -->
+					<p:rowExpansion>
+						<h:panelGrid columns="2" style="width:100%">
+							<h:outputText value="Name:" />
+							<h:outputText value="#{item.name}" />
+							<h:outputText value="Company:" />
+							<h:outputText value="#{item.company}" />
+							<h:outputText value="Email:" />
+							<h:outputText value="#{item.email}" />
+							<h:outputText value="Phone:" />
+							<h:outputText value="#{item.phone}" />
+							<h:outputText value="Address:" />
+							<h:outputText value="#{item.address}" />
+							<h:outputText value="City:" />
+							<h:outputText value="#{item.city}" />
+						</h:panelGrid>
+					</p:rowExpansion>
 				</ic:com.axonivy.market.extendedtable.ExtendedTable>
+
+				<script>
+					function filterTable() {
+						PF('rowExpansionTable').filter();
+					}
+				</script>
 			</h:form>
 
-			<script>
-				function filterTable() {
-					PF('checkboxSelectionTable').filter();
-				}
-			</script>
+
 		</ui:define>
 	</ui:composition>
 </h:body>

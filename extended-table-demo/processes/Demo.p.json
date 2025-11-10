@@ -31,16 +31,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.NonePagination",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 328 }
@@ -73,15 +64,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.Lazy",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 456 }
@@ -108,16 +91,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.ColumnToggler",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 576 }
@@ -150,16 +124,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.SingleRowSelection",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 696 }
@@ -192,16 +157,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.MultipleRowSelection",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 816 }
@@ -234,16 +190,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.CheckboxSelection",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 944 }
@@ -282,16 +229,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.DatabaseRepo",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 216 }
@@ -318,16 +256,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.RowExpansion",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1072 }
@@ -360,16 +289,7 @@
       "name" : "Dialog",
       "config" : {
         "dialogId" : "com.axonivy.market.extendedtable.demo.EditableDatatable",
-        "startMethod" : "start()",
-        "call" : {
-          "code" : [
-            "import com.axonivy.market.extendedtable.demo.service.CustomerService;",
-            "",
-            "",
-            "CustomerService service = new CustomerService();",
-            "service.initCustomersIfNotExisting(500);"
-          ]
-        }
+        "startMethod" : "start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1192 }
@@ -380,6 +300,72 @@
       "type" : "TaskEnd",
       "visual" : {
         "at" : { "x" : 352, "y" : 1192 }
+      }
+    }, {
+      "id" : "f45",
+      "type" : "RequestStart",
+      "name" : "DynamicColumns",
+      "config" : {
+        "callSignature" : "DynamicColumns",
+        "startCategory" : "ExtendedTable",
+        "outLink" : "DynamicColumns.ivp",
+        "startName" : "DynamicColumns",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1320 }
+      },
+      "connect" : { "id" : "f48", "to" : "f46" }
+    }, {
+      "id" : "f46",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.DynamicColumns",
+        "startMethod" : "start()"
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1320 }
+      },
+      "connect" : { "id" : "f49", "to" : "f47" }
+    }, {
+      "id" : "f47",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1320 }
+      }
+    }, {
+      "id" : "f50",
+      "type" : "RequestStart",
+      "name" : "Draggable",
+      "config" : {
+        "callSignature" : "Draggable",
+        "startCategory" : "ExtendedTable",
+        "outLink" : "Draggable.ivp",
+        "startName" : "Draggable",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1448 }
+      },
+      "connect" : { "id" : "f54", "to" : "f51" }
+    }, {
+      "id" : "f51",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.Draggable",
+        "startMethod" : "start()"
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1448 }
+      },
+      "connect" : { "id" : "f53", "to" : "f52" }
+    }, {
+      "id" : "f52",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1448 }
       }
     } ]
 }

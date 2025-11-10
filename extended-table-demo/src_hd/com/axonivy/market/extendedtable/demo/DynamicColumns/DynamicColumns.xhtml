@@ -4,7 +4,8 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:ic="http://ivyteam.ch/jsf/component"
 	xmlns:p="http://primefaces.org/ui"
-	xmlns:pe="http://primefaces.org/ui/extensions">
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
 <h:body>
 	<ui:composition template="/layouts/frame-10-full-width.xhtml">
 		<ui:define name="title">Extended Table Showcase</ui:define>
@@ -20,92 +21,185 @@
 					filteredValue="#{data.bean.filteredItems}">
 
 					<f:facet name="header">
-							Columns
-							<div>
-							<p:commandButton id="toggler" type="button" value="Columns"
-								icon="pi pi-align-justify" />
-								<p:columnToggler id="columnToggler"
-									widgetVar="columnTogglerWidget"
-									datasource="dynamicColumnsForm:extendedTable:dynamicColumnsTable"
-									trigger="toggler" />
+						<div class="p-d-flex p-jc-between p-ai-center" style="width: 100%">
+							<span>Columns</span>
+							<div
+								style="display: inline-flex; gap: 10px; align-items: center;">
+								<p:selectCheckboxMenu id="columnSelector"
+									value="#{data.bean.selectedColumnProperties}"
+									label="Select Columns" filter="true" filterMatchMode="contains"
+									panelStyle="width:250px" scrollHeight="400">
+									<f:selectItems value="#{data.bean.allColumnOptions}" var="opt"
+										itemLabel="#{opt.label}" itemValue="#{opt.value}" />
+								</p:selectCheckboxMenu>
+								<p:commandButton value="Apply" icon="pi pi-check"
+									action="#{data.bean.onColumnSelectionChange}"
+									update=":dynamicColumnsForm:extendedTable:dynamicColumnsTable"
+									styleClass="ui-button-success" />
+							</div>
 						</div>
 					</f:facet>
-
 					<!-- remote command to send visible columns CSV to backing bean -->
 					<p:remoteCommand name="updateVisibleColumns"
 						action="#{data.bean.updateVisibleColumns}" />
 
-					<!-- hidden inputs containing precomputed JSON/CSV from bean for client initialization -->
-					<h:inputHidden id="headerToPropJson" value='#{data.bean.headerToPropJson}' />
-					<h:inputHidden id="visibleHeadersCsv" value='#{data.bean.visibleHeadersCsv}' />
-
 					<!-- render dynamic columns from bean.dynamicColumns; bean controls visibility -->
-					<p:columns value="#{data.bean.dynamicColumns}" var="col" 
-						 rendered="#{data.bean.isColumnVisible(col.property)}">
-						<f:facet name="header">
-							<h:outputText value="#{col.header}" />
-						</f:facet>
-						<h:outputText value="#{item[col.property]}" />
-					</p:columns>
+					<!-- Using c:forEach with c:if for build-time rendering with stable column IDs -->
+					<c:forEach items="#{data.bean.dynamicColumns}" var="col">
+						
+						<!-- TEXT columns -->
+						<c:if test="#{col.filterType == 'TEXT' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="contains"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" 
+										placeholder="Search..."
+										style="width:100%" />
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+						<!-- NUMBER columns with range filter -->
+						<c:if test="#{col.filterType == 'NUMBER' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="custom"
+								filterFunction="#{data.bean.filterNumber}"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:inputText id="#{col.property}Filter"
+										placeholder="e.g: 4..6, ..10, 5.., or 5"
+										onchange="filterTable()"
+										style="width:100%" />
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+						<!-- ENUM columns with multi-select -->
+						<c:if test="#{col.filterType == 'ENUM' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="custom"
+								filterFunction="#{data.bean.filterEnum}"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:selectCheckboxMenu 
+										value="#{data.bean.enumFilters[col.property]}"
+										onchange="filterTable()"
+										multiple="true"
+										style="width:100%; box-sizing: border-box;">
+										<f:selectItems value="#{data.bean.getEnumOptions(col.property)}"
+											var="opt"
+											itemLabel="#{opt.label}"
+											itemValue="#{opt.value}" />
+									</p:selectCheckboxMenu>
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+						<!-- BOOLEAN columns -->
+						<c:if test="#{col.filterType == 'BOOLEAN' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:selectOneMenu onchange="filterTable()"
+										style="width:100%; box-sizing: border-box;">
+										<f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+										<f:selectItem itemLabel="Yes" itemValue="true" />
+										<f:selectItem itemLabel="No" itemValue="false" />
+									</p:selectOneMenu>
+								</f:facet>
+								<h:outputText value="#{item[col.property] ? 'Yes' : 'No'}" />
+							</p:column>
+						</c:if>
+						
+						<!-- DATE columns with range filter -->
+						<c:if test="#{col.filterType == 'DATE' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="custom"
+								filterFunction="#{data.bean.filterDate}"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:datePicker 
+										value="#{data.bean.dateFilters[col.property]}"
+										selectionMode="range"
+										pattern="yyyy-MM-dd"
+										onchange="filterTable()"
+										showIcon="true"
+										showButtonBar="true"
+										style="width:100%" />
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+						<!-- DATETIME columns with range filter -->
+						<c:if test="#{col.filterType == 'DATETIME' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="custom"
+								filterFunction="#{data.bean.filterDateTime}"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:datePicker 
+										value="#{data.bean.dateTimeFilters[col.property]}"
+										selectionMode="range"
+										pattern="yyyy-MM-dd HH:mm"
+										showTime="true"
+										onchange="filterTable()"
+										showIcon="true"
+										showButtonBar="true"
+										style="width:100%" />
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+						<!-- OBJECT columns (e.g., Country, Group) -->
+						<c:if test="#{col.filterType == 'OBJECT' and data.bean.isColumnVisible(col.property)}">
+							<p:column id="#{col.property}" headerText="#{col.header}"
+								filterBy="#{item[col.property]}"
+								sortBy="#{item[col.property]}"
+								filterMatchMode="contains"
+								field="#{col.property}">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()"
+										placeholder="Search..."
+										style="width:100%" />
+								</f:facet>
+								<h:outputText value="#{item[col.property]}" />
+							</p:column>
+						</c:if>
+						
+					</c:forEach>				</ic:com.axonivy.market.extendedtable.ExtendedTable>
 
-				</ic:com.axonivy.market.extendedtable.ExtendedTable>
-
-					<script type="text/javascript">
-						/*<![CDATA[*/
-						function filterTable() {
-							PF('dynamicColumnsTable').filter();
-						}
-
-						// attach listener to the columnToggler widget and notify server with visible columns CSV
-						(function() {
-							setTimeout(function() {
-								var w = PF('columnTogglerWidget');
-								if (!w || !w.jq)
-									return;
-									// mapping header -> property provided by bean (JSON string put into hidden input)
-									var headerToProp = JSON.parse(document.getElementById('headerToPropJson').value || '{}');
-									var initialVisible = (document.getElementById('visibleHeadersCsv').value || '').split(',').map(function(s){ return s.trim(); }).filter(function(s){return s.length>0;});
-								// initialize checkboxes according to server-side visibleColumns
-								var inputs = w.jq.find('input[type=checkbox]');
-								inputs.each(function(i, el) {
-									var $el = $(el);
-									var label = $el.closest('li').text() || $el.parent().text();
-									label = $.trim(label);
-									if(initialVisible.indexOf(label) !== -1) {
-										$el.prop('checked', true);
-									} else {
-										$el.prop('checked', false);
-									}
-									$el.trigger('change');
-								});
-								w.jq.on('toggle', function(e, state) {
-									// gather visible columns from DOM: the column toggler checkbox inputs carry data-colKey attr in PrimeFaces
-									var inputs = w.jq.find('input[type=checkbox]');
-									var visible = [];
-									inputs.each(function(i, el) {
-										var $el = $(el);
-										// PrimeFaces columnToggler often uses value or data-colKey to indicate column id/property
-										var v = $el.val()
-												|| $el.attr('data-colkey')
-												|| $el.attr('data-colKey')
-												|| $el.attr('data-column');
-										if (v && $el.prop('checked'))
-											visible.push(v);
-									});
-									// send CSV to server
-									if (window.updateVisibleColumns) {
-										updateVisibleColumns([ {
-											name : 'visibleColumns',
-											value : visible.join(',')
-										} ]);
-									}
-								});
-							}, 200);
-						})();
-						/*]]>*/
-					</script>
+<!-- 				<script type="text/javascript">
+					/*<![CDATA[*/
+					function filterTable() {
+						PF('dynamicColumnsTable').filter();
+					}
+					/*]]>*/
+				</script> -->
 			</h:form>
-
+			
+						<script>
+				function filterTable() {
+					PF('dynamicColumnsTable').filter();
+				}
+			</script>
 		</ui:define>
 	</ui:composition>
 </h:body>

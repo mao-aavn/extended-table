@@ -2,22 +2,35 @@ package com.axonivy.market.extendedtable.demo.beans;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
+import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
 
 public class DynamicColumnsBean extends GenericDemoBean {
+
+	public enum FilterType {
+		TEXT, NUMBER, DATE, DATETIME, ENUM, BOOLEAN, OBJECT
+	}
 
 	public static class ColumnDef {
 		public String header;
 		public String property;
+		public FilterType filterType;
+		public Class<?> fieldType;
 
-		public ColumnDef(String header, String property) {
+		public ColumnDef(String header, String property, FilterType filterType, Class<?> fieldType) {
 			this.header = header;
 			this.property = property;
+			this.filterType = filterType;
+			this.fieldType = fieldType;
 		}
 
 		public String getHeader() {
@@ -27,15 +40,54 @@ public class DynamicColumnsBean extends GenericDemoBean {
 		public String getProperty() {
 			return property;
 		}
+
+		public FilterType getFilterType() {
+			return filterType;
+		}
+
+		public Class<?> getFieldType() {
+			return fieldType;
+		}
 	}
 
 	private List<ColumnDef> dynamicColumns = new ArrayList<>();
 
-	/**
-	 * Currently visible column property names as set by the column toggler (order:
-	 * CSV from client)
-	 */
-	private List<String> visibleColumns;
+	/** Currently visible column property names */
+	private List<String> selectedColumnProperties = new ArrayList<>();
+
+	/** Date range filters for DATE columns - now using LocalDate[] for range picker */
+	private Map<String, LocalDate[]> dateFilters = new HashMap<>();
+
+	/** DateTime range filters for DATETIME columns - now using LocalDateTime[] for range picker */
+	private Map<String, LocalDateTime[]> dateTimeFilters = new HashMap<>();
+
+	/** Enum multi-select filters - using String values to avoid conversion issues */
+	private Map<String, List<String>> enumFilters = new HashMap<>();
+
+	public Map<String, LocalDate[]> getDateFilters() {
+		// Initialize arrays for all DATE properties if not exists
+		getDynamicColumns().stream()
+			.filter(c -> c.getFilterType() == FilterType.DATE)
+			.forEach(c -> dateFilters.computeIfAbsent(c.getProperty(), k -> new LocalDate[2]));
+		return dateFilters;
+	}
+
+	public Map<String, LocalDateTime[]> getDateTimeFilters() {
+		// Initialize arrays for all DATETIME properties if not exists
+		getDynamicColumns().stream()
+			.filter(c -> c.getFilterType() == FilterType.DATETIME)
+			.forEach(c -> dateTimeFilters.computeIfAbsent(c.getProperty(), k -> new LocalDateTime[2]));
+		return dateTimeFilters;
+	}
+
+	public Map<String, List<String>> getEnumFilters() {
+		// Initialize empty lists for all ENUM properties if not exists
+		getDynamicColumns().stream()
+			.filter(c -> c.getFilterType() == FilterType.ENUM)
+			.forEach(c -> enumFilters.computeIfAbsent(c.getProperty(), k -> new ArrayList<>()));
+		return enumFilters;
+	}
+
 
 	public List<ColumnDef> getDynamicColumns() {
 		if (dynamicColumns.isEmpty()) {
@@ -50,17 +102,60 @@ public class DynamicColumnsBean extends GenericDemoBean {
 					continue;
 				// build a human readable header from camelCase property name
 				String header = toHeader(prop);
-				dynamicColumns.add(new ColumnDef(header, prop));
+				FilterType filterType = detectFilterType(f);
+				dynamicColumns.add(new ColumnDef(header, prop, filterType, f.getType()));
 			}
 			// default: preselect first 5 columns
-			if (visibleColumns == null) {
-				visibleColumns = new ArrayList<>();
+			if (selectedColumnProperties.isEmpty()) {
 				for (int i = 0; i < dynamicColumns.size() && i < 5; i++) {
-					visibleColumns.add(dynamicColumns.get(i).getProperty());
+					selectedColumnProperties.add(dynamicColumns.get(i).getProperty());
 				}
 			}
 		}
 		return dynamicColumns;
+	}
+
+	private FilterType detectFilterType(Field field) {
+		Class<?> type = field.getType();
+		
+		if (type.isEnum()) {
+			return FilterType.ENUM;
+		} else if (type == boolean.class || type == Boolean.class) {
+			return FilterType.BOOLEAN;
+		} else if (type == LocalDate.class) {
+			return FilterType.DATE;
+		} else if (type == LocalDateTime.class) {
+			return FilterType.DATETIME;
+		} else if (type == int.class || type == Integer.class || 
+				   type == long.class || type == Long.class ||
+				   type == double.class || type == Double.class ||
+				   type == float.class || type == Float.class) {
+			return FilterType.NUMBER;
+		} else if (type == String.class) {
+			return FilterType.TEXT;
+		} else {
+			return FilterType.OBJECT;
+		}
+	}
+
+	/**
+	 * Get all values for enum filters - returns as String values
+	 */
+	public List<SelectItem> getEnumOptions(String property) {
+		ColumnDef col = dynamicColumns.stream()
+			.filter(c -> c.getProperty().equals(property))
+			.findFirst()
+			.orElse(null);
+		
+		if (col != null && col.getFilterType() == FilterType.ENUM) {
+			Class<?> enumClass = col.getFieldType();
+			if (enumClass.isEnum()) {
+				return Arrays.stream(enumClass.getEnumConstants())
+					.map(e -> new SelectItem(e.toString(), e.toString())) // Use string value
+					.collect(Collectors.toList());
+			}
+		}
+		return new ArrayList<>();
 	}
 
 	private String toHeader(String prop) {
@@ -86,96 +181,214 @@ public class DynamicColumnsBean extends GenericDemoBean {
 	}
 
 	/**
-	 * Called by the remoteCommand on column toggler changes. Reads the request
-	 * parameter named "visibleColumns" (CSV of property names) and stores it.
+	 * Returns SelectItem list for the column selector dropdown. Each item has
+	 * label=header, value=property name.
 	 */
-	public void updateVisibleColumns() {
-		String csv = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
-				.get("visibleColumns");
-		if (csv == null) {
-			// no param -> clear to default (show all)
-			visibleColumns = null;
-			return;
+	public List<SelectItem> getAllColumnOptions() {
+		getDynamicColumns(); // ensure populated
+		List<SelectItem> items = new ArrayList<>();
+		for (ColumnDef c : dynamicColumns) {
+			items.add(new SelectItem(c.getProperty(), c.getHeader()));
 		}
-		csv = csv.trim();
-		if (csv.isEmpty()) {
-			visibleColumns = new ArrayList<>();
-			return;
-		}
-		visibleColumns = Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isEmpty())
-				.collect(Collectors.toList());
+		return items;
 	}
 
-	public List<String> getVisibleColumns() {
-		return visibleColumns;
-	}
-
-	/** Return a comma separated, JS-quoted list of headers for initial visible columns.
-	 * Example: 'Name','Company','Country'
+	/**
+	 * Called when user changes column selection in the dropdown.
 	 */
-	public String getVisibleHeadersJs() {
-		// ensure columns populated
-		getDynamicColumns();
-		if(visibleColumns == null) return "";
-		List<String> headers = new ArrayList<>();
-		for(ColumnDef c : dynamicColumns) {
-			if(visibleColumns.contains(c.getProperty())) {
-				// escape single quotes in header
-				String h = c.getHeader().replace("'", "\\'");
-				headers.add("'" + h + "'");
-			}
-		}
-		return String.join(",", headers);
+	public void onColumnSelectionChange() {
+		// selectedColumnProperties is already updated by JSF binding
+		// table will re-render via AJAX update
 	}
 
-	/** Return a JS object literal mapping header text -> property name
-	 * Example: 'Name':'name','Company':'company'
-	 */
-	public String getHeaderToPropJs() {
-		getDynamicColumns();
-		List<String> entries = new ArrayList<>();
-		for(ColumnDef c : dynamicColumns) {
-			String h = c.getHeader().replace("'", "\\'");
-			String p = c.getProperty();
-			entries.add("'" + h + "':'" + p + "'");
-		}
-		return String.join(",", entries);
+	public List<String> getSelectedColumnProperties() {
+		return selectedColumnProperties;
 	}
 
-	/** Return visible header CSV (comma-separated). Commas inside headers are replaced by space. */
-	public String getVisibleHeadersCsv() {
-		getDynamicColumns();
-		if(visibleColumns == null) return "";
-		List<String> headers = new ArrayList<>();
-		for(ColumnDef c : dynamicColumns) {
-			if(visibleColumns.contains(c.getProperty())) {
-				headers.add(c.getHeader().replace(',', ' '));
-			}
-		}
-		return String.join(",", headers);
-	}
-
-	/** Return JSON object string mapping header -> property. */
-	public String getHeaderToPropJson() {
-		getDynamicColumns();
-		StringBuilder sb = new StringBuilder();
-		sb.append('{');
-		boolean first = true;
-		for(ColumnDef c : dynamicColumns) {
-			if(!first) sb.append(',');
-			first = false;
-			String h = c.getHeader().replace("\"", "\\\"").replace("\\","\\\\");
-			String p = c.getProperty().replace("\"", "\\\"").replace("\\","\\\\");
-			sb.append('"').append(h).append('"').append(':').append('"').append(p).append('"');
-		}
-		sb.append('}');
-		return sb.toString();
+	public void setSelectedColumnProperties(List<String> selectedColumnProperties) {
+		this.selectedColumnProperties = selectedColumnProperties;
 	}
 
 	/** Helper used by UI to decide if a column property should be rendered. */
 	public boolean isColumnVisible(String property) {
-		if (visibleColumns == null)
-			return true; // default: all visible
-		return visibleColumns.contains(property);
+		return selectedColumnProperties.contains(property);
+	}
+
+	/**
+	 * Returns the appropriate filter match mode based on filter type
+	 */
+	public String getFilterMatchMode(FilterType filterType) {
+		switch (filterType) {
+			case TEXT:
+			case OBJECT:
+				return "contains";
+			case NUMBER:
+				return "equals";
+			case BOOLEAN:
+				return "equals";
+			case ENUM:
+				return "custom"; // Use custom filter for enum multi-select
+			case DATE:
+			case DATETIME:
+				return "between"; // 'between' mode for date ranges
+			default:
+				return "contains";
+		}
+	}
+
+	/**
+	 * Custom filter function for enum multi-select
+	 * This is called by PrimeFaces for each row when filtering
+	 */
+	public boolean filterEnum(Object value, Object filter, java.util.Locale locale) {
+		// If no filter is set, show all rows
+		if (filter == null) {
+			return true;
+		}
+
+		// Handle List filter (from selectCheckboxMenu)
+		if (filter instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<String> selectedValues = (List<String>) filter;
+			
+			// If nothing selected, show all
+			if (selectedValues == null || selectedValues.isEmpty()) {
+				return true;
+			}
+
+			// If the cell value is null, don't show it
+			if (value == null) {
+				return false;
+			}
+
+			// Check if the enum value matches any selected value (as string)
+			String valueStr = value.toString();
+			return selectedValues.contains(valueStr);
+		}
+
+		// Default: show the row
+		return true;
+	}
+
+	/**
+	 * Custom filter function for number ranges (supports syntax: 5, 5.., ..10, 5..10)
+	 */
+	public boolean filterNumber(Object value, Object filter, java.util.Locale locale) {
+		if (filter == null || filter.toString().trim().isEmpty()) {
+			return true;
+		}
+
+		if (value == null) {
+			return false;
+		}
+
+		try {
+			double numValue = ((Number) value).doubleValue();
+			String filterStr = filter.toString().trim();
+
+			// Exact match: "5"
+			if (!filterStr.contains("..")) {
+				return numValue == Double.parseDouble(filterStr);
+			}
+
+			// Range: "5..10" or "5.." or "..10"
+			String[] parts = filterStr.split("\\.\\.");
+			if (parts.length == 2) {
+				// "5..10"
+				double min = parts[0].isEmpty() ? Double.MIN_VALUE : Double.parseDouble(parts[0].trim());
+				double max = parts[1].isEmpty() ? Double.MAX_VALUE : Double.parseDouble(parts[1].trim());
+				return numValue >= min && numValue <= max;
+			} else if (filterStr.startsWith("..")) {
+				// "..10"
+				double max = Double.parseDouble(filterStr.substring(2).trim());
+				return numValue <= max;
+			} else if (filterStr.endsWith("..")) {
+				// "5.."
+				double min = Double.parseDouble(filterStr.substring(0, filterStr.length() - 2).trim());
+				return numValue >= min;
+			}
+		} catch (Exception e) {
+			// Invalid filter format
+		}
+
+		return true;
+	}
+
+	/**
+	 * Custom filter function for date ranges
+	 */
+	public boolean filterDate(Object value, Object filter, java.util.Locale locale) {
+		if (filter == null) {
+			return true;
+		}
+
+		if (value == null) {
+			return false;
+		}
+
+		if (filter instanceof LocalDate[]) {
+			LocalDate[] range = (LocalDate[]) filter;
+			LocalDate dateValue = (LocalDate) value;
+
+			LocalDate from = range[0];
+			LocalDate to = range[1];
+
+			if (from == null && to == null) {
+				return true;
+			}
+
+			if (from != null && to != null) {
+				return !dateValue.isBefore(from) && !dateValue.isAfter(to);
+			} else if (from != null) {
+				return !dateValue.isBefore(from);
+			} else {
+				return !dateValue.isAfter(to);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Custom filter function for datetime ranges
+	 */
+	public boolean filterDateTime(Object value, Object filter, java.util.Locale locale) {
+		if (filter == null) {
+			return true;
+		}
+
+		if (value == null) {
+			return false;
+		}
+
+		if (filter instanceof LocalDateTime[]) {
+			LocalDateTime[] range = (LocalDateTime[]) filter;
+			LocalDateTime dateTimeValue = (LocalDateTime) value;
+
+			LocalDateTime from = range[0];
+			LocalDateTime to = range[1];
+
+			if (from == null && to == null) {
+				return true;
+			}
+
+			if (from != null && to != null) {
+				return !dateTimeValue.isBefore(from) && !dateTimeValue.isAfter(to);
+			} else if (from != null) {
+				return !dateTimeValue.isBefore(from);
+			} else {
+				return !dateTimeValue.isAfter(to);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Legacy method kept for backward compatibility if remoteCommand is still
+	 * called.
+	 */
+	public void updateVisibleColumns() {
+		// no-op: now using p:ajax from selectCheckboxMenu
 	}
 }

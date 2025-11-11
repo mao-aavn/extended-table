@@ -25,6 +25,10 @@
 	<cc:attribute name="deleteSuccessMsg" type="java.lang.String" default="Deleted the table state successfully" shortDescription="Message shown on successful delete." />
 	<cc:attribute name="deleteErrorMsg" type="java.lang.String" default="No existing state found" shortDescription="Message shown when delete failed." />
 
+	<!-- Optional callback to notify parent about rendered columns, useful for dynamic column handling -->
+	<cc:attribute name="columnsRenderCallback" method-signature="void columnsRenderCallback(java.util.List)" 
+		shortDescription="Optional method expression to receive the list of rendered columns. Example: columnsRenderCallback='{data.bean.columnsRenderCallback}'" />
+
 	<cc:attribute name="showResetButton" type="boolean" default="true" shortDescription="Whether to render the reset button." />
 	<cc:attribute name="showDeleteButton" type="boolean" default="false" shortDescription="Whether to render the delete button." />
 

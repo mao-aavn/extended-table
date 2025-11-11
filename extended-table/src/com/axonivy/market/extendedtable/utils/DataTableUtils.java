@@ -269,5 +269,46 @@ public final class DataTableUtils {
 
 		return null;
 	}
+	
+	/**
+	 * Extracts the list of rendered column identifiers from the DataTable. This
+	 * captures which columns are currently visible in the table. Uses id as
+	 * identifiers.
+	 * 
+	 * @param table The DataTable component
+	 * @return List of column identifiers in render order
+	 */
+	public static List<String> extractRenderedColumnIds(DataTable table) {
+		List<String> renderedColumnIds = new ArrayList<>();
+
+		if (table == null) {
+			return renderedColumnIds;
+		}
+
+		List<UIComponent> children = table.getChildren();
+		if (children == null) {
+			return renderedColumnIds;
+		}
+
+		for (UIComponent child : children) {
+			if (child instanceof Column) {
+				Column column = (Column) child;
+
+				// Only process rendered columns
+				if (!column.isRendered()) {
+					continue;
+				}
+
+				String columnId = column.getId();
+				if (columnId == null) {
+					throw new RuntimeException("Column id should not be null!");
+				}
+
+				renderedColumnIds.add(columnId);
+			}
+		}
+
+		return renderedColumnIds;
+	}
 
 }

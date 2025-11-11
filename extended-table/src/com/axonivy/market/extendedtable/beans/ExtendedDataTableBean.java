@@ -1,6 +1,7 @@
 package com.axonivy.market.extendedtable.beans;
 
 import static com.axonivy.market.extendedtable.utils.DataTableUtils.clearSelection;
+import static com.axonivy.market.extendedtable.utils.DataTableUtils.extractRenderedColumnIds;
 import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDatePickerPattern;
 import static com.axonivy.market.extendedtable.utils.DataTableUtils.restoreSelection;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
@@ -20,8 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.column.Column;
@@ -33,11 +36,11 @@ import org.primefaces.model.filter.FilterConstraint;
 
 import com.axonivy.market.extendedtable.controllers.IvyUserStateController;
 import com.axonivy.market.extendedtable.controllers.TableStateController;
+import com.axonivy.market.extendedtable.model.CustomDataTableState;
 import com.axonivy.market.extendedtable.utils.Attrs;
 import com.axonivy.market.extendedtable.utils.JSFUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -58,9 +61,8 @@ public class ExtendedDataTableBean {
 	private static final String CC_ATTRS_WIDGET_VAR = "widgetVar";
 	private static final String CC_ATTRS_DELETE_ERROR_MSG = "deleteErrorMsg";
 	private static final String CC_ATTRS_DELETE_SUCCESS_MSG = "deleteSuccessMsg";
+	private static final String CC_COLUMNS_RENDERED_CALLBACK = "columnsRenderCallback";
 
-	private static final String STATE = "state";
-	private static final String DATE_FORMATS = "dateFormats";
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final String STATE_KEY_PREFIX = "TABLE_STATE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
@@ -85,8 +87,18 @@ public class ExtendedDataTableBean {
 			DataTable table = (DataTable) findComponentFromClientId(tableClientId);
 
 			if (table != null) {
-				DataTableState state = table.getMultiViewState(false);
+				// Force create the state if it doesn't exist yet
+				DataTableState state = table.getMultiViewState(true);
+
 				if (state != null) {
+					// Ensure state has current table values even if no user interaction yet
+					if (state.getFirst() == 0) {
+						state.setFirst(table.getFirst());
+					}
+					if (state.getRows() == 0) {
+						state.setRows(table.getRows());
+					}
+
 					persistDataTableState(state);
 					stateNames = fetchAllDataTableStateNames();
 					addInfoMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_SAVE_SUCCESS_MSG), null);
@@ -116,9 +128,15 @@ public class ExtendedDataTableBean {
 
 		currentTable.reset();
 
-		DataTableState persistedState = fetchDataTableState();
+		CustomDataTableState persistedState = fetchDataTableState();
 
 		if (persistedState != null) {
+			// Invoke the callback to notify parent bean about rendered columns
+			MethodExpression callback = Attrs.get(CC_COLUMNS_RENDERED_CALLBACK);
+			if (callback != null) {
+				invokeColumnsRenderedCallback(persistedState.getRenderedColumns(), callback);
+			}
+
 			DataTableState currentState = currentTable.getMultiViewState(true); // force create
 			currentState.setFilterBy(persistedState.getFilterBy());
 			currentState.setSortBy(persistedState.getSortBy());
@@ -194,61 +212,86 @@ public class ExtendedDataTableBean {
 				.toList();
 	}
 
-	private void persistDataTableState(DataTableState state) {
-		String stateKey = getStateKey();
-
-		ObjectMapper mapper = TABLE_STATE_MAPPER;
-
-		// Extract and store date format patterns from columns before serialization
-		DataTable table = (DataTable) JSFUtils.findComponentFromClientId(getTableClientId());
-		Map<String, String> columnDateFormats = extractDateFormatsFromColumns(table);
-
-		try {
-			// Create a wrapper object to store both state and format info
-			Map<String, Object> stateWrapper = new HashMap<>();
-			stateWrapper.put(STATE, state);
-			stateWrapper.put(DATE_FORMATS, columnDateFormats);
-
-			String stateJson = mapper.writeValueAsString(stateWrapper);
-			getController().save(stateKey, stateJson);
-		} catch (JsonProcessingException e) {
-			Ivy.log().error("Couldn't serialize TableState to JSON", e);
+	/**
+	 * Invokes the columnsRenderCallback if provided by the parent view. This passes
+	 * the list of rendered column fields back to the consuming bean.
+	 * 
+	 * @param renderedColumns The list of column field names that were rendered
+	 * @param callback
+	 */
+	private void invokeColumnsRenderedCallback(List<String> renderedColumns, MethodExpression callback) {
+		// Get the callback method expression from component attributes
+		if (renderedColumns != null) {
+			try {
+				FacesContext context = FacesContext.getCurrentInstance();
+				callback.invoke(context.getELContext(), new Object[] { renderedColumns });
+			} catch (Exception e) {
+				Ivy.log().error("Failed to invoke onColumnsRendered callback", e);
+			}
 		}
 	}
 
-	private DataTableState fetchDataTableState() {
+	private void persistDataTableState(DataTableState state) {
+		String stateKey = getStateKey();
+		ObjectMapper mapper = TABLE_STATE_MAPPER;
+
+		// Extract metadata from the table
+		DataTable table = (DataTable) JSFUtils.findComponentFromClientId(getTableClientId());
+		Map<String, String> columnDateFormats = extractDateFormatsFromColumns(table);
+
+		// Create CustomDataTableState with all necessary information
+		CustomDataTableState customState = new CustomDataTableState();
+
+		// Copy base DataTableState properties
+		customState.setFilterBy(state.getFilterBy());
+		customState.setSortBy(state.getSortBy());
+		customState.setFirst(state.getFirst());
+		customState.setColumnMeta(state.getColumnMeta());
+		customState.setExpandedRowKeys(state.getExpandedRowKeys());
+		customState.setSelectedRowKeys(state.getSelectedRowKeys());
+		customState.setRows(state.getRows());
+		customState.setWidth(state.getWidth());
+
+		// Add custom properties
+		customState.setDateFormats(columnDateFormats);
+
+		// Only set rendered columns if callback is provided
+		if (Attrs.get(CC_COLUMNS_RENDERED_CALLBACK) != null) {
+			List<String> renderedColumnIds = extractRenderedColumnIds(table);
+			customState.setRenderedColumns(renderedColumnIds);
+		}
+
+		try {
+			// Serialize the CustomDataTableState directly
+			String stateJson = mapper.writeValueAsString(customState);
+			getController().save(stateKey, stateJson);
+		} catch (JsonProcessingException e) {
+			Ivy.log().error("Couldn't serialize CustomDataTableState to JSON", e);
+		}
+	}
+
+	private CustomDataTableState fetchDataTableState() {
 		String stateKey = getStateKey();
 		String stateJson = getController().load(stateKey);
 
-		ObjectMapper mapper = TABLE_STATE_MAPPER;
+		if (stateJson == null || stateJson.isBlank()) {
+			return null;
+		}
 
-		DataTableState tableState = null;
+		ObjectMapper mapper = TABLE_STATE_MAPPER;
+		CustomDataTableState tableState = null;
 
 		try {
-			// Validate and read the wrapper containing both state and date formats
-			if (stateJson == null || stateJson.isBlank()) {
-				return null;
-			}
-			Map<String, Object> stateWrapper = mapper.readValue(stateJson, new TypeReference<Map<String, Object>>() {
-			});
+			// Deserialize directly to CustomDataTableState
+			tableState = mapper.readValue(stateJson, CustomDataTableState.class);
 
-			// Extract the state
-			Object stateObj = stateWrapper.get(STATE);
-			if (stateObj != null) {
-				// Convert the state object back to DataTableState
-				String stateJsonStr = mapper.writeValueAsString(stateObj);
-				tableState = mapper.readValue(stateJsonStr, new TypeReference<DataTableState>() {
-				});
-
-				// Extract and apply date formats to convert string dates back to proper types
-				@SuppressWarnings("unchecked")
-				Map<String, String> dateFormats = (Map<String, String>) stateWrapper.get(DATE_FORMATS);
-				if (dateFormats != null && !dateFormats.isEmpty()) {
-					convertDateStringsUsingFormats(tableState, dateFormats);
-				}
+			// Convert date strings back to LocalDate objects using the stored format
+			// patterns
+			if (tableState != null) {
+				convertDateStringsUsingFormats(tableState);
 			}
 		} catch (IOException e) {
-			Ivy.log().error("Couldn't deserialize TableState from JSON", e);
+			Ivy.log().error("Couldn't deserialize CustomDataTableState from JSON", e);
 		}
 
 		return tableState;
@@ -326,6 +369,8 @@ public class ExtendedDataTableBean {
 		return dateFormats;
 	}
 
+	
+
 	/**
 	 * Converts date string values in FilterMeta back to appropriate date objects
 	 * using the format patterns extracted from column converters.
@@ -333,8 +378,8 @@ public class ExtendedDataTableBean {
 	 * @param state       The DataTableState containing filter metadata
 	 * @param dateFormats Map of column field names to date format patterns
 	 */
-	private void convertDateStringsUsingFormats(DataTableState state, Map<String, String> dateFormats) {
-		if (state == null || state.getFilterBy() == null || dateFormats == null || dateFormats.isEmpty()) {
+	private void convertDateStringsUsingFormats(CustomDataTableState state) {
+		if (state.getFilterBy() == null || state.getDateFormats() == null || state.getDateFormats().isEmpty()) {
 			return;
 		}
 
@@ -345,7 +390,7 @@ public class ExtendedDataTableBean {
 
 			// Check if this field has a date format
 			String field = entry.getValue().getField();
-			String pattern = dateFormats.get(field);
+			String pattern = state.getDateFormats().get(field);
 			if (pattern == null) {
 				continue;
 			}

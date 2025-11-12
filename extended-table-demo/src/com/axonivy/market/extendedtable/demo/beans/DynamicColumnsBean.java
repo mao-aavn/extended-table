@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.faces.model.SelectItem;
 import com.axonivy.market.extendedtable.demo.entities.Customer;
-import com.axonivy.market.extendedtable.demo.entities.CustomerStatus;
+
+import ch.ivyteam.ivy.environment.Ivy;
 
 public class DynamicColumnsBean extends GenericDemoBean {
 
@@ -55,30 +56,8 @@ public class DynamicColumnsBean extends GenericDemoBean {
 	/** Currently visible column property names */
 	private List<String> selectedColumnProperties = new ArrayList<>();
 
-	/** Date range filters for DATE columns - now using LocalDate[] for range picker */
-	private Map<String, LocalDate[]> dateFilters = new HashMap<>();
-
-	/** DateTime range filters for DATETIME columns - now using LocalDateTime[] for range picker */
-	private Map<String, LocalDateTime[]> dateTimeFilters = new HashMap<>();
-
 	/** Enum multi-select filters - using String values to avoid conversion issues */
 	private Map<String, List<String>> enumFilters = new HashMap<>();
-
-	public Map<String, LocalDate[]> getDateFilters() {
-		// Initialize arrays for all DATE properties if not exists
-		getDynamicColumns().stream()
-			.filter(c -> c.getFilterType() == FilterType.DATE)
-			.forEach(c -> dateFilters.computeIfAbsent(c.getProperty(), k -> new LocalDate[2]));
-		return dateFilters;
-	}
-
-	public Map<String, LocalDateTime[]> getDateTimeFilters() {
-		// Initialize arrays for all DATETIME properties if not exists
-		getDynamicColumns().stream()
-			.filter(c -> c.getFilterType() == FilterType.DATETIME)
-			.forEach(c -> dateTimeFilters.computeIfAbsent(c.getProperty(), k -> new LocalDateTime[2]));
-		return dateTimeFilters;
-	}
 
 	public Map<String, List<String>> getEnumFilters() {
 		// Initialize empty lists for all ENUM properties if not exists
@@ -199,6 +178,26 @@ public class DynamicColumnsBean extends GenericDemoBean {
 	public void onColumnSelectionChange() {
 		// selectedColumnProperties is already updated by JSF binding
 		// table will re-render via AJAX update
+	}
+
+	/**
+	 * Callback method invoked by the ExtendedTable component to notify us
+	 * about which columns are being rendered. This allows the component
+	 * to pass the rendered column list back to the bean.
+	 * 
+	 * @param renderedColumns The list of ColumnDef objects that are currently rendered
+	 */
+	public void columnsRenderCallback(List<String> renderedColumns) {
+		// This method will be called by the ExtendedTable component
+		// You can use this to track which columns are actually rendered
+		// or to implement custom logic based on the rendered columns
+		
+		// For now, we can just log or store this information if needed
+		// The main purpose is to establish the callback mechanism
+		
+		selectedColumnProperties.clear();
+		selectedColumnProperties.addAll(renderedColumns);
+		Ivy.log().info(renderedColumns);
 	}
 
 	public List<String> getSelectedColumnProperties() {
@@ -326,23 +325,37 @@ public class DynamicColumnsBean extends GenericDemoBean {
 			return false;
 		}
 
-		if (filter instanceof LocalDate[]) {
-			LocalDate[] range = (LocalDate[]) filter;
-			LocalDate dateValue = (LocalDate) value;
-
-			LocalDate from = range[0];
-			LocalDate to = range[1];
-
-			if (from == null && to == null) {
+		// Handle List<LocalDate> for range picker (expects 2 dates: from and to)
+		if (filter instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<LocalDate> range = (List<LocalDate>) filter;
+			if (range.isEmpty()) {
 				return true;
 			}
 
-			if (from != null && to != null) {
-				return !dateValue.isBefore(from) && !dateValue.isAfter(to);
-			} else if (from != null) {
-				return !dateValue.isBefore(from);
-			} else {
-				return !dateValue.isAfter(to);
+			LocalDate dateValue = (LocalDate) value;
+			
+			// Range picker returns list with [from, to]
+			if (range.size() == 2) {
+				LocalDate from = range.get(0);
+				LocalDate to = range.get(1);
+
+				if (from == null && to == null) {
+					return true;
+				}
+
+				if (from != null && to != null) {
+					return !dateValue.isBefore(from) && !dateValue.isAfter(to);
+				} else if (from != null) {
+					return !dateValue.isBefore(from);
+				} else if (to != null) {
+					return !dateValue.isAfter(to);
+				}
+			}
+			// Single date selected
+			else if (range.size() == 1) {
+				LocalDate filterDate = range.get(0);
+				return dateValue.equals(filterDate);
 			}
 		}
 
@@ -361,23 +374,37 @@ public class DynamicColumnsBean extends GenericDemoBean {
 			return false;
 		}
 
-		if (filter instanceof LocalDateTime[]) {
-			LocalDateTime[] range = (LocalDateTime[]) filter;
-			LocalDateTime dateTimeValue = (LocalDateTime) value;
-
-			LocalDateTime from = range[0];
-			LocalDateTime to = range[1];
-
-			if (from == null && to == null) {
+		// Handle List<LocalDateTime> for range picker (expects 2 dates: from and to)
+		if (filter instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<LocalDateTime> range = (List<LocalDateTime>) filter;
+			if (range.isEmpty()) {
 				return true;
 			}
 
-			if (from != null && to != null) {
-				return !dateTimeValue.isBefore(from) && !dateTimeValue.isAfter(to);
-			} else if (from != null) {
-				return !dateTimeValue.isBefore(from);
-			} else {
-				return !dateTimeValue.isAfter(to);
+			LocalDateTime dateTimeValue = (LocalDateTime) value;
+			
+			// Range picker returns list with [from, to]
+			if (range.size() == 2) {
+				LocalDateTime from = range.get(0);
+				LocalDateTime to = range.get(1);
+
+				if (from == null && to == null) {
+					return true;
+				}
+
+				if (from != null && to != null) {
+					return !dateTimeValue.isBefore(from) && !dateTimeValue.isAfter(to);
+				} else if (from != null) {
+					return !dateTimeValue.isBefore(from);
+				} else if (to != null) {
+					return !dateTimeValue.isAfter(to);
+				}
+			}
+			// Single datetime selected
+			else if (range.size() == 1) {
+				LocalDateTime filterDateTime = range.get(0);
+				return dateTimeValue.equals(filterDateTime);
 			}
 		}
 

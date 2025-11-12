@@ -367,5 +367,38 @@
       "visual" : {
         "at" : { "x" : 352, "y" : 1448 }
       }
+    }, {
+      "id" : "f55",
+      "type" : "RequestStart",
+      "name" : "Group",
+      "config" : {
+        "callSignature" : "group",
+        "startCategory" : "ExtendedTable",
+        "outLink" : "group.ivp",
+        "startName" : "Group",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1576 }
+      },
+      "connect" : { "id" : "f59", "to" : "f56" }
+    }, {
+      "id" : "f56",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.Group",
+        "startMethod" : "start()"
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1576 }
+      },
+      "connect" : { "id" : "f58", "to" : "f57" }
+    }, {
+      "id" : "f57",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1576 }
+      }
     } ]
 }

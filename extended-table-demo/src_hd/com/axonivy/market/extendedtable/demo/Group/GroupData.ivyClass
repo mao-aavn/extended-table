@@ -1,0 +1,4 @@
+GroupData #class
+com.axonivy.market.extendedtable.demo.Group #namespace
+bean com.axonivy.market.extendedtable.demo.beans.GroupBean #field
+bean PERSISTENT #fieldModifier

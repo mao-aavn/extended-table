@@ -12,7 +12,10 @@
 		<ui:define name="content">
 
 			<h2>Dynamic Columns</h2>
-			<p><b>NOTE</b>: Column id should match with entity's field name to make the table restoration works</p>
+			<p>
+				<b>NOTE</b>: Column id should match with entity's field name to make
+				the table restoration works
+			</p>
 			<h:form id="dynamicColumnsForm">
 				<p:messages />
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
@@ -99,51 +102,36 @@
 							</c:when>
 
 							<!-- DateTime column -->
-							<!-- 							<c:when
+							<c:when
 								test="#{col.property eq 'dateTime' and data.bean.isColumnVisible(col.property)}">
-								Date Time
-								<p:column headerText="Date Time (Multi Selection)"
-									field="dateTime">
+								<p:column id="dateTime" headerText="Date Time"
+									filterBy="#{item.dateTime}" filterMatchMode="custom"
+									filterFunction="#{data.bean.filterDateTime}" field="dateTime"
+									style="width:220px">
 									<f:facet name="filter">
-										<p:datePicker selectionMode="multiple" pattern="dd.MM.yyyy"
-											value="#{data.bean.dateTimeFilters[col.property]}" onchange="filterTable()" />
+										<p:datePicker selectionMode="range" pattern="dd.MM.yyyy HH:mm"
+											value="#{data.bean.dateTimeFilters[col.property]}"
+											onchange="filterTable()" showTime="true" />
 									</f:facet>
 									<h:outputText
 										value="#{data.bean.formatDateTime(item.dateTime)}" />
 								</p:column>
-
-							</c:when> -->
+							</c:when>
 
 							<!-- Date column -->
 							<c:when
 								test="#{col.property eq 'date' and data.bean.isColumnVisible(col.property)}">
-								<p:column id="date" headerText="Single Date"
-									filterBy="#{item.date}" field="date" filterMatchMode="custom"
+								<p:column id="date" headerText="Date" filterBy="#{item.date}"
+									field="date" filterMatchMode="custom"
 									filterFunction="#{data.bean.filterDate}" style="width:180px">
 									<f:facet name="filter">
-										<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
-											value="#{data.bean.dateFilter}" onchange="filterTable()" />
+										<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
+											value="#{data.bean.dateFilters[col.property]}"
+											onchange="filterTable()" />
 									</f:facet>
 									<h:outputText value="#{data.bean.formatDate(item.date)}" />
 								</p:column>
 							</c:when>
-
-							Date1 column
-<!-- 							<c:when
-								test="#{col.property eq 'date1' and data.bean.isColumnVisible(col.property)}">
-								<p:column id="date1" headerText="Date 1"
-									filterBy="#{item.date1}" sortBy="#{item.date1}"
-									filterMatchMode="custom"
-									filterFunction="#{data.bean.filterDate}" style="width:180px">
-									<f:facet name="filter">
-										<p:datePicker value="#{data.bean.dateFilters[col.property]}"
-											selectionMode="range" pattern="yyyy-MM-dd"
-											onchange="filterTable()" showIcon="true" showButtonBar="true"
-											style="width:100%" />
-									</f:facet>
-									<h:outputText value="#{item.date1}" />
-								</p:column>
-							</c:when> -->
 
 							<!-- Status column -->
 							<c:when

@@ -5,8 +5,11 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,8 @@ public abstract class GenericDemoBean {
 	protected LocalDate dateFilter;
 	protected List<LocalDate> datesFilter; // for date range and multiple modes only
 	protected List<LocalDate> dateTimesFilter; // for date range and multiple modes only
+	protected Map<String, List<LocalDate>> dateFilters; // for dynamic date range filters
+	protected Map<String, List<LocalDateTime>> dateTimeFilters; // for dynamic datetime range filters
 	protected Integer rankFrom;
 	protected Integer rankTo;
 
@@ -515,6 +520,36 @@ public abstract class GenericDemoBean {
 
 	public void setDateFilter(LocalDate dateFilter) {
 		this.dateFilter = dateFilter;
+	}
+
+	public Map<String, List<LocalDate>> getDateFilters() {
+		if (dateFilters == null) {
+			dateFilters = new HashMap<>();
+		}
+		return dateFilters;
+	}
+
+	public void setDateFilters(Map<String, List<LocalDate>> dateFilters) {
+		this.dateFilters = dateFilters;
+	}
+
+	public List<LocalDate> getDateFilter(String property) {
+		return getDateFilters().computeIfAbsent(property, k -> new ArrayList<>());
+	}
+
+	public Map<String, List<LocalDateTime>> getDateTimeFilters() {
+		if (dateTimeFilters == null) {
+			dateTimeFilters = new HashMap<>();
+		}
+		return dateTimeFilters;
+	}
+
+	public void setDateTimeFilters(Map<String, List<LocalDateTime>> dateTimeFilters) {
+		this.dateTimeFilters = dateTimeFilters;
+	}
+
+	public List<LocalDateTime> getDateTimeFilter(String property) {
+		return getDateTimeFilters().computeIfAbsent(property, k -> new ArrayList<>());
 	}
 
 }

@@ -1,0 +1,339 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+<h:body>
+	<ui:composition template="/layouts/frame-10-full-width.xhtml">
+		<ui:define name="title">Extended Table Showcase</ui:define>
+		<ui:define name="content">
+
+			<h1>Group</h1>
+			<h:form id="groupForm">
+				<p:messages />
+				<ic:com.axonivy.market.extendedtable.ExtendedTable
+					tableId="groupTable" widgetVar="groupTable"
+					resizableColumns="false" id="extendedTable"
+					value="#{data.bean.items}" paginator="true" rows="10"
+					scrollable="true" scrollWidth="100%"
+					filteredValue="#{data.bean.filteredItems}">
+
+					<!-- Header Column Groups -->
+					<p:columnGroup type="header">
+						<p:row>
+							<p:column headerText="Basic Info" colspan="4" style="width:650px; background-color:#1976d2; color:white; font-weight:bold; text-align:center;" />
+							<p:column headerText="Financial" colspan="1" style="width:230px; background-color:#f57c00; color:white; font-weight:bold; text-align:center;" />
+							<p:column headerText="Contact Info" colspan="5" style="width:1030px; background-color:#7b1fa2; color:white; font-weight:bold; text-align:center;" />
+							<p:column headerText="Location" colspan="3" style="width:550px; background-color:#388e3c; color:white; font-weight:bold; text-align:center;" />
+							<p:column headerText="Additional Details" colspan="4" style="width:1030px; background-color:#c2185b; color:white; font-weight:bold; text-align:center;" />
+						</p:row>
+						<p:row>
+							<p:column headerText="Name" style="width:200px;" sortBy="#{item.name}" filterBy="#{item.name}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText styleClass="custom-filter" onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Single Date" style="width:180px;" sortBy="#{item.date}" filterBy="#{item.date}" filterMatchMode="custom" filterFunction="#{data.bean.filterDate}">
+								<f:facet name="filter">
+									<p:datePicker selectionMode="single" pattern="dd.MM.yyyy" value="#{data.bean.dateFilter}" onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Has Representative" style="width:170px;" sortBy="#{item.hasRepresentative}" filterBy="#{item.hasRepresentative}">
+								<f:facet name="filter">
+									<p:selectOneMenu onchange="filterTable()">
+										<f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+										<f:selectItem itemLabel="True" itemValue="true" />
+										<f:selectItem itemLabel="False" itemValue="false" />
+									</p:selectOneMenu>
+								</f:facet>
+							</p:column>
+							<p:column headerText="Number Rank" style="width:150px;" sortBy="#{item.rank}" filterBy="#{item.rank}" filterMatchMode="custom" filterFunction="#{data.bean.filterNumber}">
+								<f:facet name="filter">
+									<p:inputText placeholder="4..6, ..10, 5.., or 5" style="width:120px" onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Income" style="width:180px;" sortBy="#{item.income}" filterBy="#{item.income}" filterMatchMode="custom" filterFunction="#{data.bean.filterNumber}">
+								<f:facet name="filter">
+									<p:inputText placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px" onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Status" style="width:180px;" sortBy="#{item.status}" filterBy="#{item.status}" filterMatchMode="custom" filterFunction="#{data.bean.filterEnum}">
+								<f:facet name="filter">
+									<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}" onchange="filterTable()" multiple="true" style="width:100%; box-sizing: border-box;">
+										<f:selectItems value="#{data.bean.customerStatus}" />
+									</p:selectCheckboxMenu>
+								</f:facet>
+							</p:column>
+							<p:column headerText="Email" style="width:250px;" sortBy="#{item.email}" filterBy="#{item.email}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Phone" style="width:180px;" sortBy="#{item.phone}" filterBy="#{item.phone}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Contact Person" style="width:200px;" sortBy="#{item.contactPerson}" filterBy="#{item.contactPerson}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Country" style="width:220px;" sortBy="#{item.country.name}" filterBy="#{item.country.name}" filterMatchMode="exact">
+								<f:facet name="filter">
+									<p:selectOneMenu onchange="filterTable()" filter="true" style="width:100%; box-sizing: border-box;">
+										<f:selectItem itemLabel="All" itemValue="#{null}" noSelectionOption="true" />
+										<f:selectItems value="#{data.bean.countries}" var="country" itemLabel="#{country.name}" itemValue="#{country.name}" />
+									</p:selectOneMenu>
+								</f:facet>
+							</p:column>
+							<p:column headerText="Address" style="width:220px;" sortBy="#{item.address}" filterBy="#{item.address}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="City" style="width:180px;" sortBy="#{item.city}" filterBy="#{item.city}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Postal Code" style="width:150px;" sortBy="#{item.postalCode}" filterBy="#{item.postalCode}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Website" style="width:250px;" sortBy="#{item.website}" filterBy="#{item.website}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Description" style="width:300px;" sortBy="#{item.description}" filterBy="#{item.description}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Notes" style="width:300px;" sortBy="#{item.notes}" filterBy="#{item.notes}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+							<p:column headerText="Department" style="width:180px;" sortBy="#{item.department}" filterBy="#{item.department}" filterMatchMode="contains">
+								<f:facet name="filter">
+									<p:inputText onchange="filterTable()" />
+								</f:facet>
+							</p:column>
+						</p:row>
+					</p:columnGroup>
+
+					<!-- Name column -->
+					<p:column filterBy="#{item.name}"
+						sortBy="#{item.name}" filterMatchMode="contains"
+						style="width:200px">
+						<f:facet name="filter">
+							<p:inputText id="nameFilter" styleClass="custom-filter"
+								onchange="filterTable()" />
+						</f:facet>
+
+						<h:outputText value="#{item.name}" />
+					</p:column>
+
+					<!-- Single Date -->
+					<p:column filterBy="#{item.date}"
+						field="date" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterDate}" style="width:180px">
+						<f:facet name="filter">
+							<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
+								value="#{data.bean.dateFilter}" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{data.bean.formatDate(item.date)}" />
+					</p:column>
+
+					<!-- Has Representative column -->
+					<p:column sortBy="#{item.hasRepresentative}"
+						filterBy="#{item.hasRepresentative}" style="width:200px">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItem itemLabel="True" itemValue="true" />
+								<f:selectItem itemLabel="False" itemValue="false" />
+							</p:selectOneMenu>
+						</f:facet>
+						<h:outputText value="#{item.hasRepresentative ? 'True' : 'False'}" />
+					</p:column>
+
+					<!-- Rank column with single input range syntax -->
+					<p:column field="rank"
+						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterNumber}" style="width:150px">
+						<f:facet name="filter">
+							<p:inputText id="rankFilter" placeholder="4..6, ..10, 5.., or 5"
+								style="width:120px" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.rank}" />
+					</p:column>
+
+					<!-- Income column-->
+					<p:column field="income"
+						filterMatchMode="custom"
+						filterFunction="#{data.bean.filterNumber}" style="width:180px">
+						<f:facet name="filter">
+							<p:inputText id="incomeFilter"
+								placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5"
+								style="width:120px" onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.income}">
+							<f:convertNumber locale="de_DE" minFractionDigits="2"
+								maxFractionDigits="2" />
+						</h:outputText>
+					</p:column>
+
+					<!-- Status column (Multiple selection) with custom filter -->
+					<p:column filterBy="#{item.status}"
+						sortBy="#{item.status}" filterMatchMode="custom"
+						filterFunction="#{data.bean.filterEnum}" style="width:180px">
+						<f:facet name="filter">
+							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"
+								onchange="filterTable()" multiple="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItems value="#{data.bean.customerStatus}" />
+							</p:selectCheckboxMenu>
+						</f:facet>
+						<span
+							class="customer-badge status-#{item.status.name().toLowerCase()}">
+							#{item.status} </span>
+					</p:column>
+
+					<!-- Email column -->
+					<p:column filterBy="#{item.email}"
+						sortBy="#{item.email}" filterMatchMode="contains"
+						style="width:250px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.email}" />
+					</p:column>
+
+					<!-- Phone column -->
+					<p:column filterBy="#{item.phone}"
+						sortBy="#{item.phone}" filterMatchMode="contains"
+						style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.phone}" />
+					</p:column>
+
+					<!-- Contact Person column -->
+					<p:column filterBy="#{item.contactPerson}" sortBy="#{item.contactPerson}"
+						filterMatchMode="contains" style="width:200px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.contactPerson}" />
+					</p:column>
+
+					<!-- Country column -->
+					<p:column filterBy="#{item.country.name}"
+						sortBy="#{item.country.name}" filterMatchMode="exact"
+						style="width:180px">
+						<f:facet name="filter">
+							<p:selectOneMenu onchange="filterTable()" filter="true"
+								style="width:100%; box-sizing: border-box;">
+								<f:selectItem itemLabel="All" itemValue="#{null}"
+									noSelectionOption="true" />
+								<f:selectItems value="#{data.bean.countries}" var="country"
+									itemLabel="#{country.name}" itemValue="#{country.name}" />
+							</p:selectOneMenu>
+						</f:facet>
+						<span class="flag flag-#{item.country.code}"
+							style="width: 30px; height: 20px" />
+						<h:outputText style="vertical-align: middle; margin-left: .5rem"
+							value="#{item.country.name}" />
+					</p:column>
+
+					<!-- Address column -->
+					<p:column filterBy="#{item.address}"
+						sortBy="#{item.address}" filterMatchMode="contains"
+						style="width:220px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.address}" />
+					</p:column>
+
+					<!-- City column -->
+					<p:column filterBy="#{item.city}"
+						sortBy="#{item.city}" filterMatchMode="contains"
+						style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.city}" />
+					</p:column>
+
+					<!-- Postal Code column -->
+					<p:column filterBy="#{item.postalCode}"
+						sortBy="#{item.postalCode}" filterMatchMode="contains"
+						style="width:150px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.postalCode}" />
+					</p:column>
+
+					<!-- Website column -->
+					<p:column filterBy="#{item.website}"
+						sortBy="#{item.website}" filterMatchMode="contains"
+						style="width:250px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.website}" />
+					</p:column>
+
+					<!-- Description column -->
+					<p:column filterBy="#{item.description}"
+						sortBy="#{item.description}" filterMatchMode="contains"
+						style="width:300px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.description}" />
+					</p:column>
+
+					<!-- Notes column -->
+					<p:column filterBy="#{item.notes}"
+						sortBy="#{item.notes}" filterMatchMode="contains"
+						style="width:300px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.notes}" />
+					</p:column>
+
+					<!-- Department column -->
+					<p:column filterBy="#{item.department}"
+						sortBy="#{item.department}" filterMatchMode="contains"
+						style="width:180px">
+						<f:facet name="filter">
+							<p:inputText onchange="filterTable()" />
+						</f:facet>
+						<h:outputText value="#{item.department}" />
+					</p:column>
+				</ic:com.axonivy.market.extendedtable.ExtendedTable>
+			</h:form>
+
+			<script>
+				function filterTable() {
+					PF('groupTable').filter();
+				}
+			</script>
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

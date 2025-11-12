@@ -1,0 +1,146 @@
+/* State Name Label - using class selector with higher specificity */
+.extended-table-panel .extended-table-label.ui-outputlabel {
+	font-weight: 600;
+	color: #b91c1c;
+	font-size: 14px;
+	margin-right: 12px;
+	display: inline-flex;
+	align-items: center;
+}
+
+/* State Name Input - autocomplete wrapper */
+.extended-table-panel .extended-table-input.ui-autocomplete {
+	display: inline-flex;
+	align-items: stretch;
+	vertical-align: middle;
+	border: 2px solid #fca5a5;
+	border-radius: 6px;
+	transition: all 0.18s ease;
+	box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
+	background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+	padding: 0;
+	overflow: hidden;
+}
+
+/* Inner input field */
+.extended-table-panel .extended-table-input input[id$="stateNameInput_input"],
+	.extended-table-panel .extended-table-input .ui-autocomplete-input {
+	padding: 8px 12px;
+	font-size: 14px;
+	border: none;
+	background: transparent;
+	outline: none;
+	margin: 0;
+	border-radius: 6px 0 0 6px;
+	flex: 1;
+	color: #7f1d1d;
+	font-weight: 500;
+}
+
+.extended-table-panel .extended-table-input input[id$="stateNameInput_input"]::placeholder
+	{
+	color: #fca5a5;
+	opacity: 0.8;
+}
+
+/* Dropdown button */
+.extended-table-panel .extended-table-input .ui-autocomplete-dropdown,
+	.extended-table-panel .extended-table-input button[id$="stateNameInput_button"]
+	{
+	margin: 0;
+	border-radius: 0 4px 4px 0;
+	background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+	border: none;
+	border-left: 1px solid rgba(255, 255, 255, 0.3);
+	color: #fff;
+	padding: 0 12px;
+	transition: all 0.3s ease;
+	box-shadow: none;
+	height: auto;
+	min-width: 36px;
+}
+
+.extended-table-panel .extended-table-input .ui-autocomplete-dropdown:hover,
+	.extended-table-panel .extended-table-input button[id$="stateNameInput_button"]:hover
+	{
+	background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+
+/* Fix PrimeFaces corner classes */
+.extended-table-panel .extended-table-input .ui-autocomplete-input.ui-corner-left
+	{
+	border-radius: 6px 0 0 6px;
+}
+
+.extended-table-panel .extended-table-input .ui-autocomplete-dropdown.ui-corner-right
+	{
+	border-radius: 0 4px 4px 0;
+}
+
+.extended-table-panel .extended-table-input.ui-autocomplete:hover {
+	border-color: #f87171;
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.extended-table-panel .extended-table-input.ui-autocomplete.ui-state-focus,
+	.extended-table-panel .extended-table-input input[id$="stateNameInput_input"]:focus
+	{
+	border-color: #ef4444;
+	box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+/* Custom button styling */
+.extended-table-panel .top-buttons.ui-button {
+	margin-left: 16px;
+	background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+	border: none;
+	color: white;
+	padding: 8px 20px;
+	border-radius: 6px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.extended-table-panel .top-buttons.ui-button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+	background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+
+.extended-table-panel .top-buttons.ui-button:active {
+	transform: translateY(0);
+}
+
+/* Save button - Deeper red gradient */
+.extended-table-panel #saveTableStateBtn.ui-button {
+	background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+	box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.extended-table-panel #saveTableStateBtn.ui-button:hover {
+	background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+	box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+}
+
+/* Restore button - Medium red gradient */
+.extended-table-panel #restoreStateBtn.ui-button {
+	background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+	box-shadow: 0 2px 8px rgba(248, 113, 113, 0.3);
+}
+
+.extended-table-panel #restoreStateBtn.ui-button:hover {
+	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+	box-shadow: 0 4px 12px rgba(248, 113, 113, 0.5);
+}
+
+/* Reset button - Rose/Pink gradient */
+.extended-table-panel #resetButton.ui-button {
+	background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+	box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
+}
+
+.extended-table-panel #resetButton.ui-button:hover {
+	background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+	box-shadow: 0 4px 12px rgba(244, 63, 94, 0.5);
+}

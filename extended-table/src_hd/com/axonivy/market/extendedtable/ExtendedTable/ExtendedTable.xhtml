@@ -18,6 +18,18 @@
 	<cc:attribute name="saveStateLabel" type="java.lang.String" default="Save Table State" shortDescription="Label for the save state button." />
 	<cc:attribute name="restoreStateLabel" type="java.lang.String" default="Restore Table State" shortDescription="Label for the restore state button." />
 	<cc:attribute name="deleteStateLabel" type="java.lang.String" default="Delete Table State" shortDescription="Label for the delete state button." />
+	
+	<!-- Button Icons -->
+	<cc:attribute name="saveStateIcon" type="java.lang.String" default="pi pi-save" shortDescription="Icon for the save state button. Default is 'pi pi-save'." />
+	<cc:attribute name="restoreStateIcon" type="java.lang.String" default="pi pi-replay" shortDescription="Icon for the restore state button. Default is 'pi pi-replay'." />
+	<cc:attribute name="deleteStateIcon" type="java.lang.String" default="pi pi-trash" shortDescription="Icon for the delete state button. Default is 'pi pi-trash'." />
+	<cc:attribute name="resetTableIcon" type="java.lang.String" default="pi pi-refresh" shortDescription="Icon for the reset table button. Default is 'pi pi-refresh'." />
+	
+	<!-- Icon Visibility Flags -->
+	<cc:attribute name="showSaveStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the save state button." />
+	<cc:attribute name="showRestoreStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the restore state button." />
+	<cc:attribute name="showDeleteStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the delete state button." />
+	<cc:attribute name="showResetTableIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the reset table button." />
     
 	<!-- UI Messages -->
 	<cc:attribute name="stateNameRequiredMsg" type="java.lang.String" default="State name is required!" shortDescription="Validation message when state name is empty." />
@@ -131,19 +143,21 @@
 
 <cc:implementation>
 	<style>
-		.top-buttons {
-			margin-left: 8px;
+		.extended-table-panel .top-buttons.ui-button {
+			margin-left: 10px;
 		}
 	</style>
 
 	<p:growl id="extendedTableGrowlMsg"></p:growl>
 
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
+		styleClass="extended-table-panel"
 		id="tableStatePanel">
 		<!-- Hidden button to prevent Enter key in filters from triggering Save button -->
 		<button type="submit" disabled="disabled" style="display:none;" aria-hidden="true"></button>
 		
-		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" />
+		<p:outputLabel for="stateNameInput" value="#{cc.attrs.stateNameLabel}" 
+			styleClass="extended-table-label" />
 		<p:autoComplete id="stateNameInput"
 			required="false"
 			value="#{data.bean.stateName}"
@@ -152,10 +166,12 @@
 			placeholder="Enter or select state name" var="name"
 			itemLabel="#{name}" itemValue="#{name}" minQueryLength="3"
 			requiredMessage="#{cc.attrs.stateNameRequiredMsg}"
+			styleClass="extended-table-input"
 			style="width:250px; margin: 0px 30px" />
 
 		<p:commandButton value="#{cc.attrs.saveStateLabel}"
 			styleClass="top-buttons" id="saveTableStateBtn"
+			icon="#{cc.attrs.showSaveStateIcon ? cc.attrs.saveStateIcon : ''}"
 			action="#{data.bean.saveTableState}"
 			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId}"
 			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput">
@@ -164,6 +180,7 @@
 
 		<p:commandButton value="#{cc.attrs.restoreStateLabel}"
 			id="restoreStateBtn" styleClass="top-buttons"
+			icon="#{cc.attrs.showRestoreStateIcon ? cc.attrs.restoreStateIcon : ''}"
 			process="#{cc.clientId}:stateNameInput"
 			action="#{data.bean.restoreTableState}"
 			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
@@ -171,12 +188,14 @@
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"
+			icon="#{cc.attrs.showDeleteStateIcon ? cc.attrs.deleteStateIcon : ''}"
 			action="#{data.bean.deleteTableState}"
 			rendered="#{cc.attrs.showDeleteButton}" process="stateNameInput"
 			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput" />
 
 		<p:commandButton value="#{cc.attrs.resetTableLabel}" id="resetButton"
 			styleClass="top-buttons" rendered="#{cc.attrs.showResetButton}"
+			icon="#{cc.attrs.showResetTableIcon ? cc.attrs.resetTableIcon : ''}"
 			process="@this"
 			actionListener="#{data.bean.resetTable}"
 			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg"

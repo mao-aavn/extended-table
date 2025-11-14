@@ -14,26 +14,30 @@
 
 	<!-- Initial state to load -->
 	<cc:attribute name="initialStateName" type="java.lang.String" 
-		shortDescription="Name of the state to automatically load when the component is initialized. If provided, the table will restore this state on first render." />
+		shortDescription="Name of the state to automatically load when the component is initialized. If provided, the table will restore this state on first render. It should be used with the showShareButton attribute, and please make sure about the scope of sharing state." />
 
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" type="java.lang.String" default="State Name" shortDescription="Label for the state name input." />
 	<cc:attribute name="resetTableLabel" type="java.lang.String" default="Reset Table" shortDescription="Label for the reset button." />
 	<cc:attribute name="saveStateLabel" type="java.lang.String" default="Save Table State" shortDescription="Label for the save state button." />
+	<cc:attribute name="shareStateLabel" type="java.lang.String" default="Copy Shareable Link" shortDescription="Label for the share state button." />
 	<cc:attribute name="restoreStateLabel" type="java.lang.String" default="Restore Table State" shortDescription="Label for the restore state button." />
 	<cc:attribute name="deleteStateLabel" type="java.lang.String" default="Delete Table State" shortDescription="Label for the delete state button." />
 	
 	<!-- Button Icons -->
 	<cc:attribute name="saveStateIcon" type="java.lang.String" default="pi pi-save" shortDescription="Icon for the save state button. Default is 'pi pi-save'." />
+	<cc:attribute name="shareStateIcon" type="java.lang.String" default="pi pi-share-alt" shortDescription="Icon for the share state button. Default is 'pi pi-share-alt'." />
 	<cc:attribute name="restoreStateIcon" type="java.lang.String" default="pi pi-replay" shortDescription="Icon for the restore state button. Default is 'pi pi-replay'." />
 	<cc:attribute name="deleteStateIcon" type="java.lang.String" default="pi pi-trash" shortDescription="Icon for the delete state button. Default is 'pi pi-trash'." />
 	<cc:attribute name="resetTableIcon" type="java.lang.String" default="pi pi-refresh" shortDescription="Icon for the reset table button. Default is 'pi pi-refresh'." />
 	
 	<!-- Icon Visibility Flags -->
 	<cc:attribute name="showSaveStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the save state button." />
+	<cc:attribute name="showShareStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the share state button." />
 	<cc:attribute name="showRestoreStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the restore state button." />
 	<cc:attribute name="showDeleteStateIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the delete state button." />
 	<cc:attribute name="showResetTableIcon" type="boolean" default="true" shortDescription="Whether to show the icon on the reset table button." />
+
     
 	<!-- UI Messages -->
 	<cc:attribute name="stateNameRequiredMsg" type="java.lang.String" default="State name is required!" shortDescription="Validation message when state name is empty." />
@@ -45,9 +49,12 @@
 	<cc:attribute name="columnsRenderCallback" method-signature="void columnsRenderCallback(java.util.List)" 
 		shortDescription="Optional method expression to receive the list of rendered columns. Example: columnsRenderCallback='{data.bean.columnsRenderCallback}'" />
 
+	<!-- Buttons visibility -->
 	<cc:attribute name="showResetButton" type="boolean" default="true" shortDescription="Whether to render the reset button." />
 	<cc:attribute name="showDeleteButton" type="boolean" default="false" shortDescription="Whether to render the delete button." />
+	<cc:attribute name="showShareButton" type="boolean" default="false" shortDescription="Whether to render the share button. It should be used with the initialStateName attribute, and please make sure about the scope of sharing state." />
 
+	<!-- Table Id-->
 	<cc:attribute name="tableId" type="java.lang.String" required="true" shortDescription="ID of the underlying p:dataTable." />
 
 	<!-- Datatable mapping (matching PrimeFaces DataTable attribute types/defaults where applicable) -->
@@ -151,7 +158,10 @@
 			margin-left: 10px;
 		}
 	</style>
-	<f:event listener="#{data.bean.init}" type="preRenderComponent"></f:event>
+	
+	<c:if test="#{not empty cc.attrs.initialStateName}">
+		<f:event listener="#{data.bean.restoreStateFromGivenInitialStateName}" type="preRenderComponent"></f:event>
+	</c:if>
 	<p:growl id="extendedTableGrowlMsg"></p:growl>
 
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
@@ -178,7 +188,7 @@
 			icon="#{cc.attrs.showSaveStateIcon ? cc.attrs.saveStateIcon : ''}"
 			action="#{data.bean.saveTableState}"
 			process="#{cc.clientId}:stateNameInput :#{cc.clientId}:#{cc.attrs.tableId}"
-			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput">
+			update="#{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:shareStateBtn">
 			<f:param name="explicitSave" value="true" />
 		</p:commandButton>
 
@@ -187,8 +197,18 @@
 			icon="#{cc.attrs.showRestoreStateIcon ? cc.attrs.restoreStateIcon : ''}"
 			process="#{cc.clientId}:stateNameInput"
 			action="#{data.bean.restoreTableState}"
-			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
+			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:shareStateBtn"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
+
+		<p:commandButton value="#{cc.attrs.shareStateLabel}"
+			id="shareStateBtn" styleClass="top-buttons"
+			icon="#{cc.attrs.showShareStateIcon ? cc.attrs.shareStateIcon : ''}"
+			rendered="#{cc.attrs.showShareButton}"
+			disabled="#{empty data.bean.stateName}"
+			process="@this"
+			update="#{cc.clientId}:extendedTableGrowlMsg"
+			actionListener="#{data.bean.copyShareableStateLinkToClipboard}"
+			/> 
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"
 			styleClass="top-buttons"
@@ -202,7 +222,7 @@
 			icon="#{cc.attrs.showResetTableIcon ? cc.attrs.resetTableIcon : ''}"
 			process="@this"
 			actionListener="#{data.bean.resetTable}"
-			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg"
+			update="#{cc.clientId}:stateNameInput #{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput #{cc.clientId}:shareStateBtn"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();">
 			<p:resetInput target="#{cc.clientId}:stateNameInput"></p:resetInput>
 		</p:commandButton>

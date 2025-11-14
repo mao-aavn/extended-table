@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.context.ExternalContext;
 
 import org.primefaces.util.ComponentTraversalUtils;
+import org.primefaces.PrimeFaces;
 
 public final class JSFUtils {
 
@@ -64,5 +65,29 @@ public final class JSFUtils {
 		UIComponent root = currentContext().getViewRoot();
 
 		return ComponentTraversalUtils.firstWithId(localId, root);
+	}
+
+	/**
+	 * Execute arbitrary JavaScript on the client via PrimeFaces.
+	 */
+	public static void executeScript(String script) {
+		PrimeFaces.current().executeScript(script);
+	}
+
+	/**
+	 * Copy the provided text to the client's clipboard by executing a small
+	 * navigator.clipboard.writeText(...) script. The text will be escaped to be
+	 * safely embedded into a single-quoted JavaScript string literal.
+	 */
+	public static void copyToClipboard(String text) {
+		if (text == null) {
+			return;
+		}
+		// Escape backslashes and single quotes and normalize newlines for JS string
+		String jsSafe = text.replace("\\", "\\\\").replace("'", "\\'")
+				.replace("\n", "\\n").replace("\r", "");
+		String script = "navigator.clipboard.writeText('" + jsSafe
+				+ "').then(function(){console.log('copied to clipboard');}).catch(function(e){console.error(e);});";
+		executeScript(script);
 	}
 }

@@ -6,12 +6,15 @@ import static com.axonivy.market.extendedtable.utils.DataTableUtils.findDatePick
 import static com.axonivy.market.extendedtable.utils.DataTableUtils.restoreSelection;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addErrorMsg;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.addInfoMsg;
+import static com.axonivy.market.extendedtable.utils.JSFUtils.copyToClipboard;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponent;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.findComponentFromClientId;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getRequestParam;
 import static com.axonivy.market.extendedtable.utils.JSFUtils.getViewRoot;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -75,10 +78,10 @@ public class ExtendedDataTableBean {
 	private List<String> stateNames = new ArrayList<>();
 
 	/**
-	 * Initialize the component and auto-load the state if initialStateName is
+	 * Initialize the component and restore the state if initialStateName is
 	 * provided. This method is called via f:event preRenderComponent.
 	 */
-	public void init() {
+	public void restoreStateFromGivenInitialStateName() {
 		// Prevent multiple initializations (e.g., during AJAX updates)
 		if (initialized) {
 			return;
@@ -93,13 +96,14 @@ public class ExtendedDataTableBean {
 
 		String initialStateName = Attrs.get(CC_ATTRS_INITIAL_STATE_NAME);
 		if (initialStateName == null || initialStateName.isEmpty()) {
+			addErrorMsg(GROWL_MSG_ID, "initialStateName should be set", null);
 			return;
 		}
 
 		// Check if the provided initial state exists for this table
 		boolean isStateExists = stateNames.stream().anyMatch(name -> name != null && name.equals(initialStateName));
 		if (!isStateExists) {
-			JSFUtils.addErrorMsg(GROWL_MSG_ID, "State not found: " + initialStateName, null);
+			addErrorMsg(GROWL_MSG_ID, "State not found: " + initialStateName, null);
 			return;
 		}
 
@@ -253,6 +257,37 @@ public class ExtendedDataTableBean {
 
 		return stateNames.stream().filter(name -> name != null && name.toLowerCase().contains(query.toLowerCase()))
 				.toList();
+	}
+	
+	public void copyShareableStateLinkToClipboard() {
+		// Build shareable link and copy it to clipboard on the client.
+		if (stateName == null || stateName.isEmpty()) {
+			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
+			return;
+		}
+
+		try {
+			// Try to get a stable base link for the current process start
+			String baseLink = null;
+			if (Ivy.wfCase().getProcessStart() != null && Ivy.wfCase().getProcessStart().getLink() != null) {
+				baseLink = Ivy.wfCase().getProcessStart().getLink().getAbsolute();
+			}
+
+			if (baseLink == null || baseLink.isBlank()) {
+				addErrorMsg(GROWL_MSG_ID, "Unable to build share link (process start link not available)", null);
+				return;
+			}
+
+			String encodedState = URLEncoder.encode(stateName, StandardCharsets.UTF_8.toString());
+			String sep = baseLink.contains("?") ? "&" : "?";
+			String shareLink = baseLink + sep + "embedInFrame&state=" + encodedState;
+
+			copyToClipboard(shareLink);
+			addInfoMsg(GROWL_MSG_ID, "Share link copied to clipboard.", null);
+		} catch (Exception e) {
+			Ivy.log().error("Failed to build or copy share link: {0}", e.getMessage(), e);
+			addErrorMsg(GROWL_MSG_ID, "Failed to create share link", null);
+		}
 	}
 
 	/**

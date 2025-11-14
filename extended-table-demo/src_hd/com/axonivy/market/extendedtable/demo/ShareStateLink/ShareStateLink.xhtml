@@ -16,13 +16,14 @@
 				<p:growl id="msgs" showDetail="true"></p:growl>
 
 				<ic:com.axonivy.market.extendedtable.ExtendedTable
-					tableId="checkboxSelectionTable" 
-					widgetVar="checkboxSelectionTable"
-					id="checkboxSelectionTableWrapper" value="#{data.bean.items}"
+					tableId="shareStateLinkTable" 
+					widgetVar="shareStateLinkTable"
+					id="shareStateLinkTableWrapper" value="#{data.bean.items}"
 					allowUnsorting="true"
 					filteredValue="#{data.bean.filteredItems}" showResetButton="true"
 					paginator="true" rows="10"
 					resizableColumns="true"
+					initialStateName="#{data.bean.initialStateName}"
 					showShareButton="true"
 					rowKey="#{item.id}">
 
@@ -127,7 +128,7 @@
 
 			<script>
 				function filterTable() {
-					PF('checkboxSelectionTable').filter();
+					PF('shareStateLinkTable').filter();
 				}
 			</script>
 		</ui:define>

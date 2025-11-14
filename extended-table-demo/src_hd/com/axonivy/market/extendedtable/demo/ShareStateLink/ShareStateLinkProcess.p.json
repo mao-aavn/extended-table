@@ -8,9 +8,17 @@
   "elements" : [ {
       "id" : "f0",
       "type" : "HtmlDialogStart",
-      "name" : "start()",
+      "name" : "start(String)",
       "config" : {
         "callSignature" : "start",
+        "input" : {
+          "params" : [
+            { "name" : "state", "type" : "String" }
+          ],
+          "map" : {
+            "out.bean.initialStateName" : "param.state"
+          }
+        },
         "guid" : "1985F9B5E0AE1884"
       },
       "visual" : {

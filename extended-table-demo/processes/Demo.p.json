@@ -400,5 +400,95 @@
       "visual" : {
         "at" : { "x" : 352, "y" : 1576 }
       }
+    }, {
+      "id" : "f60",
+      "type" : "RequestStart",
+      "name" : "Load Initial State",
+      "config" : {
+        "callSignature" : "loadInitialState",
+        "input" : {
+          "params" : [
+            { "name" : "state", "type" : "String" }
+          ],
+          "map" : {
+            "out.state" : "param.state"
+          }
+        },
+        "startCategory" : "ExtendedTable",
+        "outLink" : "loadInitialState.ivp",
+        "startName" : "Load Initial State",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1712 }
+      },
+      "connect" : { "id" : "f63", "to" : "f61" }
+    }, {
+      "id" : "f61",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.LoadInitialState",
+        "startMethod" : "start(String)",
+        "call" : {
+          "params" : [
+            { "name" : "state", "type" : "String" }
+          ],
+          "map" : {
+            "param.state" : "in.state"
+          }
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1712 }
+      },
+      "connect" : { "id" : "f64", "to" : "f62" }
+    }, {
+      "id" : "f62",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1712 }
+      }
+    }, {
+      "id" : "f65",
+      "type" : "RequestStart",
+      "name" : "Share State Link",
+      "config" : {
+        "callSignature" : "shareStateLink",
+        "input" : {
+          "params" : [
+            { "name" : "state", "type" : "String" }
+          ],
+          "map" : {
+            "out.state" : "param.state"
+          }
+        },
+        "startCategory" : "ExtendedTable",
+        "outLink" : "shareStateLink.ivp",
+        "startName" : "Share State Link",
+        "case" : { }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 1840 }
+      },
+      "connect" : { "id" : "f68", "to" : "f66" }
+    }, {
+      "id" : "f66",
+      "type" : "DialogCall",
+      "name" : "Dialog",
+      "config" : {
+        "dialogId" : "com.axonivy.market.extendedtable.demo.ShareStateLink",
+        "startMethod" : "start()"
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 1840 }
+      },
+      "connect" : { "id" : "f69", "to" : "f67" }
+    }, {
+      "id" : "f67",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 352, "y" : 1840 }
+      }
     } ]
 }

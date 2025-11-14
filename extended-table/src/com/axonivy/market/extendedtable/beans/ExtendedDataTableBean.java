@@ -62,15 +62,57 @@ public class ExtendedDataTableBean {
 	private static final String CC_ATTRS_DELETE_ERROR_MSG = "deleteErrorMsg";
 	private static final String CC_ATTRS_DELETE_SUCCESS_MSG = "deleteSuccessMsg";
 	private static final String CC_COLUMNS_RENDERED_CALLBACK = "columnsRenderCallback";
+	private static final String CC_ATTRS_INITIAL_STATE_NAME = "initialStateName";
 
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final String STATE_KEY_PREFIX = "TABLE_STATE_";
 	private static final String STATE_KEY_PATTERN = STATE_KEY_PREFIX + "%s_%s";
 	private String stateName;
+	private boolean initialized = false;
 
 	private static final ObjectMapper TABLE_STATE_MAPPER = createObjectMapperInstance();
 
 	private List<String> stateNames = new ArrayList<>();
+
+	/**
+	 * Initialize the component and auto-load the state if initialStateName is
+	 * provided. This method is called via f:event preRenderComponent.
+	 */
+	public void init() {
+		// Prevent multiple initializations (e.g., during AJAX updates)
+		if (initialized) {
+			return;
+		}
+		initialized = true;
+
+		// Fetch available saved state names for this table
+		stateNames = fetchAllDataTableStateNames();
+		if (stateNames == null) {
+			stateNames = new ArrayList<>();
+		}
+
+		String initialStateName = Attrs.get(CC_ATTRS_INITIAL_STATE_NAME);
+		if (initialStateName == null || initialStateName.isEmpty()) {
+			return;
+		}
+
+		// Check if the provided initial state exists for this table
+		boolean isStateExists = stateNames.stream().anyMatch(name -> name != null && name.equals(initialStateName));
+		if (!isStateExists) {
+			JSFUtils.addErrorMsg(GROWL_MSG_ID, "State not found: " + initialStateName, null);
+			return;
+		}
+
+		this.stateName = initialStateName;
+		try {
+			restoreTableState();
+		} catch (RuntimeException e) {
+			// Catch any unexpected runtime exceptions during restore
+			Ivy.log().error("Unexpected error while restoring initial state for table {0}: {1}", getTableClientId(),
+					e.getMessage(), e);
+			addErrorMsg(GROWL_MSG_ID, "Failed to apply initial table state due to an unexpected error.", null);
+		}
+	}
 
 	public void saveTableState() {
 		String explicitSave = getRequestParam("explicitSave");
@@ -107,9 +149,10 @@ public class ExtendedDataTableBean {
 				}
 			}
 		}
+
 	}
 
-	public void restoreTableState() throws JsonProcessingException {
+	public void restoreTableState() {
 		if (stateName == null || stateName.isEmpty()) {
 			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
 			return;
@@ -368,8 +411,6 @@ public class ExtendedDataTableBean {
 
 		return dateFormats;
 	}
-
-	
 
 	/**
 	 * Converts date string values in FilterMeta back to appropriate date objects

@@ -27,6 +27,8 @@ import com.axonivy.market.extendedtable.demo.service.CustomerService;
 import ch.ivyteam.ivy.environment.Ivy;
 
 public abstract class GenericDemoBean {
+	private String initialStateName;
+
 	private final DateTimeFormatter dateTimeFormatter = ofPattern("dd.MM.yyyy MM:ss");
 	private final DateTimeFormatter dateFormatter = ofPattern("dd.MM.yyyy");
 
@@ -87,7 +89,6 @@ public abstract class GenericDemoBean {
 			FacesContext.getCurrentInstance().addMessage(null, msg);
 		}
 	}
-
 
 	/**
 	 * Extracts customer names from the selection object. Handles both single
@@ -550,6 +551,14 @@ public abstract class GenericDemoBean {
 
 	public List<LocalDateTime> getDateTimeFilter(String property) {
 		return getDateTimeFilters().computeIfAbsent(property, k -> new ArrayList<>());
+	}
+
+	public String getInitialStateName() {
+		return initialStateName;
+	}
+
+	public void setInitialStateName(String initialStateName) {
+		this.initialStateName = initialStateName;
 	}
 
 }

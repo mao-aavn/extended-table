@@ -1,0 +1,4 @@
+LoadInitialStateData #class
+com.axonivy.market.extendedtable.demo.LoadInitialState #namespace
+bean com.axonivy.market.extendedtable.demo.beans.CheckboxSelectionBean #field
+bean PERSISTENT #fieldModifier

@@ -12,6 +12,10 @@
 		type="com.axonivy.market.extendedtable.controllers.TableStateController"
 		shortDescription="Controller to persist/fetch the table state; default will be IvyUserStateController" />
 
+	<!-- Initial state to load -->
+	<cc:attribute name="initialStateName" type="java.lang.String" 
+		shortDescription="Name of the state to automatically load when the component is initialized. If provided, the table will restore this state on first render." />
+
 	<!-- UI Labels -->
 	<cc:attribute name="stateNameLabel" type="java.lang.String" default="State Name" shortDescription="Label for the state name input." />
 	<cc:attribute name="resetTableLabel" type="java.lang.String" default="Reset Table" shortDescription="Label for the reset button." />
@@ -147,7 +151,7 @@
 			margin-left: 10px;
 		}
 	</style>
-
+	<f:event listener="#{data.bean.init}" type="preRenderComponent"></f:event>
 	<p:growl id="extendedTableGrowlMsg"></p:growl>
 
 	<p:outputPanel style="margin-bottom: 10px; text-align:right;"
@@ -183,7 +187,7 @@
 			icon="#{cc.attrs.showRestoreStateIcon ? cc.attrs.restoreStateIcon : ''}"
 			process="#{cc.clientId}:stateNameInput"
 			action="#{data.bean.restoreTableState}"
-			update=":#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
+			update="#{cc.clientId}:#{cc.attrs.tableId} #{cc.clientId}:extendedTableGrowlMsg #{cc.clientId}:stateNameInput"
 			onclick="PF('#{cc.attrs.widgetVar}').clearFilters();" />
 
 		<p:commandButton value="#{cc.attrs.deleteStateLabel}"

@@ -3,7 +3,7 @@
   "id" : "1991897EEBF541EB",
   "kind" : "HTML_DIALOG",
   "config" : {
-    "data" : "com.axonivy.market.extendedtable.demo.DatabaseRepo.DatabaseRepoData"
+    "data" : "com.axonivy.market.extendedtable.demo.DatabaseTableState.DatabaseTableStateData"
   },
   "elements" : [ {
       "id" : "f0",

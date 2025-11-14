@@ -41,6 +41,22 @@ and refence it below in the head part.
 <h:body class="body-hd">
   <ui:include src="/layouts/includes/progress-loader.xhtml" />
   <div id="content" class="container frame full-width">
+    <!-- Demo process quick links (generated) -->
+    
+    <div class="demo-process-links" style="padding:0.5rem 1rem;">
+      <h:panelGroup rendered="#{not empty processStartListBean.demoProcessStarts}">
+        <hr/>
+				<h3>Other Showcases</h3>
+				<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <ui:repeat value="#{processStartListBean.demoProcessStarts}" var="link">
+            <li>
+              <h:outputLink value="#{link.relative}" style="color:var(--ivy-color-primary);text-decoration:underline;" target="_blank">#{link.name}</h:outputLink>
+            </li>
+          </ui:repeat>
+        </ul>
+        <hr/>
+      </h:panelGroup>
+    </div>
     <ui:insert name="content">
       default content
     </ui:insert>

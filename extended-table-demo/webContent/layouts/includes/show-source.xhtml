@@ -1,0 +1,187 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+	<!-- 
+	Source Code Viewer Component
+	
+	Usage (Manual):
+	<ui:include src="/layouts/includes/show-source.xhtml">
+		<ui:param name="xhtmlPath" value="com/axonivy/market/extendedtable/demo/CheckboxSelection/CheckboxSelection.xhtml" />
+		<ui:param name="javaPath" value="com/axonivy/market/extendedtable/demo/beans/CheckboxSelectionBean.java" />
+		<ui:param name="dialogId" value="sourceDialog" />
+		<ui:param name="showGenericBean" value="true" />
+	</ui:include>
+	
+	Usage (Auto-detect - recommended):
+	<ui:include src="/layouts/includes/show-source.xhtml">
+		<ui:param name="autoDetect" value="true" />
+	</ui:include>
+	
+	Parameters:
+	- autoDetect: automatically detect XHTML and Java bean paths (recommended)
+	- xhtmlPath: relative path to XHTML file under src_hd (optional if autoDetect=true)
+	- javaPath: relative path to Java file under src (optional if autoDetect=true)
+	- dialogId: unique ID for dialog (optional, auto-generated if not provided)
+	- showGenericBean: whether to show GenericDemoBean tab (optional, default true)
+	-->
+
+	<ui:param name="effectiveXhtmlPath" value="#{autoDetect eq true ? codeViewerBean.autoDetectedXhtmlPath : xhtmlPath}" />
+	<ui:param name="effectiveJavaPath" value="#{autoDetect eq true ? codeViewerBean.autoDetectedJavaPath : javaPath}" />
+	<ui:param name="effectiveDialogId" value="#{empty dialogId ? 'sourceCodeDialog' : dialogId}" />
+	<ui:param name="effectiveShowGenericBean" value="#{empty showGenericBean ? true : showGenericBean}" />
+	
+	<!-- Extract file names for tab titles -->
+	<ui:param name="xhtmlFileName" value="#{effectiveXhtmlPath.substring(effectiveXhtmlPath.lastIndexOf('/') + 1)}" />
+	<ui:param name="javaFileName" value="#{effectiveJavaPath.substring(effectiveJavaPath.lastIndexOf('/') + 1)}" />
+
+	<h:panelGroup rendered="#{not empty effectiveXhtmlPath}">
+		<style>
+			.source-viewer-btn {
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+				z-index: 1000;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+			}
+			.source-code-container {
+				max-height: 600px;
+				overflow: auto;
+				background: #272822;
+				border-radius: 4px;
+			}
+			.source-code-container pre {
+				margin: 0 !important;
+			}
+			.copy-code-btn {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				z-index: 10;
+			}
+		</style>
+
+		<!-- Floating button to show source -->
+		<p:commandButton 
+			value="View Source" 
+			icon="pi pi-code"
+			styleClass="source-viewer-btn ui-button-rounded"
+			onclick="PF('#{effectiveDialogId}').show(); applySourceHighlighting(); return false;" 
+			type="button" />
+
+		<!-- Dialog with tabs for XHTML and Java source -->
+		<p:dialog 
+			id="#{effectiveDialogId}" 
+			widgetVar="#{effectiveDialogId}"
+			header="Source Code" 
+			modal="true" 
+			width="90%" 
+			height="80%"
+			responsive="true"
+			closeOnEscape="true">
+			
+			<!-- Growl for copy messages -->
+			<p:growl id="copyGrowl" showDetail="true" sticky="false" life="2000" />
+			
+			<!-- Remote command to trigger backend notification -->
+			<p:remoteCommand 
+				name="notifyCopySuccess" 
+				actionListener="#{codeViewerBean.showCopySuccess()}" 
+				update="copyGrowl" />
+
+			<p:tabView dynamic="false">
+				<!-- XHTML Tab -->
+				<p:tab title="#{xhtmlFileName}">
+					<div style="position: relative;">
+						<p:commandButton 
+							value="Copy" 
+							icon="pi pi-copy"
+							styleClass="copy-code-btn ui-button-sm"
+							onclick="copySourceToClipboard('xhtml-source-#{effectiveDialogId}'); return false;" 
+							type="button" />
+						
+						<div class="source-code-container">
+							<pre id="xhtml-source-#{effectiveDialogId}"><code class="language-markup"><h:outputText value="#{codeViewerBean.getXhtmlSource(effectiveXhtmlPath)}" escape="false" /></code></pre>
+						</div>
+					</div>
+				</p:tab>
+				
+				<!-- Related Demo Java Files (dynamically added) -->
+				<c:forEach items="#{codeViewerBean.relatedDemoJavaFilesList}" var="relatedFile" varStatus="status">
+					<p:tab title="#{relatedFile.fileName}">
+						<div style="position: relative;">
+							<p:commandButton 
+								value="Copy" 
+								icon="pi pi-copy"
+								styleClass="copy-code-btn ui-button-sm"
+								onclick="copySourceToClipboard('related-source-#{status.index}-#{effectiveDialogId}'); return false;" 
+								type="button" />
+							
+							<div class="source-code-container">
+								<pre id="related-source-#{status.index}-#{effectiveDialogId}"><code class="language-java"><h:outputText value="#{codeViewerBean.getJavaSource(relatedFile.filePath)}" escape="false" /></code></pre>
+							</div>
+						</div>
+					</p:tab>
+				</c:forEach>
+			</p:tabView>
+
+			<f:facet name="footer">
+				<p:commandButton 
+					value="Close" 
+					icon="pi pi-times"
+					onclick="PF('#{effectiveDialogId}').hide(); return false;" 
+					type="button" />
+			</f:facet>
+		</p:dialog>
+
+		<script>
+		//<![CDATA[
+			// Apply syntax highlighting when source viewer is shown
+			function applySourceHighlighting() {
+				setTimeout(function() {
+					if (typeof Prism !== 'undefined') {
+						Prism.highlightAll();
+					}
+				}, 100);
+			}
+
+			// Copy source code to clipboard
+			function copySourceToClipboard(elementId) {
+				var element = document.getElementById(elementId);
+				if (element) {
+					var codeElement = element.querySelector('code');
+					var text = codeElement ? (codeElement.textContent || codeElement.innerText) : (element.textContent || element.innerText);
+					
+					if (navigator.clipboard && navigator.clipboard.writeText) {
+						navigator.clipboard.writeText(text).then(function() {
+							notifyCopySuccess();
+						}).catch(function(err) {
+							console.error('Copy failed:', err);
+						});
+					} else {
+						// Fallback for older browsers
+						var textArea = document.createElement('textarea');
+						textArea.value = text;
+						textArea.style.position = 'fixed';
+						textArea.style.top = '0';
+						textArea.style.left = '0';
+						document.body.appendChild(textArea);
+						textArea.focus();
+						textArea.select();
+						try {
+							document.execCommand('copy');
+							notifyCopySuccess();
+						} catch (err) {
+							console.error('Fallback copy failed:', err);
+						}
+						document.body.removeChild(textArea);
+					}
+				}
+			}
+		//]]>
+		</script>
+	</h:panelGroup>
+</ui:composition>

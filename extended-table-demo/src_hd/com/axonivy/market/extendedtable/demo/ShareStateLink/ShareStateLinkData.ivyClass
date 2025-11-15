@@ -1,4 +1,4 @@
 ShareStateLinkData #class
 com.axonivy.market.extendedtable.demo.ShareStateLink #namespace
-bean com.axonivy.market.extendedtable.demo.beans.CheckboxSelectionBean #field
+bean com.axonivy.market.extendedtable.demo.beans.ShareStateLinkBean #field
 bean PERSISTENT #fieldModifier

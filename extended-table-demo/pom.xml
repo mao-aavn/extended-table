@@ -104,6 +104,62 @@
 					</compilerOptions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>copy-source-files</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<!-- Copy to target/classes so it gets included in the build but doesn't pollute source tree -->
+							<outputDirectory>${project.build.outputDirectory}/resources/source</outputDirectory>
+							<resources>
+								<!-- Copy XHTML and Process.p.json files from src_hd -->
+								<resource>
+									<directory>${project.basedir}/src_hd</directory>
+									<includes>
+										<include>**/*.xhtml</include>
+										<include>**/*.p.json</include>
+									</includes>
+									<targetPath>src_hd</targetPath>
+								</resource>
+								<!-- Copy Java files from src -->
+								<resource>
+									<directory>${project.basedir}/src</directory>
+									<includes>
+										<include>**/*.java</include>
+									</includes>
+									<targetPath>src</targetPath>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-vendor-resources</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<!-- Copy vendor resources to META-INF/resources for JSF ResourceHandler -->
+							<outputDirectory>${project.build.outputDirectory}/META-INF/resources/vendor</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/webContent/resources/vendor</directory>
+									<includes>
+										<include>prism.css</include>
+										<include>prism.js</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

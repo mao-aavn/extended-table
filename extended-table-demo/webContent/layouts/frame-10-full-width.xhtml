@@ -34,6 +34,8 @@ and refence it below in the head part.
   <h:outputStylesheet name="#{ivyFreyaTheme.layout}" library="#{ivyFreyaTheme.library}" />
   <h:outputStylesheet name="primeflex-2.min.css" library="primeflex" />
   <h:outputStylesheet name="custom.css" library="ivy-branding" />
+  <h:outputStylesheet name="prism.css" library="css"/>
+  <h:outputScript name="prism.js" target="body" library="js"/>
   <!-- Optional Style or Script files: 
   <h:outputStylesheet name="layouts/styles/style.css" /> 
   -->
@@ -60,6 +62,11 @@ and refence it below in the head part.
     <ui:insert name="content">
       default content
     </ui:insert>
+    
+    <!-- Automatic Source Code Viewer -->
+    <ui:include src="/layouts/includes/show-source.xhtml">
+      <ui:param name="autoDetect" value="true" />
+    </ui:include>
   </div>
   
   <ui:insert name="exception">

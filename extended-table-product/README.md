@@ -115,6 +115,47 @@ Notes:
 
 The component extends PrimeFaces `p:dataTable` and provides additional attributes for managing table state persistence.
 
+### Share Link Feature
+
+The Extended Table component includes a **share link feature** that allows users to generate shareable URLs containing the current table state (filters, sorting, pagination, etc.). This is useful for:
+- Sharing specific table views with your bussiness partners
+- Creating bookmarks for frequently used configurations
+- Providing deep links in emails or documentation
+
+**Important:** For the share link feature to work properly, you **must** include the `initialStateName` attribute. This attribute allows the table to automatically load the shared state when users click on the shared link.
+
+**Usage:**
+
+```xml
+<ic:com.axonivy.market.extendedtable.ExtendedTable
+    tableId="myTable" 
+    widgetVar="myTableWidget"
+    value="#{data.items}"
+    showShareButton="true"
+    initialStateName="#{param.stateName}"
+    rowKey="#{item.id}">
+    <!-- columns here -->
+</ic:com.axonivy.market.extendedtable.ExtendedTable>
+```
+
+**Required Attributes:**
+- `initialStateName`: **Mandatory for share feature** - Must be set to `#{param.stateName}` or similar URL parameter binding to enable loading of shared states
+- `showShareButton`: Set to `true` to display the share button (default: `false`, hidden)
+- `rowKey`: Required when using the share feature to properly identify rows
+
+When enabled, users can click the share button to get a URL that preserves the current table configuration. The `initialStateName` attribute ensures the shared state is automatically restored when the link is opened.
+
+### Code Viewer Feature (Demo Project)
+
+The **extended-table-demo** project includes a developer-friendly code viewer that displays source code for each demo page. This feature helps developers refer/copy the related code easily.
+
+**Features:**
+- Floating "View Source" button on demo pages
+- Syntax-highlighted XHTML and Java code
+- Copy-to-clipboard functionality
+- Automatic detection of related source files
+- Modal dialog with tabbed interface
+
 <!--
 The entries under the heading "Setup" are filled in this tab, e.g. for the Connector A-Trust here: https://market.axonivy.com/a-trust#tab-setup. 
 -->

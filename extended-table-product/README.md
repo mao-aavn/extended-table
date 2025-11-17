@@ -34,6 +34,8 @@ This is the initial version
 - [JUnit](https://junit.org/junit5/) tests for the main module unit testing
 - [Hypersonic SQL DB](http://hsqldb.org/) as the embedded database for the demo project (Demo data + database controller)
 - [Persistence Utils](https://market.axonivy.com/persistence-utils) library for robust database access and entity management
+- Code viewer displays source code for each demo page. This feature helps developers refer/copy the related code easily.
+
 
 ## Table State Persistence
 In the background, the table state is persisted as a JSON string value, together with the key formed by some factors (formId, tableId, state name). The persistence mechanism is decided by the given controller - the default controller will persist in the user's property map.
@@ -132,8 +134,7 @@ The Extended Table component includes a **share link feature** that allows users
     widgetVar="myTableWidget"
     value="#{data.items}"
     showShareButton="true"
-    initialStateName="#{param.stateName}"
-    rowKey="#{item.id}">
+    initialStateName="#{param.stateName}">
     <!-- columns here -->
 </ic:com.axonivy.market.extendedtable.ExtendedTable>
 ```
@@ -141,7 +142,6 @@ The Extended Table component includes a **share link feature** that allows users
 **Required Attributes:**
 - `initialStateName`: **Mandatory for share feature** - Must be set to `#{param.stateName}` or similar URL parameter binding to enable loading of shared states
 - `showShareButton`: Set to `true` to display the share button (default: `false`, hidden)
-- `rowKey`: Required when using the share feature to properly identify rows
 
 When enabled, users can click the share button to get a URL that preserves the current table configuration. The `initialStateName` attribute ensures the shared state is automatically restored when the link is opened.
 

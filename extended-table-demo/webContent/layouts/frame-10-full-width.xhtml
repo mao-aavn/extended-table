@@ -49,10 +49,10 @@ and refence it below in the head part.
       <h:panelGroup rendered="#{not empty processStartListBean.demoProcessStarts}">
         <hr/>
 				<h3>Other Showcases</h3>
-				<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:0.5rem;">
+				<ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:1rem;">
           <ui:repeat value="#{processStartListBean.demoProcessStarts}" var="link">
-            <li>
-              <h:outputLink value="#{link.relative}" style="color:var(--ivy-color-primary);text-decoration:underline;" target="_blank">#{link.name}</h:outputLink>
+            <li style="padding:0.25rem 0.75rem;background:var(--surface-100);border-radius:4px;border:1px solid var(--surface-300);">
+              <h:outputLink value="#{link.relative}" style="color:var(--ivy-color-primary);text-decoration:none;font-weight:500;" target="_blank">#{link.name}</h:outputLink>
             </li>
           </ui:repeat>
         </ul>

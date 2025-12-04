@@ -44,6 +44,12 @@ import com.axonivy.market.extendedtable.controllers.TableStateController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ch.ivyteam.ivy.environment.IvyTest;
+import ch.ivyteam.ivy.environment.Ivy;
+import ch.ivyteam.ivy.model.value.WebLink;
+import ch.ivyteam.ivy.workflow.ICase;
+import ch.ivyteam.ivy.workflow.IProcessStart;
+import javax.el.MethodExpression;
+import com.axonivy.market.extendedtable.utils.JSFUtils;
 
 /**
  * Unit tests for ExtendedDataTableBean following Ivy standard testing practices.
@@ -150,7 +156,7 @@ class ExtendedDataTableBeanTest {
         bean.setStateName("testState");
         
         // Mock DataTable and state
-        when(mockDataTable.getMultiViewState(false)).thenReturn(mockDataTableState);
+        when(mockDataTable.getMultiViewState(true)).thenReturn(mockDataTableState);
         when(mockDataTable.getClientId()).thenReturn("form:testTable");
         when(mockViewRoot.findComponent("form:testTable")).thenReturn(mockDataTable);
         
@@ -465,6 +471,138 @@ class ExtendedDataTableBeanTest {
         
         bean.setStateNames(stateNames);
         assertEquals(stateNames, bean.getStateNames());
+    }
+
+    @Test
+    void testRestoreStateFromGivenInitialStateName_WhenAlreadyInitialized_ShouldDoNothing() {
+        // Given
+         when(mockDataTable.getClientId()).thenReturn("form:testTable");
+         when(mockViewRoot.findComponent("form:testTable")).thenReturn(mockDataTable);
+         
+         try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableId}"), eq(Object.class)))
+                .thenReturn("testTable");
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableStateController}"), eq(Object.class)))
+                .thenReturn(mockController);
+            
+            // Ensure ComponentTraversalUtils used by JSFUtils.findComponent returns our mock
+            try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
+                traverseMock.when(() -> ComponentTraversalUtils.firstWithId("testTable", mockViewRoot))
+                    .thenReturn(mockDataTable);
+
+                // When
+                bean.restoreStateFromGivenInitialStateName();
+                bean.restoreStateFromGivenInitialStateName();
+                
+                // Then
+                verify(mockController, times(1)).listKeys(anyString());
+            }
+         }
+    }
+
+    @Test
+    void testRestoreStateFromGivenInitialStateName_WithValidState_ShouldRestore() throws JsonProcessingException {
+         // Given
+         when(mockDataTable.getClientId()).thenReturn("form:testTable");
+         when(mockViewRoot.findComponent("form:testTable")).thenReturn(mockDataTable);
+         when(mockDataTable.getMultiViewState(true)).thenReturn(mockDataTableState);
+         
+         try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableId}"), eq(Object.class)))
+                .thenReturn("testTable");
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableStateController}"), eq(Object.class)))
+                .thenReturn(mockController);
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.initialStateName}"), eq(Object.class)))
+                .thenReturn("initialState");
+            
+            when(mockController.listKeys(anyString())).thenReturn(Arrays.asList("TABLE_STATE_form_testTable_initialState"));
+            when(mockController.load(anyString())).thenReturn("{}"); // Mock empty state json
+            
+            // Ensure ComponentTraversalUtils used by JSFUtils.findComponent returns our mock
+            try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
+                traverseMock.when(() -> ComponentTraversalUtils.firstWithId("testTable", mockViewRoot))
+                    .thenReturn(mockDataTable);
+
+                // When
+                bean.restoreStateFromGivenInitialStateName();
+
+                // Then
+                assertEquals("initialState", bean.getStateName());
+                verify(mockDataTable).reset(); // Called in restoreTableState
+            }
+         }
+    }
+
+    @Test
+    void testCopyShareableStateLinkToClipboard_Success() {
+        // Given
+        bean.setStateName("testState");
+        
+        try (MockedStatic<Ivy> ivyMock = Mockito.mockStatic(Ivy.class);
+             MockedStatic<JSFUtils> jsfUtilsMock = Mockito.mockStatic(JSFUtils.class)) {
+             
+            ICase mockCase = mock(ICase.class);
+            IProcessStart mockProcessStart = mock(IProcessStart.class);
+            WebLink mockLink = mock(WebLink.class);
+            
+            ivyMock.when(Ivy::wfCase).thenReturn(mockCase);
+            when(mockCase.getProcessStart()).thenReturn(mockProcessStart);
+            when(mockProcessStart.getLink()).thenReturn(mockLink);
+            when(mockLink.getAbsolute()).thenReturn("http://localhost/ivy/pro/test.ivp");
+            
+            // When
+            bean.copyShareableStateLinkToClipboard();
+            
+            // Then
+            jsfUtilsMock.verify(() -> JSFUtils.copyToClipboard(
+                eq("http://localhost/ivy/pro/test.ivp?embedInFrame&state=testState")));
+        }
+    }
+    
+    @Test
+    void testRestoreTableState_ShouldInvokeCallback() throws JsonProcessingException {
+        // Given
+        bean.setStateName("testState");
+        
+        // Setup mock table
+        when(mockDataTable.getClientId()).thenReturn("form:testTable");
+        when(mockDataTable.getFilteredValue()).thenReturn(new ArrayList<>());
+        when(mockDataTable.getMultiViewState(true)).thenReturn(mockDataTableState);
+        when(mockViewRoot.findComponent("form:testTable")).thenReturn(mockDataTable);
+        
+        // Mock JSON state with rendered columns
+        String jsonState = "{\"renderedColumns\": [\"col1\", \"col2\"]}";
+        
+        MethodExpression mockCallback = mock(MethodExpression.class);
+        
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            when(mockFacesContext.getELContext()).thenReturn(mock(javax.el.ELContext.class));
+            
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableId}"), eq(Object.class)))
+                .thenReturn("testTable");
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableStateController}"), eq(Object.class)))
+                .thenReturn(mockController);
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.columnsRenderCallback}"), eq(Object.class)))
+                .thenReturn(mockCallback);
+
+            when(mockController.load(anyString())).thenReturn(jsonState);
+            
+            try (MockedStatic<ComponentTraversalUtils> traverseMock = Mockito.mockStatic(ComponentTraversalUtils.class)) {
+                traverseMock.when(() -> ComponentTraversalUtils.firstWithId("testTable", mockViewRoot))
+                    .thenReturn(mockDataTable);
+
+                // When
+                bean.restoreTableState();
+
+                // Then
+                verify(mockCallback).invoke(any(), any());
+            }
+        }
     }
 
 }

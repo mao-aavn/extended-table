@@ -86,18 +86,3 @@ The Extended Table component includes a share link feature that allows users to 
     <!-- columns here -->
 </ic:com.axonivy.market.extendedtable.ExtendedTable>
 ```
-
-
-## LIMITATIONS & NOTES TBC
-
-- Var declaration
-- multipleViewState
-- Change ids => impact persisted state
-- Dynamic columns
-
-## TODOS
-
-- Check group ID with Peter
-- Lazy approach for all showcases
-- Import/Export states
-

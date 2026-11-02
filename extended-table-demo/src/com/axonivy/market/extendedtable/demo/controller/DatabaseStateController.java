@@ -11,7 +11,14 @@ public class DatabaseStateController implements TableStateController {
 
 	@Override
 	public void save(String key, String stateAsJSON) {
-		dao.save(DataTableState.builder().stateKey(key).stateValue(stateAsJSON).build());
+		// Overwrite an existing state with the same key (state key is unique)
+		DataTableState existing = dao.findByKey(key);
+		if (existing != null) {
+			existing.setStateValue(stateAsJSON);
+			dao.save(existing);
+		} else {
+			dao.save(DataTableState.builder().stateKey(key).stateValue(stateAsJSON).build());
+		}
 	}
 
 	@Override

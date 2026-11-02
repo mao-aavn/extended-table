@@ -66,6 +66,8 @@ public class ExtendedDataTableBean {
 	private static final String CC_ATTRS_DELETE_SUCCESS_MSG = "deleteSuccessMsg";
 	private static final String CC_COLUMNS_RENDERED_CALLBACK = "columnsRenderCallback";
 	private static final String CC_ATTRS_INITIAL_STATE_NAME = "initialStateName";
+	private static final String CC_ATTRS_STATE_NOT_AVAILABLE_MSG = "stateNotAvailableMsg";
+	private static final String DEFAULT_STATE_NOT_AVAILABLE_MSG = "Please log in to save, restore or delete table states.";
 
 	private static final String GROWL_MSG_ID = "extendedTableGrowlMsg";
 	private static final String STATE_KEY_PREFIX = "TABLE_STATE_";
@@ -87,6 +89,10 @@ public class ExtendedDataTableBean {
 			return;
 		}
 		initialized = true;
+
+		if (!isStateStorageAvailable()) {
+			return;
+		}
 
 		// Fetch available saved state names for this table
 		stateNames = fetchAllDataTableStateNames();
@@ -128,7 +134,7 @@ public class ExtendedDataTableBean {
 
 		if (stateName == null || stateName.isEmpty()) {
 			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
-		} else {
+		} else if (isStateStorageAvailable()) {
 			String tableClientId = getTableClientId();
 			DataTable table = (DataTable) findComponentFromClientId(tableClientId);
 
@@ -159,6 +165,10 @@ public class ExtendedDataTableBean {
 	public void restoreTableState() {
 		if (stateName == null || stateName.isEmpty()) {
 			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_STATE_NAME_REQUIRED_MSG), null);
+			return;
+		}
+
+		if (!isStateStorageAvailable()) {
 			return;
 		}
 
@@ -229,6 +239,9 @@ public class ExtendedDataTableBean {
 	}
 
 	public void deleteTableState() {
+		if (!isStateStorageAvailable()) {
+			return;
+		}
 		String stateKey = getStateKey();
 		if (!getController().delete(stateKey)) {
 			addErrorMsg(GROWL_MSG_ID, Attrs.get(CC_ATTRS_DELETE_ERROR_MSG), null);
@@ -542,6 +555,21 @@ public class ExtendedDataTableBean {
 		}
 		// Replace characters that may be problematic in keys
 		return tableId.replace(':', '_').replace(' ', '_');
+	}
+
+	/**
+	 * Checks whether the table state controller can persist states (e.g. a user is
+	 * logged in). If not, a user friendly message is shown instead of failing.
+	 * 
+	 * @return true if the state controller can be used
+	 */
+	private boolean isStateStorageAvailable() {
+		if (getController().isAvailable()) {
+			return true;
+		}
+		String msg = Attrs.get(CC_ATTRS_STATE_NOT_AVAILABLE_MSG);
+		addErrorMsg(GROWL_MSG_ID, msg == null || msg.isBlank() ? DEFAULT_STATE_NOT_AVAILABLE_MSG : msg, null);
+		return false;
 	}
 
 	/**

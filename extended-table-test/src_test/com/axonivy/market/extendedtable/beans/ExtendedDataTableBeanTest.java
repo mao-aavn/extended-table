@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -24,6 +25,7 @@ import java.util.Set;
 import javax.faces.application.Application;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.context.PartialViewContext;
 
@@ -102,6 +104,100 @@ class ExtendedDataTableBeanTest {
         mockPartialViewContext = mock(PartialViewContext.class);
         when(mockFacesContext.getPartialViewContext()).thenReturn(mockPartialViewContext);
         when(mockPartialViewContext.getRenderIds()).thenReturn(new java.util.HashSet<>());
+
+        // Mockito returns false for the default isAvailable(): the mocked controller is usable
+        when(mockController.isAvailable()).thenReturn(true);
+    }
+
+    private void givenUnavailableController(String notAvailableMsg) {
+        when(mockController.isAvailable()).thenReturn(false);
+        when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.tableStateController}"), eq(Object.class)))
+            .thenReturn(mockController);
+        when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.stateNotAvailableMsg}"), eq(Object.class)))
+            .thenReturn(notAvailableMsg);
+    }
+
+    private void verifyErrorMessage(String summary) {
+        verify(mockFacesContext).addMessage(eq("extendedTableGrowlMsg"),
+            argThat(m -> m.getSeverity() == FacesMessage.SEVERITY_ERROR && summary.equals(m.getSummary())));
+    }
+
+    @Test
+    void testSaveTableState_WhenStorageNotAvailable_ShouldShowMessageAndNotSave() {
+        Map<String, String> requestParameterMap = new HashMap<>();
+        requestParameterMap.put("explicitSave", "true");
+        when(mockExternalContext.getRequestParameterMap()).thenReturn(requestParameterMap);
+        bean.setStateName("testState");
+
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            givenUnavailableController("Please log in");
+
+            bean.saveTableState();
+
+            verify(mockController, never()).save(anyString(), anyString());
+            verifyErrorMessage("Please log in");
+        }
+    }
+
+    @Test
+    void testRestoreTableState_WhenStorageNotAvailable_ShouldShowMessageAndNotLoad() {
+        bean.setStateName("testState");
+
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            givenUnavailableController("Please log in");
+
+            bean.restoreTableState();
+
+            verify(mockController, never()).load(anyString());
+            verifyErrorMessage("Please log in");
+        }
+    }
+
+    @Test
+    void testDeleteTableState_WhenStorageNotAvailable_ShouldShowMessageAndNotDelete() {
+        bean.setStateName("testState");
+
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            givenUnavailableController("Please log in");
+
+            bean.deleteTableState();
+
+            verify(mockController, never()).delete(anyString());
+            verifyErrorMessage("Please log in");
+        }
+    }
+
+    @Test
+    void testDeleteTableState_WhenStorageNotAvailableAndNoCustomMessage_ShouldShowDefaultMessage() {
+        bean.setStateName("testState");
+
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            givenUnavailableController(null);
+
+            bean.deleteTableState();
+
+            verifyErrorMessage("Please log in to save, restore or delete table states.");
+        }
+    }
+
+    @Test
+    void testRestoreStateFromGivenInitialStateName_WhenStorageNotAvailable_ShouldShowMessageOnly() {
+        try (MockedStatic<FacesContext> facesContextMock = Mockito.mockStatic(FacesContext.class)) {
+            facesContextMock.when(FacesContext::getCurrentInstance).thenReturn(mockFacesContext);
+            givenUnavailableController("Please log in");
+            when(mockApplication.evaluateExpressionGet(any(), eq("#{cc.attrs.initialStateName}"), eq(Object.class)))
+                .thenReturn("testState");
+
+            bean.restoreStateFromGivenInitialStateName();
+
+            verify(mockController, never()).listKeys(anyString());
+            verify(mockController, never()).load(anyString());
+            verifyErrorMessage("Please log in");
+        }
     }
 
     @Test

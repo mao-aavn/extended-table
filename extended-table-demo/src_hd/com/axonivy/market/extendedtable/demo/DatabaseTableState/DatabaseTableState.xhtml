@@ -36,7 +36,7 @@
 
 					<!-- Date Range with custom filter to avoid RangeFilterConstraint issues -->
 					<p:column headerText="Date Range" filterBy="#{item.date}"
-						field="date" filterMatchMode="custom"
+						field="date"
 						filterFunction="#{data.bean.filterDate}">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="range" pattern="dd.MM.yyyy"
@@ -47,7 +47,7 @@
 
 					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
-						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterBy="#{item.rank}"
 						filterFunction="#{data.bean.filterNumber}">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="e.g: 4..6, ..10, 5.., or 5"
@@ -57,7 +57,7 @@
 					</p:column>
 					
 					<!-- Income column-->
-					<p:column headerText="Income" field="income" filterMatchMode="custom"
+					<p:column headerText="Income" field="income"
 						filterFunction="#{data.bean.filterNumber}">
 						<f:facet name="filter">
 							<p:inputText id="incomeFilter"
@@ -106,7 +106,7 @@
 
 					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="custom"
+						sortBy="#{item.status}"
 						filterFunction="#{data.bean.filterEnum}">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"

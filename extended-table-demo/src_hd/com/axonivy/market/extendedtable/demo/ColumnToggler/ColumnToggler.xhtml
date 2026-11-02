@@ -21,7 +21,7 @@
 					filteredValue="#{data.bean.filteredItems}">
 
 					<f:facet name="header">
-						<div class="p-d-flex p-jc-between p-ai-center">
+						<div class="flex justify-content-between align-items-center">
 							Columns
 							<div>
 								<p:commandButton id="toggler" type="button" value="Columns"
@@ -46,7 +46,7 @@
 
 					<!-- Single Date -->
 					<p:column headerText="Single Date" filterBy="#{item.date}"
-						field="date" filterMatchMode="custom"
+						field="date"
 						filterFunction="#{data.bean.filterDate}" style="width:180px">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
@@ -57,7 +57,7 @@
 					
 					<!-- Rank column with single input range syntax -->
 					<p:column headerText="Number Rank" field="rank"
-						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterBy="#{item.rank}"
 						filterFunction="#{data.bean.filterNumber}" style="width:150px">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="4..6, ..10, 5.., or 5"
@@ -67,7 +67,7 @@
 					</p:column>
 					
 					<!-- Income column-->
-					<p:column headerText="Income" field="income" filterMatchMode="custom"
+					<p:column headerText="Income" field="income"
 						filterFunction="#{data.bean.filterNumber}" style="width:180px">
 						<f:facet name="filter">
 							<p:inputText id="incomeFilter"
@@ -115,7 +115,7 @@
 
 					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column headerText="Status" filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="custom"
+						sortBy="#{item.status}"
 						filterFunction="#{data.bean.filterEnum}" style="width:180px">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"

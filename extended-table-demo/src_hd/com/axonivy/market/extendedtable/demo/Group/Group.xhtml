@@ -33,7 +33,7 @@
 									<p:inputText styleClass="custom-filter" onchange="filterTable()" />
 								</f:facet>
 							</p:column>
-							<p:column headerText="Single Date" style="width:180px;" sortBy="#{item.date}" filterBy="#{item.date}" filterMatchMode="custom" filterFunction="#{data.bean.filterDate}">
+							<p:column headerText="Single Date" style="width:180px;" sortBy="#{item.date}" filterBy="#{item.date}" filterFunction="#{data.bean.filterDate}">
 								<f:facet name="filter">
 									<p:datePicker selectionMode="single" pattern="dd.MM.yyyy" value="#{data.bean.dateFilter}" onchange="filterTable()" />
 								</f:facet>
@@ -47,17 +47,17 @@
 									</p:selectOneMenu>
 								</f:facet>
 							</p:column>
-							<p:column headerText="Number Rank" style="width:150px;" sortBy="#{item.rank}" filterBy="#{item.rank}" filterMatchMode="custom" filterFunction="#{data.bean.filterNumber}">
+							<p:column headerText="Number Rank" style="width:150px;" sortBy="#{item.rank}" filterBy="#{item.rank}" filterFunction="#{data.bean.filterNumber}">
 								<f:facet name="filter">
 									<p:inputText placeholder="4..6, ..10, 5.., or 5" style="width:120px" onchange="filterTable()" />
 								</f:facet>
 							</p:column>
-							<p:column headerText="Income" style="width:180px;" sortBy="#{item.income}" filterBy="#{item.income}" filterMatchMode="custom" filterFunction="#{data.bean.filterNumber}">
+							<p:column headerText="Income" style="width:180px;" sortBy="#{item.income}" filterBy="#{item.income}" filterFunction="#{data.bean.filterNumber}">
 								<f:facet name="filter">
 									<p:inputText placeholder="e.g: 4.5..6.1, ..10.2, 5.., or 5" style="width:120px" onchange="filterTable()" />
 								</f:facet>
 							</p:column>
-							<p:column headerText="Status" style="width:180px;" sortBy="#{item.status}" filterBy="#{item.status}" filterMatchMode="custom" filterFunction="#{data.bean.filterEnum}">
+							<p:column headerText="Status" style="width:180px;" sortBy="#{item.status}" filterBy="#{item.status}" filterFunction="#{data.bean.filterEnum}">
 								<f:facet name="filter">
 									<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}" onchange="filterTable()" multiple="true" style="width:100%; box-sizing: border-box;">
 										<f:selectItems value="#{data.bean.customerStatus}" />
@@ -139,7 +139,7 @@
 
 					<!-- Single Date -->
 					<p:column filterBy="#{item.date}"
-						field="date" filterMatchMode="custom"
+						field="date"
 						filterFunction="#{data.bean.filterDate}" style="width:180px">
 						<f:facet name="filter">
 							<p:datePicker selectionMode="single" pattern="dd.MM.yyyy"
@@ -164,7 +164,7 @@
 
 					<!-- Rank column with single input range syntax -->
 					<p:column field="rank"
-						filterBy="#{item.rank}" filterMatchMode="custom"
+						filterBy="#{item.rank}"
 						filterFunction="#{data.bean.filterNumber}" style="width:150px">
 						<f:facet name="filter">
 							<p:inputText id="rankFilter" placeholder="4..6, ..10, 5.., or 5"
@@ -175,7 +175,6 @@
 
 					<!-- Income column-->
 					<p:column field="income"
-						filterMatchMode="custom"
 						filterFunction="#{data.bean.filterNumber}" style="width:180px">
 						<f:facet name="filter">
 							<p:inputText id="incomeFilter"
@@ -190,7 +189,7 @@
 
 					<!-- Status column (Multiple selection) with custom filter -->
 					<p:column filterBy="#{item.status}"
-						sortBy="#{item.status}" filterMatchMode="custom"
+						sortBy="#{item.status}"
 						filterFunction="#{data.bean.filterEnum}" style="width:180px">
 						<f:facet name="filter">
 							<p:selectCheckboxMenu value="#{data.bean.selectedStatuses}"

@@ -238,7 +238,7 @@ public abstract class GenericDemoBean {
 	 * Usage in XHTML:
 	 * 
 	 * <pre>
-	 * &lt;p:column filterBy="#{item.status}" filterMatchMode="custom" 
+	 * &lt;p:column filterBy="#{item.status}"
 	 *           filterFunction="#{data.bean.filterEnum}"&gt;
 	 * </pre>
 	 * 

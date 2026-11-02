@@ -1,4 +1,0 @@
-RowExpansionData #class
-com.axonivy.market.extendedtable.demo.RowExpansion #namespace
-bean com.axonivy.market.extendedtable.demo.beans.RowExpansionBean #field
-bean PERSISTENT #fieldModifier

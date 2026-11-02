@@ -1,5 +1,5 @@
 {
-  "format" : "10.0.0",
+  "$schema" : "https://json-schema.axonivy.com/process/12.0.0/process.json",
   "id" : "19A4D2E869D4A988",
   "config" : {
     "data" : "com.axonivy.market.extendedtable.demo.Data"
@@ -9,16 +9,18 @@
       "type" : "RequestStart",
       "name" : "nonePagination.ivp",
       "config" : {
-        "callSignature" : "nonePagination",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "nonePagination.ivp",
-        "startName" : "None Pagination Table",
-        "case" : { }
+        "signature" : "nonePagination",
+        "request" : {
+          "name" : "None Pagination Table",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 328 }
       },
-      "connect" : { "id" : "f26", "to" : "f12" }
+      "connect" : [
+        { "id" : "f26", "to" : "f12" }
+      ]
     }, {
       "id" : "f11",
       "type" : "TaskEnd",
@@ -30,28 +32,31 @@
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.NonePagination",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.NonePagination:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 328 }
       },
-      "connect" : { "id" : "f25", "to" : "f11" }
+      "connect" : [
+        { "id" : "f25", "to" : "f11" }
+      ]
     }, {
       "id" : "f15",
       "type" : "RequestStart",
       "name" : "lazy.ivp",
       "config" : {
-        "callSignature" : "lazy",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "lazy.ivp",
-        "startName" : "Lazy Table",
-        "case" : { }
+        "signature" : "lazy",
+        "request" : {
+          "name" : "Lazy Table",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 456 }
       },
-      "connect" : { "id" : "f18", "to" : "f17" }
+      "connect" : [
+        { "id" : "f18", "to" : "f17" }
+      ]
     }, {
       "id" : "f16",
       "type" : "TaskEnd",
@@ -63,40 +68,44 @@
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.Lazy",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.Lazy:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 456 }
       },
-      "connect" : { "id" : "f19", "to" : "f16" }
+      "connect" : [
+        { "id" : "f19", "to" : "f16" }
+      ]
     }, {
       "id" : "f3",
       "type" : "RequestStart",
       "name" : "ColumnToggler",
       "config" : {
-        "callSignature" : "ColumnToggler",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "ColumnToggler.ivp",
-        "startName" : "Column Toggler",
-        "case" : { }
+        "signature" : "ColumnToggler",
+        "request" : {
+          "name" : "Column Toggler",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 576 }
       },
-      "connect" : { "id" : "f9", "to" : "f4" }
+      "connect" : [
+        { "id" : "f9", "to" : "f4" }
+      ]
     }, {
       "id" : "f4",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.ColumnToggler",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.ColumnToggler:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 576 }
       },
-      "connect" : { "id" : "f27", "to" : "f5" }
+      "connect" : [
+        { "id" : "f27", "to" : "f5" }
+      ]
     }, {
       "id" : "f5",
       "type" : "TaskEnd",
@@ -108,28 +117,31 @@
       "type" : "RequestStart",
       "name" : "Single Row Selection",
       "config" : {
-        "callSignature" : "SingleRowSelection",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "SingleRowSelection.ivp",
-        "startName" : "Single Row Selection",
-        "case" : { }
+        "signature" : "SingleRowSelection",
+        "request" : {
+          "name" : "Single Row Selection",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 696 }
       },
-      "connect" : { "id" : "f13", "to" : "f7" }
+      "connect" : [
+        { "id" : "f13", "to" : "f7" }
+      ]
     }, {
       "id" : "f7",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.SingleRowSelection",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.SingleRowSelection:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 696 }
       },
-      "connect" : { "id" : "f14", "to" : "f8" }
+      "connect" : [
+        { "id" : "f14", "to" : "f8" }
+      ]
     }, {
       "id" : "f8",
       "type" : "TaskEnd",
@@ -141,28 +153,31 @@
       "type" : "RequestStart",
       "name" : "Multiple Row Selection",
       "config" : {
-        "callSignature" : "MultipleRowSelection",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "MultipleRowSelection.ivp",
-        "startName" : "Multiple Row Selection",
-        "case" : { }
+        "signature" : "MultipleRowSelection",
+        "request" : {
+          "name" : "Multiple Row Selection",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 816 }
       },
-      "connect" : { "id" : "f20", "to" : "f1" }
+      "connect" : [
+        { "id" : "f20", "to" : "f1" }
+      ]
     }, {
       "id" : "f1",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.MultipleRowSelection",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.MultipleRowSelection:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 816 }
       },
-      "connect" : { "id" : "f21", "to" : "f2" }
+      "connect" : [
+        { "id" : "f21", "to" : "f2" }
+      ]
     }, {
       "id" : "f2",
       "type" : "TaskEnd",
@@ -174,28 +189,31 @@
       "type" : "RequestStart",
       "name" : "Checkbox Selection",
       "config" : {
-        "callSignature" : "CheckboxSelection",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "CheckboxSelection.ivp",
-        "startName" : "Checkbox Selection",
-        "case" : { }
+        "signature" : "CheckboxSelection",
+        "request" : {
+          "name" : "Checkbox Selection",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 944 }
       },
-      "connect" : { "id" : "f28", "to" : "f23" }
+      "connect" : [
+        { "id" : "f28", "to" : "f23" }
+      ]
     }, {
       "id" : "f23",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.CheckboxSelection",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.CheckboxSelection:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 944 }
       },
-      "connect" : { "id" : "f29", "to" : "f24" }
+      "connect" : [
+        { "id" : "f29", "to" : "f24" }
+      ]
     }, {
       "id" : "f24",
       "type" : "TaskEnd",
@@ -207,16 +225,18 @@
       "type" : "RequestStart",
       "name" : "databaseTableState.ivp",
       "config" : {
-        "callSignature" : "databaseTableState",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "databaseTableState.ivp",
-        "startName" : "Database Table State",
-        "case" : { }
+        "signature" : "databaseTableState",
+        "request" : {
+          "name" : "Database Table State",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 216 }
       },
-      "connect" : { "id" : "f38", "to" : "f37" }
+      "connect" : [
+        { "id" : "f38", "to" : "f37" }
+      ]
     }, {
       "id" : "f36",
       "type" : "TaskEnd",
@@ -228,40 +248,44 @@
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.DatabaseTableState",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.DatabaseTableState:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 216 }
       },
-      "connect" : { "id" : "f39", "to" : "f36" }
+      "connect" : [
+        { "id" : "f39", "to" : "f36" }
+      ]
     }, {
       "id" : "f30",
       "type" : "RequestStart",
       "name" : "RowExpansion",
       "config" : {
-        "callSignature" : "RowExpansion",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "RowExpansion.ivp",
-        "startName" : "Row Expansion",
-        "case" : { }
+        "signature" : "RowExpansion",
+        "request" : {
+          "name" : "Row Expansion",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1072 }
       },
-      "connect" : { "id" : "f34", "to" : "f31" }
+      "connect" : [
+        { "id" : "f34", "to" : "f31" }
+      ]
     }, {
       "id" : "f31",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.RowExpansion",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.RowExpansion:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1072 }
       },
-      "connect" : { "id" : "f33", "to" : "f32" }
+      "connect" : [
+        { "id" : "f33", "to" : "f32" }
+      ]
     }, {
       "id" : "f32",
       "type" : "TaskEnd",
@@ -273,28 +297,31 @@
       "type" : "RequestStart",
       "name" : "Editable",
       "config" : {
-        "callSignature" : "editable",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "editable.ivp",
-        "startName" : "Editable",
-        "case" : { }
+        "signature" : "editable",
+        "request" : {
+          "name" : "Editable",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1192 }
       },
-      "connect" : { "id" : "f44", "to" : "f41" }
+      "connect" : [
+        { "id" : "f44", "to" : "f41" }
+      ]
     }, {
       "id" : "f41",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.EditableDatatable",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.EditableDatatable:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1192 }
       },
-      "connect" : { "id" : "f43", "to" : "f42" }
+      "connect" : [
+        { "id" : "f43", "to" : "f42" }
+      ]
     }, {
       "id" : "f42",
       "type" : "TaskEnd",
@@ -306,28 +333,31 @@
       "type" : "RequestStart",
       "name" : "DynamicColumns",
       "config" : {
-        "callSignature" : "DynamicColumns",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "DynamicColumns.ivp",
-        "startName" : "Dynamic Columns",
-        "case" : { }
+        "signature" : "DynamicColumns",
+        "request" : {
+          "name" : "Dynamic Columns",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1320 }
       },
-      "connect" : { "id" : "f48", "to" : "f46" }
+      "connect" : [
+        { "id" : "f48", "to" : "f46" }
+      ]
     }, {
       "id" : "f46",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.DynamicColumns",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.DynamicColumns:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1320 }
       },
-      "connect" : { "id" : "f49", "to" : "f47" }
+      "connect" : [
+        { "id" : "f49", "to" : "f47" }
+      ]
     }, {
       "id" : "f47",
       "type" : "TaskEnd",
@@ -339,28 +369,31 @@
       "type" : "RequestStart",
       "name" : "Draggable",
       "config" : {
-        "callSignature" : "Draggable",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "Draggable.ivp",
-        "startName" : "Draggable",
-        "case" : { }
+        "signature" : "Draggable",
+        "request" : {
+          "name" : "Draggable",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1448 }
       },
-      "connect" : { "id" : "f54", "to" : "f51" }
+      "connect" : [
+        { "id" : "f54", "to" : "f51" }
+      ]
     }, {
       "id" : "f51",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.Draggable",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.Draggable:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1448 }
       },
-      "connect" : { "id" : "f53", "to" : "f52" }
+      "connect" : [
+        { "id" : "f53", "to" : "f52" }
+      ]
     }, {
       "id" : "f52",
       "type" : "TaskEnd",
@@ -372,28 +405,31 @@
       "type" : "RequestStart",
       "name" : "Group",
       "config" : {
-        "callSignature" : "group",
-        "startCategory" : "ExtendedTable",
-        "outLink" : "group.ivp",
-        "startName" : "Group",
-        "case" : { }
+        "signature" : "group",
+        "request" : {
+          "name" : "Group",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1576 }
       },
-      "connect" : { "id" : "f59", "to" : "f56" }
+      "connect" : [
+        { "id" : "f59", "to" : "f56" }
+      ]
     }, {
       "id" : "f56",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.Group",
-        "startMethod" : "start()"
+        "dialog" : "com.axonivy.market.extendedtable.demo.Group:start()"
       },
       "visual" : {
         "at" : { "x" : 224, "y" : 1576 }
       },
-      "connect" : { "id" : "f58", "to" : "f57" }
+      "connect" : [
+        { "id" : "f58", "to" : "f57" }
+      ]
     }, {
       "id" : "f57",
       "type" : "TaskEnd",
@@ -405,35 +441,33 @@
       "type" : "RequestStart",
       "name" : "Share State Link",
       "config" : {
-        "callSignature" : "shareStateLink",
+        "signature" : "shareStateLink",
         "input" : {
           "params" : [
-            { "name" : "state", "type" : "String" }
+            { "name" : "state", "type" : "String", "desc" : "" }
           ],
           "map" : {
             "out.state" : "param.state"
           }
         },
-        "startCategory" : "ExtendedTable",
-        "outLink" : "shareStateLink.ivp",
-        "startName" : "Share State Link",
-        "case" : { }
+        "request" : {
+          "name" : "Share State Link",
+          "category" : "ExtendedTable"
+        }
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 1704 }
       },
-      "connect" : { "id" : "f68", "to" : "f66" }
+      "connect" : [
+        { "id" : "f68", "to" : "f66" }
+      ]
     }, {
       "id" : "f66",
       "type" : "DialogCall",
       "name" : "Dialog",
       "config" : {
-        "dialogId" : "com.axonivy.market.extendedtable.demo.ShareStateLink",
-        "startMethod" : "start(String)",
+        "dialog" : "com.axonivy.market.extendedtable.demo.ShareStateLink:start(String)",
         "call" : {
-          "params" : [
-            { "name" : "state", "type" : "String" }
-          ],
           "map" : {
             "param.state" : "in.state"
           }
@@ -442,7 +476,9 @@
       "visual" : {
         "at" : { "x" : 224, "y" : 1704 }
       },
-      "connect" : { "id" : "f69", "to" : "f67" }
+      "connect" : [
+        { "id" : "f69", "to" : "f67" }
+      ]
     }, {
       "id" : "f67",
       "type" : "TaskEnd",

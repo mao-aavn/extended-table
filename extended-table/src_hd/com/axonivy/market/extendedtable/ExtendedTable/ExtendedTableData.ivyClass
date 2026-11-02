@@ -1,4 +1,0 @@
-ExtendedTableData #class
-com.axonivy.market.extendedtable.ExtendedTable #namespace
-bean com.axonivy.market.extendedtable.beans.ExtendedDataTableBean #field
-bean PERSISTENT #fieldModifier

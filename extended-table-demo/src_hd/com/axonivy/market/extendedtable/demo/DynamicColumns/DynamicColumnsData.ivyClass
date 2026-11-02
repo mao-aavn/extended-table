@@ -1,4 +1,0 @@
-DynamicColumnsData #class
-com.axonivy.market.extendedtable.demo.DynamicColumns #namespace
-bean com.axonivy.market.extendedtable.demo.beans.DynamicColumnsBean #field
-bean PERSISTENT #fieldModifier

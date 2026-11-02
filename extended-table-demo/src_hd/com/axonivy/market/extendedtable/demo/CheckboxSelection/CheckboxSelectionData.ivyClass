@@ -1,4 +1,0 @@
-CheckboxSelectionData #class
-com.axonivy.market.extendedtable.demo.CheckboxSelection #namespace
-bean com.axonivy.market.extendedtable.demo.beans.CheckboxSelectionBean #field
-bean PERSISTENT #fieldModifier

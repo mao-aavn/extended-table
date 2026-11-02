@@ -1,6 +1,0 @@
-DatabaseTableStateData #class
-com.axonivy.market.extendedtable.demo.DatabaseTableState #namespace
-controller com.axonivy.market.extendedtable.controllers.TableStateController #field
-controller PERSISTENT #fieldModifier
-bean com.axonivy.market.extendedtable.demo.beans.DatabaseRepoBean #field
-bean PERSISTENT #fieldModifier

@@ -39,4 +39,18 @@ public interface TableStateController {
 	 * @return
 	 */
 	List<String> listKeys(String prefix);
+
+	/**
+	 * Whether the table state can be persisted right now, e.g. the default
+	 * {@link IvyUserStateController} needs a logged-in Ivy user. When it returns
+	 * false, the ExtendedTable does not save, restore or delete states and shows
+	 * the stateNotAvailableMsg instead.
+	 * <p>
+	 * Controllers that are always available don't need to override this.
+	 * 
+	 * @return true if save, load, delete and listKeys can be used
+	 */
+	default boolean isAvailable() {
+		return true;
+	}
 }

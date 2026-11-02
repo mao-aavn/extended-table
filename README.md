@@ -16,6 +16,17 @@ In the background, the table state is persisted as a JSON string value, together
 - **Customizable button icons** with show/hide controls
 - Seamless integration with Axon.ivy and PrimeFaces
 
+## Anonymous Users
+
+The default controller stores states in the property map of the logged-in Ivy user. When the page is opened without a login (anonymous session), the table still works, but save, restore and delete show a message instead of storing anything. Customize that message with `stateNotAvailableMsg`:
+
+```xml
+<ic:com.axonivy.market.extendedtable.ExtendedTable ...
+    stateNotAvailableMsg="Please log in to keep your table views." />
+```
+
+A custom `TableStateController` can override `isAvailable()` to signal the same condition; it defaults to `true`.
+
 ## Pre-loading a Saved State
 
 You can automatically load a saved table state when the component is first rendered by using the `initialStateName` attribute. This is useful when you want to open a view with a specific table configuration (pre-applied filters, sorting, etc.).

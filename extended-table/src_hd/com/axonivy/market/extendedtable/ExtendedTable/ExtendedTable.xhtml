@@ -44,6 +44,7 @@
 	<cc:attribute name="saveSuccessMsg" type="java.lang.String" default="Saved the table state successfully" shortDescription="Message shown on successful save." />
 	<cc:attribute name="deleteSuccessMsg" type="java.lang.String" default="Deleted the table state successfully" shortDescription="Message shown on successful delete." />
 	<cc:attribute name="deleteErrorMsg" type="java.lang.String" default="No existing state found" shortDescription="Message shown when delete failed." />
+	<cc:attribute name="stateNotAvailableMsg" type="java.lang.String" default="Please log in to save, restore or delete table states." shortDescription="Message shown when the state cannot be stored, e.g. no Ivy user is logged in (anonymous session)." />
 
 	<!-- Optional callback to notify parent about rendered columns, useful for dynamic column handling -->
 	<cc:attribute name="columnsRenderCallback" method-signature="void columnsRenderCallback(java.util.List)" 

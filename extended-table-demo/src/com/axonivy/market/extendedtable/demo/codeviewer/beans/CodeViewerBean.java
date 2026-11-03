@@ -287,7 +287,8 @@ public class CodeViewerBean implements Serializable {
       
       String xhtmlPath = getAutoDetectedXhtmlPath();
       if (xhtmlPath != null) {
-        String processPath = xhtmlPath.replace(".xhtml", "Process.p.json");
+        // Copied by the build as *.p.json.txt so Designer does not see duplicate processes
+        String processPath = xhtmlPath.replace(".xhtml", "Process.p.json.txt");
         parseProcessJsonImports(processPath, relatedFiles);
       }
       

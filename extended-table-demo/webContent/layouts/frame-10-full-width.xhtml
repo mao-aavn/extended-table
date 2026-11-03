@@ -5,7 +5,8 @@
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:ic="http://ivyteam.ch/jsf/component"
   xmlns:p="http://primefaces.org/ui"
-  xmlns:pe="http://primefaces.org/ui/extensions">
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
   
 <!--
 DESCRIPTION:
@@ -68,10 +69,16 @@ and refence it below in the head part.
     }
     .showcase-link:hover,
     .showcase-link:focus-visible {
+      background: color-mix(in srgb, var(--showcase-accent) 12%, transparent);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      outline: none;
+    }
+    /* The showcase currently displayed */
+    .showcase-link.active {
       background: var(--showcase-accent);
       color: #ffffff !important;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      outline: none;
+      font-weight: 600;
+      cursor: default;
     }
   </style>
 </h:head>
@@ -87,7 +94,8 @@ and refence it below in the head part.
 				<ul class="showcase-list">
           <ui:repeat value="#{processStartListBean.demoProcessStarts}" var="link">
             <li class="showcase-item">
-              <h:outputLink value="#{link.relative}" class="showcase-link" target="_blank">#{link.name}</h:outputLink>
+              <h:outputLink value="#{link.relative}" class="showcase-link#{link.active ? ' active' : ''}" target="_blank"
+                pt:aria-current="#{link.active ? 'page' : 'false'}">#{link.name}</h:outputLink>
             </li>
           </ui:repeat>
         </ul>

@@ -162,6 +162,17 @@ public class CodeViewerBean implements Serializable {
    * @param resourcePath full resource path starting with /resources/source/
    * @return HTML-escaped source code or error message
    */
+  /**
+   * The build copies the demo sources as *.txt (e.g. Foo.java.txt), otherwise
+   * Designer would validate the copies in target/classes as real Java, dialog
+   * and process sources.
+   */
+  private static final String SOURCE_SUFFIX = ".txt";
+
+  private InputStream openSource(String resourcePath) {
+    return getClass().getResourceAsStream(resourcePath + SOURCE_SUFFIX);
+  }
+
   private String getSourceEscaped(String resourcePath) {
     // Check cache first
     if (cache.containsKey(resourcePath)) {
@@ -175,7 +186,7 @@ public class CodeViewerBean implements Serializable {
       return escapeHtml(error);
     }
 
-    try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+    try (InputStream is = openSource(resourcePath)) {
       if (is == null) {
         String error = "Source file not found: " + resourcePath + "\n\nMake sure to run the build to copy sources to resources.";
         return escapeHtml(error);
@@ -287,8 +298,7 @@ public class CodeViewerBean implements Serializable {
       
       String xhtmlPath = getAutoDetectedXhtmlPath();
       if (xhtmlPath != null) {
-        // Copied by the build as *.p.json.txt so Designer does not see duplicate processes
-        String processPath = xhtmlPath.replace(".xhtml", "Process.p.json.txt");
+        String processPath = xhtmlPath.replace(".xhtml", "Process.p.json");
         parseProcessJsonImports(processPath, relatedFiles);
       }
       
@@ -502,11 +512,11 @@ public class CodeViewerBean implements Serializable {
     InputStream is = null;
     try {
       // Try to get resource stream
-      is = getClass().getResourceAsStream(resourcePath);
+      is = openSource(resourcePath);
       
       // If not found, try with Thread context classloader
       if (is == null) {
-        is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.substring(1));
+        is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.substring(1) + SOURCE_SUFFIX);
         if (is != null) {
           Ivy.log().debug("CodeViewer: Reading resource using Thread classloader: {0}", resourcePath);
         }
@@ -540,7 +550,7 @@ public class CodeViewerBean implements Serializable {
    */
   private boolean fileExists(String resourcePath) {
     // Try multiple approaches to find the resource
-    try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+    try (InputStream is = openSource(resourcePath)) {
       if (is != null) {
         return true;
       }
@@ -549,7 +559,7 @@ public class CodeViewerBean implements Serializable {
     }
     
     // Try with Thread context classloader
-    try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.substring(1))) {
+    try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath.substring(1) + SOURCE_SUFFIX)) {
       if (is != null) {
         Ivy.log().debug("CodeViewer: Found resource using Thread classloader: {0}", resourcePath);
         return true;

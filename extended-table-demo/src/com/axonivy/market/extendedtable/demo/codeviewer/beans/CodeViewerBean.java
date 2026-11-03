@@ -4,7 +4,11 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -169,8 +173,63 @@ public class CodeViewerBean implements Serializable {
    */
   private static final String SOURCE_SUFFIX = ".txt";
 
+  /** Folder of the dialogs (XHTML and Process.p.json) inside the project. */
+  private static final String DIALOG_DIR = "src_hd";
+
   private InputStream openSource(String resourcePath) {
-    return getClass().getResourceAsStream(resourcePath + SOURCE_SUFFIX);
+    InputStream is = getClass().getResourceAsStream(resourcePath + SOURCE_SUFFIX);
+    return is != null ? is : openFromProjectDir(resourcePath);
+  }
+
+  /**
+   * Fallback for Designer: its workspace build does not run the Maven step that
+   * copies the sources, so read the original file from the project folder.
+   */
+  private InputStream openFromProjectDir(String resourcePath) {
+    try {
+      Path root = projectDir();
+      if (root == null) {
+        return null;
+      }
+      String relative;
+      if (resourcePath.startsWith(XHTML_BASE)) {
+        relative = DIALOG_DIR + "/" + resourcePath.substring(XHTML_BASE.length());
+      } else if (resourcePath.startsWith(JAVA_BASE)) {
+        relative = "src/" + resourcePath.substring(JAVA_BASE.length());
+      } else {
+        return null;
+      }
+      Path file = root.resolve(relative).normalize();
+      if (!file.startsWith(root) || !Files.isRegularFile(file)) {
+        return null;
+      }
+      return Files.newInputStream(file);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  /**
+   * The demo project folder, found by walking up from where this class was
+   * loaded (e.g. &lt;project&gt;/target/classes/com/...), or null.
+   */
+  private static Path projectDir() {
+    try {
+      URL url = CodeViewerBean.class.getResource(CodeViewerBean.class.getSimpleName() + ".class");
+      if (url == null || !"file".equals(url.getProtocol())) {
+        return null;
+      }
+      Path dir = Paths.get(url.toURI()).getParent();
+      while (dir != null) {
+        if (Files.isDirectory(dir.resolve(DIALOG_DIR)) && Files.isDirectory(dir.resolve("src"))) {
+          return dir.normalize();
+        }
+        dir = dir.getParent();
+      }
+    } catch (Exception e) {
+      // not resolvable, e.g. loaded from a jar
+    }
+    return null;
   }
 
   private String getSourceEscaped(String resourcePath) {

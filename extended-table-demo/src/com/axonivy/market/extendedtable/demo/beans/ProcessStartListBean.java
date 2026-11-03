@@ -12,6 +12,7 @@ import ch.ivyteam.ivy.application.IApplication;
 import ch.ivyteam.ivy.application.IProcessModel;
 import ch.ivyteam.ivy.application.IProcessModelVersion;
 import ch.ivyteam.ivy.application.app.IApplicationRepository;
+import ch.ivyteam.ivy.environment.Ivy;
 import ch.ivyteam.ivy.security.ISecurityContext;
 import ch.ivyteam.ivy.security.exec.Sudo;
 import ch.ivyteam.ivy.workflow.IProcessStart;
@@ -29,10 +30,17 @@ public class ProcessStartListBean implements Serializable {
   public static class StartLink {
     private final String name;
     private final String relative;
+    private final boolean active;
 
-    StartLink(String name, String relative) {
+    StartLink(String name, String relative, boolean active) {
       this.name = name;
       this.relative = relative;
+      this.active = active;
+    }
+
+    /** True for the showcase whose process start opened the current case. */
+    public boolean isActive() {
+      return active;
     }
 
     public String getName() {
@@ -55,6 +63,7 @@ public class ProcessStartListBean implements Serializable {
     // and expose .ivp links.
     return Sudo.get(() -> {
       List<StartLink> links = new ArrayList<>();
+      String currentStart = currentStartLink();
       List<IApplication> apps = IApplicationRepository.instance().allOf(ISecurityContext.current());
       for (IApplication app : apps) {
         for (IProcessModel pm : app.getProcessModelsSortedByName()) {
@@ -107,7 +116,7 @@ public class ProcessStartListBean implements Serializable {
               }
 
               if (rel != null && rel.endsWith(".ivp")) {
-                links.add(new StartLink(ps.getName(), rel+ "?embedInFrame"));
+                links.add(new StartLink(ps.getName(), rel + "?embedInFrame", rel.equals(currentStart)));
               }
             } catch (Exception e) {
               // ignore inaccessible starts
@@ -117,6 +126,19 @@ public class ProcessStartListBean implements Serializable {
       }
       return links;
     });
+  }
+
+  /**
+   * Relative link of the process start that opened the current case (the
+   * showcase being displayed), or null if it cannot be determined.
+   */
+  private static String currentStartLink() {
+    try {
+      IProcessStart start = Ivy.wfCase().getProcessStart();
+      return start != null && start.getLink() != null ? start.getLink().getRelative() : null;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
 }

@@ -113,32 +113,6 @@
         <version>3.3.1</version>
         <executions>
           <execution>
-            <id>copy-source-files</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.outputDirectory}/resources/source</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}/src_hd</directory>
-                  <includes>
-                    <include>**/*.xhtml</include>
-                  </includes>
-                  <targetPath>src_hd</targetPath>
-                </resource>
-                <resource>
-                  <directory>${project.basedir}/src</directory>
-                  <includes>
-                    <include>**/*.java</include>
-                  </includes>
-                  <targetPath>src</targetPath>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-          <execution>
             <id>copy-vendor-resources</id>
             <phase>process-resources</phase>
             <goals>
@@ -160,13 +134,14 @@
         </executions>
       </plugin>
       <plugin>
-        <!-- Process files must not be copied as *.p.json: Designer would see every process twice
-             ("do have the same process identifier"). The code viewer reads them as *.p.json.txt. -->
+        <!-- Demo sources for the code viewer are copied as *.txt: as plain *.java/*.xhtml/*.p.json
+             in target/classes, Designer validates them as real sources (duplicate process
+             identifiers, "is not on its project's build path"). -->
         <artifactId>maven-antrun-plugin</artifactId>
         <version>3.1.0</version>
         <executions>
           <execution>
-            <id>copy-process-sources</id>
+            <id>copy-demo-sources</id>
             <phase>process-resources</phase>
             <goals>
               <goal>run</goal>
@@ -174,8 +149,12 @@
             <configuration>
               <target>
                 <copy todir="${project.build.outputDirectory}/resources/source/src_hd">
-                  <fileset dir="${project.basedir}/src_hd" includes="**/*.p.json" />
-                  <globmapper from="*.p.json" to="*.p.json.txt" />
+                  <fileset dir="${project.basedir}/src_hd" includes="**/*.xhtml,**/*.p.json" />
+                  <globmapper from="*" to="*.txt" />
+                </copy>
+                <copy todir="${project.build.outputDirectory}/resources/source/src">
+                  <fileset dir="${project.basedir}/src" includes="**/*.java" />
+                  <globmapper from="*" to="*.txt" />
                 </copy>
               </target>
             </configuration>

@@ -51,6 +51,11 @@ class IvyUserStateControllerTest {
     }
 
     @Test
+    void testIsAvailable_WithLoggedInUser_ShouldBeTrue() {
+        assertTrue(controller.isAvailable());
+    }
+
+    @Test
     void testSave_ShouldPersistStateInUserProperties() {    	
         // When
         controller.save(testKey, testState);

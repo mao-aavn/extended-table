@@ -5,7 +5,8 @@
   xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
   xmlns:ic="http://ivyteam.ch/jsf/component"
   xmlns:p="http://primefaces.org/ui"
-  xmlns:pe="http://primefaces.org/ui/extensions">
+  xmlns:pe="http://primefaces.org/ui/extensions"
+  xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
   
 <!--
 DESCRIPTION:
@@ -40,6 +41,7 @@ and refence it below in the head part.
   <h:outputStylesheet name="layouts/styles/style.css" /> 
   -->
   <style>
+    /* Only --primary-color is defined by the Freya theme in Ivy 10, 12 and 14 (and inside the Portal iframe) */
     .showcase-list {
       list-style: none;
       margin: 0;
@@ -49,28 +51,34 @@ and refence it below in the head part.
       gap: 0.5rem;
     }
     .showcase-item {
-      background: var(--surface-100);
-      border-radius: 4px;
-      border: 1px solid var(--surface-300);
-      transition: all 0.2s;
-    }
-    .showcase-item:hover {
-      background: var(--ivy-color-primary) !important;
-      border-color: var(--ivy-color-primary);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
+      margin: 0;
     }
     .showcase-link {
-      display: block;
+      --showcase-accent: var(--primary-color, #1b6ea1);
+      display: inline-flex;
+      align-items: center;
       padding: 0.5rem 1rem;
-      color: var(--ivy-color-primary) !important;
-      text-decoration: none;
+      border: 1px solid var(--showcase-accent);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--showcase-accent) !important;
       font-weight: 500;
+      line-height: 1.2;
+      text-decoration: none !important;
+      transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
     }
-    .showcase-item:hover .showcase-link {
-      color: #FFFFFF !important;
-      background: var(--ivy-primary-color) !important;
-      text-decoration: none;
+    .showcase-link:hover,
+    .showcase-link:focus-visible {
+      background: color-mix(in srgb, var(--showcase-accent) 12%, transparent);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      outline: none;
+    }
+    /* The showcase currently displayed */
+    .showcase-link.active {
+      background: var(--showcase-accent);
+      color: #ffffff !important;
+      font-weight: 600;
+      cursor: default;
     }
   </style>
 </h:head>
@@ -86,7 +94,8 @@ and refence it below in the head part.
 				<ul class="showcase-list">
           <ui:repeat value="#{processStartListBean.demoProcessStarts}" var="link">
             <li class="showcase-item">
-              <h:outputLink value="#{link.relative}" class="showcase-link" target="_blank">#{link.name}</h:outputLink>
+              <h:outputLink value="#{link.relative}" class="showcase-link#{link.active ? ' active' : ''}" target="_blank"
+                pt:aria-current="#{link.active ? 'page' : 'false'}">#{link.name}</h:outputLink>
             </li>
           </ui:repeat>
         </ul>
